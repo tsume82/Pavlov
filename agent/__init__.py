@@ -1,1 +1,1 @@
-from Agent import Agent
+from agent.Agent import *

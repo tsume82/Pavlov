@@ -24,7 +24,7 @@ class MemePolicyEnvironment(gym.Env):
         self.steps = steps
         self.curr_step = 0
         self.obj_function = obj_function
-        self.archive = np.zeros(shape=(H, dim))
+        self.archive = np.zeros(shape=(H, self.dim))
         self.archive_fitness = np.zeros(shape=(H, obj_no))
 
         print(step_boundaries.shape)
@@ -58,19 +58,19 @@ class MemePolicyEnvironment(gym.Env):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
-    def __unpack_state(self):
+    def _unpack_state(self):
         state_location, state_gradient, state_recent_gradient = np.split(
             self.state, (self.dim, self.dim+self.obj_no))   # last is equal to self.dim+self.obj_no+self.obj_no*self.H
         state_recent_gradient.reshape(self.obj_no,self.H)
         return state_location, state_gradient, state_recent_gradient
 
-    def __pack_state(self, state_location, state_gradient, state_recent_gradient, set_state=True):
+    def _pack_state(self, state_location, state_gradient, state_recent_gradient, set_state=True):
         new_state = np.concatenate((state_location, state_gradient.flatten(), state_recent_gradient.flatten()))
         if set_state:
             self.state = new_state
         return new_state
 
-    def __evaluate(self, ind):
+    def _evaluate(self, ind):
         fit = self.obj_function(ind)
         self.archive[self.curr_step%self.H] = ind
         self.archive_fitness[self.curr_step%self.H] = fit
@@ -85,9 +85,9 @@ class MemePolicyEnvironment(gym.Env):
         return self.state
 
     def step(self, action):
-        state_location, state_gradient, state_recent_gradient = self.__unpack_state()
+        state_location, state_gradient, state_recent_gradient = self._unpack_state()
         next_location = state_location + action
-        fit = self.__evaluate(next_location)
+        fit = self._evaluate(next_location)
         next_state = self.build_state(next_location)
         done = (self.curr_step >= self.steps)
         reward = -fit  # TODO should depend on metrics
@@ -109,7 +109,7 @@ class MemePolicyEnvironment(gym.Env):
         print(self.state)
         next_gradient, next_recent_gradient = self.compute_curr_gradient()  # TODO will depend on metrics
         print(self.state)
-        return self.__pack_state(next_location, next_gradient, next_recent_gradient)
+        return self._pack_state(next_location, next_gradient, next_recent_gradient)
 
 
 def environment_loader(env_name,config) -> gym.Env:
