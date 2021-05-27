@@ -10,10 +10,12 @@ class InvalidEnvironmentRequest(Exception):
         super().__init__(*args)
 
 
+# TODO the obj_function must be built, interfacing with the CLI and with Kimeme runtime
 class MemePolicyEnvironment(gym.Env):
     def render(self, mode='human'):
         print("Step {}: state is {}".format(self.curr_step, self.state))
 
+    # TODO accept variable config in input? probably not needed
     def __init__(self, obj_no, H, steps, obj_function, var_boundaries, step_boundaries, start_x=None, dim=None):
         assert (type(start_x) is np.ndarray and len(start_x.shape) == 1) or (type(dim) == int and dim > 0)
 
@@ -52,7 +54,7 @@ class MemePolicyEnvironment(gym.Env):
         )
 
         self.seed()
-        # self.reset()
+        self.reset(start_x=start_x)
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -76,8 +78,11 @@ class MemePolicyEnvironment(gym.Env):
         self.archive_fitness[self.curr_step%self.H] = fit
         return fit
 
-    def reset(self):
-        state_location = np.random.random(size=(self.dim,))
+    def reset(self, start_x=None):
+        if start_x is None:
+            state_location = np.random.random(size=(self.dim,))
+        else:
+            state_location = start_x
         self.state = np.concatenate((state_location, np.zeros(self.obj_no + self.obj_no*self.H)))
         self.curr_step = 0
         self.archive = np.zeros(shape=(self.H, self.dim))
@@ -112,6 +117,70 @@ class MemePolicyEnvironment(gym.Env):
         return self._pack_state(next_location, next_gradient, next_recent_gradient)
 
 
+class SchedulerPolicyEnvironment(gym.Env):
+    # TODO steps -> generic stop conditions based on metrics
+    """
+    action space is divided in 2 parts:
+        - meme to activate, Discrete space of dimension meme_no
+        - parameters, Bounded Continuous/Discrete parameter which can be applied to a subset of memes.
+            the idea is to limit the search space, as having many many combinations of parameters of memes which will
+            not be activated would make the problem harder
+        it's up the the step and the kimeme interface to apply the parameters to the correct subset of memes
+    observation space: based on metrics, which are build on a list of solutions -> TODO from network table somehow?
+    """
+
+    def __init__(self, steps, obj_function, var_boundaries, step_boundaries, start_x=None, dim=None):
+        assert (type(start_x) is np.ndarray and len(start_x.shape) == 1) or (type(dim) == int and dim > 0)
+        # TODO     = start_x
+        self.state = start_x
+        self.dim = start_x.shape[0] if start_x is not None else dim
+        self.obj_no = obj_no
+        self.H = H
+        self.steps = steps
+        self.curr_step = 0
+        self.obj_function = obj_function
+        self.archive = np.zeros(shape=(H, self.dim))
+        self.archive_fitness = np.zeros(shape=(H, obj_no))
+
+        print(step_boundaries.shape)
+        print(step_boundaries[:1, :])
+        print(step_boundaries[1:, :])
+
+        # deltaX to next solution
+        self.action_space = spaces.Box(
+            low=step_boundaries[:1, :],
+            high=step_boundaries[1:, :],
+            shape=(1, self.dim),
+            dtype=np.float32
+        )
+
+        print(var_boundaries.shape)
+        print(var_boundaries[:1, :])
+        print(var_boundaries[1:, :])
+
+        # TODO temporary state, LTO-like, current position, current gradient + recent gradients
+        self.observation_space = spaces.Box(
+            low=var_boundaries[:1, :],
+            high=var_boundaries[1:, :],
+            shape=(1, self.dim + self.obj_no + self.obj_no*self.H),
+            dtype=np.float32
+        )
+
+        self.seed()
+        self.reset()
+
+    # TODO command kimeme-interface to activate a meme
+    def step(self, action):
+        pass
+
+    def reset(self):
+        pass
+
+    def render(self, mode='human'):
+        pass
+
+
+"""
 def environment_loader(env_name,config) -> gym.Env:
     assert type(env_name) is str
     env = None
@@ -128,3 +197,4 @@ def environment_loader(env_name,config) -> gym.Env:
 
     env.reset()
     return env
+"""

@@ -1,9 +1,9 @@
-from environment import environment_loader
-from agent import Agent
+from environments import environment_loader
+from agents import Agent
 
 rl_configuration = {
     "model.train": True,
-    "model.environment": "gym.CartPole-v0",
+    "model.environments": "gym.CartPole-v0",
     "model.state": "metrics",
     "model.state.metrics": [
         "recentGradients"
@@ -21,7 +21,7 @@ rl_configuration = {
 
 
 def main():
-    env = environment_loader(rl_configuration["model.environment"], rl_configuration)
+    env = environment_loader(rl_configuration["model.environments"], rl_configuration)
     agent_builder = Agent(rl_configuration, env)
 
 if __name__ == '__main__':
