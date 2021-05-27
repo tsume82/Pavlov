@@ -119,34 +119,25 @@ class MemePolicyEnvironment(gym.Env):
 
 class SchedulerPolicyEnvironment(gym.Env):
     # TODO steps -> generic stop conditions based on metrics
-    """
-    action space is divided in 2 parts:
-        - meme to activate, Discrete space of dimension meme_no
-        - parameters, Bounded Continuous/Discrete parameter which can be applied to a subset of memes.
-            the idea is to limit the search space, as having many many combinations of parameters of memes which will
-            not be activated would make the problem harder
-        it's up the the step and the kimeme interface to apply the parameters to the correct subset of memes
-    observation space: based on metrics, which are build on a list of solutions -> TODO from network table somehow?
-    """
-
-    def __init__(self, steps, obj_function, var_boundaries, step_boundaries, start_x=None, dim=None):
-        assert (type(start_x) is np.ndarray and len(start_x.shape) == 1) or (type(dim) == int and dim > 0)
-        # TODO     = start_x
-        self.state = start_x
-        self.dim = start_x.shape[0] if start_x is not None else dim
-        self.obj_no = obj_no
-        self.H = H
+    # TODO WIP
+    def __init__(self, kimeme_driver,  steps, memes_no, state_metrics, parameter_tune_config):
+        """
+        action space is divided in 2 parts:
+            - meme to activate, Discrete space of dimension meme_no
+            - parameters, Bounded Continuous/Discrete parameter which can be applied to a subset of memes.
+                the idea is to limit the search space, as having many many combinations of parameters of memes which will
+                not be activated would make the problem harder
+            it's up the the step and the kimeme interface to apply the parameters to the correct subset of memes
+        observation space: based on metrics, which are build on a list of solutions -> TODO from network table somehow?
+        """
+        self.state = None  # TODO fetch from kimeme-driver
+        self.kimeme_driver = kimeme_driver
         self.steps = steps
         self.curr_step = 0
-        self.obj_function = obj_function
         self.archive = np.zeros(shape=(H, self.dim))
         self.archive_fitness = np.zeros(shape=(H, obj_no))
 
-        print(step_boundaries.shape)
-        print(step_boundaries[:1, :])
-        print(step_boundaries[1:, :])
-
-        # deltaX to next solution
+        self.memes_no = memes_no
         self.action_space = spaces.Box(
             low=step_boundaries[:1, :],
             high=step_boundaries[1:, :],
@@ -154,10 +145,8 @@ class SchedulerPolicyEnvironment(gym.Env):
             dtype=np.float32
         )
 
-        print(var_boundaries.shape)
-        print(var_boundaries[:1, :])
-        print(var_boundaries[1:, :])
-
+        self.state_metrics = state_metrics
+        self.build_metrics()
         # TODO temporary state, LTO-like, current position, current gradient + recent gradients
         self.observation_space = spaces.Box(
             low=var_boundaries[:1, :],

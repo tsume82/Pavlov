@@ -5,8 +5,6 @@ import warnings
 
 import numpy as np
 
-_metrics = {}
-
 
 class UnknownMetricException(Exception):
     def __init__(self, name):
@@ -16,22 +14,27 @@ class UnknownMetricException(Exception):
 
 
 class MetricProvider():
-    @staticmethod
-    def register_metric(name, clazz):
-        _metrics[name] = clazz
+    _metrics = {}
 
-    @staticmethod
-    def get_metric(name) -> str:
-        if name in _metrics.keys():
-            return _metrics[name]
+    @classmethod
+    def register_metric(cls, name, clazz):
+        cls._metrics[name] = clazz
+
+    @classmethod
+    def get_metric(cls, name) -> str:
+        if name in cls._metrics.keys():
+            return cls._metrics[name]
         else:
             raise UnknownMetricException(name)
 
+    @classmethod
+    def build(cls):
+        for k,v in cls._metrics.items():
+            if type(v) == str:
+                cls._metrics[v] = eval(v)
+
 
 class Metric(ABC):
-    def __init__(self):
-        MetricProvider.register_metric(self.name, self.__class__)
-
     @property
     @abstractmethod
     def name(self) -> str:
@@ -57,6 +60,7 @@ class RecentGradients(Metric):
     """
 
     name = "RecentGradients"
+    MetricProvider.register_metric(name, __qualname__)
 
     def __init__(self, dim, max_archive=None, chunk_size=1, chunk_num=None, chunk_use_last=1):
         super().__init__()
@@ -111,3 +115,8 @@ class RecentGradients(Metric):
     def get_space(self):
         space = Box(low=-np.inf, high=np.inf, shape=(self.chunk_use_last, self.dim))
         return space
+
+
+# build up MetricProvider registered metrics class types
+# NB: this must be the last line of metrics.py
+MetricProvider.build()
