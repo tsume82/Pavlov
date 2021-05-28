@@ -21,7 +21,7 @@ class MetricProvider():
         cls._metrics[name] = clazz
 
     @classmethod
-    def get_metric(cls, name) -> str:
+    def get_metric(cls, name):
         if name in cls._metrics.keys():
             return cls._metrics[name]
         else:

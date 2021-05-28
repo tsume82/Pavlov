@@ -3,6 +3,7 @@ import numpy as np
 import gym
 from gym import spaces
 from gym.utils import seeding
+from metrics import *
 
 
 class InvalidEnvironmentRequest(Exception):
@@ -120,7 +121,7 @@ class MemePolicyEnvironment(gym.Env):
 class SchedulerPolicyEnvironment(gym.Env):
     # TODO steps -> generic stop conditions based on metrics
     # TODO WIP
-    def __init__(self, kimeme_driver,  steps, memes_no, state_metrics, parameter_tune_config):
+    def __init__(self, kimeme_driver,  steps, memes_no, state_metrics_names, space_metrics_config, parameter_tune_config):
         """
         action space is divided in 2 parts:
             - meme to activate, Discrete space of dimension meme_no
@@ -130,30 +131,18 @@ class SchedulerPolicyEnvironment(gym.Env):
             it's up the the step and the kimeme interface to apply the parameters to the correct subset of memes
         observation space: based on metrics, which are build on a list of solutions -> TODO from network table somehow?
         """
-        self.state = None  # TODO fetch from kimeme-driver
+        space_metrics = [MetricProvider.get_metric(state_metrics_names[sm])(*space_metrics_config[sm]) for sm in range(len(state_metrics_names))]
+        self.observation_space = spaces.Tuple(space_metrics)
+        # TODO do something similar for reward
+        self.memes_no = memes_no
+
+        self.state = None  # TODO fetch from kimeme-driver?
         self.kimeme_driver = kimeme_driver
         self.steps = steps
         self.curr_step = 0
         self.archive = np.zeros(shape=(H, self.dim))
         self.archive_fitness = np.zeros(shape=(H, obj_no))
 
-        self.memes_no = memes_no
-        self.action_space = spaces.Box(
-            low=step_boundaries[:1, :],
-            high=step_boundaries[1:, :],
-            shape=(1, self.dim),
-            dtype=np.float32
-        )
-
-        self.state_metrics = state_metrics
-        self.build_metrics()
-        # TODO temporary state, LTO-like, current position, current gradient + recent gradients
-        self.observation_space = spaces.Box(
-            low=var_boundaries[:1, :],
-            high=var_boundaries[1:, :],
-            shape=(1, self.dim + self.obj_no + self.obj_no*self.H),
-            dtype=np.float32
-        )
 
         self.seed()
         self.reset()
