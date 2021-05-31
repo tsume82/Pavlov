@@ -33,6 +33,30 @@ class MetricProvider():
             if type(v) == str:
                 cls._metrics[v] = eval(v)
 
+    @classmethod
+    def combine(cls, metricsNames):
+        class CombinedMetric(Metric):
+
+            name = "_".join(metricsNames)
+            metrics_types = tuple((MetricProvider.get_metric(m) for m in metricsNames))
+
+            def __init__(self, configs):
+                self.metrics = tuple((self.metrics_types[i](*configs[i]) for i in range(len(self.metrics_types))))
+
+            def get_space(self):
+                Tuple([m.get_space() for m in self.metrics])
+
+            def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+                # TODO may add mask attribute to compute metrics selectively
+                result = (m.compute(solutions, fitness, **options) for m in self.metrics)
+                return result
+
+            def reset(self) -> None:
+                for m in self.metrics:
+                    m.reset()
+
+        return CombinedMetric
+
 
 class Metric(ABC):
     @property
@@ -46,7 +70,7 @@ class Metric(ABC):
         pass
 
     @abstractmethod
-    def compute(self, solutions: np.array, **options) -> np.array:
+    def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
         pass
 
     @abstractmethod
@@ -62,10 +86,11 @@ class RecentGradients(Metric):
     name = "RecentGradients"
     MetricProvider.register_metric(name, __qualname__)
 
-    def __init__(self, dim, max_archive=None, chunk_size=1, chunk_num=None, chunk_use_last=1):
+    def __init__(self, dim, max_archive=None, chunk_size=1, chunk_num=None, chunk_use_last=1, on_fitness=True):
         super().__init__()
         self.max_archive = max_archive
         self.dim = dim
+        self.on_fitness = on_fitness
 
         if chunk_num is not None and max_archive is not None:
             chunk_size = max(1, max_archive // chunk_num)
@@ -84,8 +109,10 @@ class RecentGradients(Metric):
         self.archive = None
         self.reset()
 
-    def compute(self, fitness_list: np.array, **options) -> np.array:
-        self.archive = np.vstack((self.archive, fitness_list))
+    def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+        dataset = fitness if self.on_fitness else solutions
+
+        self.archive = np.vstack((self.archive, dataset))
         # only consider last chunks_use_last chunks of size chunk_size
         considering = self.archive[[*range(
             self.archive.shape[0] - 1,
@@ -115,6 +142,38 @@ class RecentGradients(Metric):
     def get_space(self):
         space = Box(low=-np.inf, high=np.inf, shape=(self.chunk_use_last, self.dim))
         return space
+
+
+class Best(Metric):
+
+    name = "Best"
+
+    def __init__(self, fit_dim=1, fit_index=0):
+        self.fit_dim = fit_dim
+        self.fit_index = fit_index
+        assert 0 <= self.fit_index < self.fit_dim
+        self.best = None
+        self.best_sol = None
+        self.reset()
+
+    def get_space(self):
+        space = Box(low=-np.inf, high=np.inf, shape=(1, 1))
+
+    def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+        indexes = np.argmin(fitness, axis=0)
+        curr_best_index = indexes[self.fit_index]
+        curr_best_fit = fitness[curr_best_index, self.fit_index]
+        if curr_best_fit < self.best:
+            self.best = curr_best_fit
+            self.best_sol = solutions[curr_best_index]
+        return self.best
+
+    def reset(self) -> None:
+        self.best = np.inf
+        self.best_sol = None
+
+    def get_best(self):
+        return self.best, self.best_sol
 
 
 # build up MetricProvider registered metrics class types

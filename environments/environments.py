@@ -112,16 +112,17 @@ class MemePolicyEnvironment(gym.Env):
         return curr_grad, grads
 
     def build_state(self, next_location):
-        print(self.state)
+        # print(self.state)
         next_gradient, next_recent_gradient = self.compute_curr_gradient()  # TODO will depend on metrics
-        print(self.state)
+        # print(self.state)
         return self._pack_state(next_location, next_gradient, next_recent_gradient)
 
 
 class SchedulerPolicyEnvironment(gym.Env):
     # TODO steps -> generic stop conditions based on metrics
     # TODO WIP
-    def __init__(self, kimeme_driver,  steps, memes_no, state_metrics_names, space_metrics_config, parameter_tune_config):
+    def __init__(self, kimeme_driver, steps, memes_no, state_metrics_names, space_metrics_config, reward_metric,
+                 reward_metric_config, parameter_tune_config=None):
         """
         action space is divided in 2 parts:
             - meme to activate, Discrete space of dimension meme_no
@@ -131,34 +132,57 @@ class SchedulerPolicyEnvironment(gym.Env):
             it's up the the step and the kimeme interface to apply the parameters to the correct subset of memes
         observation space: based on metrics, which are build on a list of solutions -> TODO from network table somehow?
         """
-        space_metrics = [MetricProvider.get_metric(state_metrics_names[sm])(*space_metrics_config[sm]) for sm in range(len(state_metrics_names))]
-        self.observation_space = spaces.Tuple(space_metrics)
-        # TODO do something similar for reward
-        self.memes_no = memes_no
+        # observation space (state), build with a set of metrics
+        self.state_metrics = MetricProvider.combine(state_metrics_names)(space_metrics_config)
+        self.observation_space = self.state_metrics.get_space()
 
-        self.state = None  # TODO fetch from kimeme-driver?
+        # action space, can also include parameter tuning
+        self.memes_no = memes_no
+        if parameter_tune_config is not None:
+            param_max_bounds = np.array([parameter_tune_config[p]["max"] for _, p in parameter_tune_config.items()])
+            param_min_bounds = np.array([parameter_tune_config[p]["mix"] for _, p in parameter_tune_config.items()])
+            parameter_space = Box(low=param_min_bounds, high=param_max_bounds, dtype=np.float32)
+            self.action_space = Tuple((Discrete(memes_no), parameter_space))
+        else:
+            self.action_space = Discrete(memes_no)
+
+        # reward space, note that the reward must be one-dimensional, so an appropriate metric must be used
+        self.reward_metric = MetricProvider.get_metric(reward_metric)(reward_metric_config)
+
+        self.state = None  # fetch from kimeme-driver in self.reset()
         self.kimeme_driver = kimeme_driver
         self.steps = steps
         self.curr_step = 0
-        self.archive = np.zeros(shape=(H, self.dim))
-        self.archive_fitness = np.zeros(shape=(H, obj_no))
-
 
         self.seed()
         self.reset()
 
-    # TODO command kimeme-interface to activate a meme
+    def seed(self, seed=None):
+        self.np_random, seed = seeding.np_random(seed)
+        return [seed]
+
+    def _build_state(self, evaluated_solutions, fitness):
+        return (m.compute(evaluated_solutions, fitness) for m in self.state_metrics)
+
     def step(self, action):
-        pass
+        # this will actually launch an eventual cli or interface with kimeme via RPC, it will take time
+        evaluated_solutions, fitness = self.kimeme_driver.step()
+        self.state = self._build_state(evaluated_solutions,fitness)
+        reward = self.reward_metric.compute(evaluated_solutions, fitness)
+        done = self.kimeme_driver.is_done()
+        return self.state, reward, done, {}
 
     def reset(self):
-        pass
+        if not self.kimeme_driver.initialized():
+            self.kimeme_driver.initialize()
+        self.state = self.kimeme_driver.reset()
 
     def render(self, mode='human'):
         pass
 
 
 """
+# not needed
 def environment_loader(env_name,config) -> gym.Env:
     assert type(env_name) is str
     env = None
