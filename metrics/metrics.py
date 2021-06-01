@@ -147,6 +147,7 @@ class RecentGradients(Metric):
 class Best(Metric):
 
     name = "Best"
+    MetricProvider.register_metric(name, __qualname__)
 
     def __init__(self, fit_dim=1, fit_index=0):
         self.fit_dim = fit_dim

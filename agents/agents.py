@@ -17,8 +17,8 @@ class AgentBuilder:
     tforce_agent = None
     ray_agent = None
 
-    @staticmethod
-    def build(config, env, optimizer):
+    @classmethod
+    def build(cls, config, env, optimizer=None):
         assert "agent.algorithm" in config.keys()
         algorithm = config["agent.algorithm"]
         if algorithm in TFA_AGENTS:
@@ -31,7 +31,7 @@ class AgentBuilder:
                 )
 
                 train_step_counter = tf.compat.v2.Variable(0)
-                tf_agent = reinforce_agent.ReinforceAgent(
+                cls.tf_agent = reinforce_agent.ReinforceAgent(
                     env.time_step_spec(),
                     env.action_spec(),
                     actor_network=actor_net,
@@ -40,7 +40,8 @@ class AgentBuilder:
                     train_step_counter=train_step_counter
                 )
 
-            tf_agent.initialize()
+            if cls.tf_agent is not None:
+                cls.tf_agent.initialize()
             # TODO self.get_policy = lambda _: self.tf_agent.policy
             # TODO step etc...
             # buildTFA function that maps steps to a uniform interface of methods
@@ -49,13 +50,13 @@ class AgentBuilder:
             if algorithm == "TForce_REINFORCE":
                 max_episode_steps = config["agent.algorithm.TForce_REINFORCE.max_episode_steps"]
                 batch_size = config["agent.algorithm.TForce_REINFORCE.batch_size"]
-                tforce_agent = TForceReinforce(
+                cls.tforce_agent = TForceReinforce(
                     env.states(),
                     env.actions(),
                     max_episode_steps, batch_size
                 )
 
-            tforce_agent.initialize()
+            cls.tforce_agent.initialize()
             #TODO build_from_TForce()
 
         if algorithm in RAY_AGENTS:
@@ -64,7 +65,9 @@ class AgentBuilder:
             env_id = "env"
             agent_config = {k[len(agent_id)+1:]: v for k, v in config if k.startswith(agent_id)}
             env_config = {k[len(env_id)+1:]: v for k, v in config if k.startswith(agent_id)}
-            ray_agent = RayPolicyGradient(agent_config, env_config)
+            cls.ray_agent = RayPolicyGradient(agent_config, env_config)
+
+            return cls.ray_agent
 
 
 # meta functions:

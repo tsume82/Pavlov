@@ -120,7 +120,6 @@ class MemePolicyEnvironment(gym.Env):
 
 class SchedulerPolicyEnvironment(gym.Env):
     # TODO steps -> generic stop conditions based on metrics
-    # TODO WIP
     def __init__(self, kimeme_driver, steps, memes_no, state_metrics_names, space_metrics_config, reward_metric,
                  reward_metric_config, parameter_tune_config=None):
         """
@@ -147,7 +146,7 @@ class SchedulerPolicyEnvironment(gym.Env):
             self.action_space = Discrete(memes_no)
 
         # reward space, note that the reward must be one-dimensional, so an appropriate metric must be used
-        self.reward_metric = MetricProvider.get_metric(reward_metric)(reward_metric_config)
+        self.reward_metric = MetricProvider.get_metric(reward_metric)(*reward_metric_config)
 
         self.state = None  # fetch from kimeme-driver in self.reset()
         self.kimeme_driver = kimeme_driver
@@ -162,12 +161,12 @@ class SchedulerPolicyEnvironment(gym.Env):
         return [seed]
 
     def _build_state(self, evaluated_solutions, fitness):
-        return (m.compute(evaluated_solutions, fitness) for m in self.state_metrics)
+        return self.state_metrics.compute(evaluated_solutions, fitness)
 
     def step(self, action):
         # this will actually launch an eventual cli or interface with kimeme via RPC, it will take time
-        evaluated_solutions, fitness = self.kimeme_driver.step()
-        self.state = self._build_state(evaluated_solutions,fitness)
+        evaluated_solutions, fitness = self.kimeme_driver.step(action)
+        self.state = self._build_state(evaluated_solutions, fitness)
         reward = self.reward_metric.compute(evaluated_solutions, fitness)
         done = self.kimeme_driver.is_done()
         return self.state, reward, done, {}
@@ -175,7 +174,8 @@ class SchedulerPolicyEnvironment(gym.Env):
     def reset(self):
         if not self.kimeme_driver.initialized():
             self.kimeme_driver.initialize()
-        self.state = self.kimeme_driver.reset()
+        start_solutions, start_fitness = self.kimeme_driver.reset()
+        self.state = self._build_state(start_solutions, start_fitness)
 
     def render(self, mode='human'):
         pass

@@ -1,5 +1,6 @@
-from environments import environment_loader
-from agents import Agent
+from environments import SchedulerPolicyEnvironment
+from agents import AgentBuilder
+from drivers import KimemeSchedulerFileDriver
 
 rl_configuration = {
     "model.train": True,
@@ -21,8 +22,22 @@ rl_configuration = {
 
 
 def main():
-    env = environment_loader(rl_configuration["model.environments"], rl_configuration)
-    agent_builder = Agent(rl_configuration, env)
+    # env = environment_loader(rl_configuration["model.environments"], rl_configuration)
+    # agent_builder = Agent(rl_configuration, env)
+    driver = KimemeSchedulerFileDriver("/home/kimeme/RL/PavlovTMP/sample_run.csv.txt", "x\(.*\)", "f",
+                                       "Error,OperatorID,OperatorCode,CMAES_Individual_Type,CMAES_Individual_ID,"
+                                       "Iteration".split(","))
+
+    steps = 22      # test data (techinically 24, TODO check for corner cases)
+    memes_no = 5    # test data (+ DOE of course)
+    env = SchedulerPolicyEnvironment(
+        driver, steps, memes_no,
+        ("RecentGradients",), ((2, 6, 1, None, 1),),
+        "Best", (), parameter_tune_config=None
+    )
+
+    print(env.kimeme_driver.next_step())
+
 
 if __name__ == '__main__':
     main()
