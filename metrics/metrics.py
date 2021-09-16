@@ -44,11 +44,11 @@ class MetricProvider():
                 self.metrics = tuple((self.metrics_types[i](*configs[i]) for i in range(len(self.metrics_types))))
 
             def get_space(self):
-                Tuple([m.get_space() for m in self.metrics])
+                return Tuple([m.get_space() for m in self.metrics])
 
             def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
                 # TODO may add mask attribute to compute metrics selectively
-                result = (m.compute(solutions, fitness, **options) for m in self.metrics)
+                result = [m.compute(solutions, fitness, **options) for m in self.metrics]
                 return result
 
             def reset(self) -> None:

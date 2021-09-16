@@ -6,6 +6,8 @@ from tf_agents.networks import actor_distribution_network
 import ray.tune
 from ray.rllib.agents import Trainer as RayTrainer
 from ray.rllib.agents.pg import PGTrainer
+from ray.tune.registry import register_env
+
 
 TFA_AGENTS = ["TFA_REINFORCE"]
 TFORCE_AGENTS = ["TForce_REINFORCE"]
@@ -18,7 +20,7 @@ class AgentBuilder:
     ray_agent = None
 
     @classmethod
-    def build(cls, config, env, optimizer=None):
+    def build(cls, config, env=None, optimizer=None):
         assert "agent.algorithm" in config.keys()
         algorithm = config["agent.algorithm"]
         if algorithm in TFA_AGENTS:
@@ -63,8 +65,8 @@ class AgentBuilder:
             # e.g. algorithm == "Ray_PolicyGradient":
             agent_id = "agent.algorithm." + algorithm
             env_id = "env"
-            agent_config = {k[len(agent_id)+1:]: v for k, v in config if k.startswith(agent_id)}
-            env_config = {k[len(env_id)+1:]: v for k, v in config if k.startswith(agent_id)}
+            agent_config = {k[len(agent_id)+1:]: v for k, v in config.items() if k.startswith(agent_id)}
+            env_config = {k[len(env_id)+1:]: v for k, v in config.items() if k.startswith(env_id)}
             cls.ray_agent = RayPolicyGradient(agent_config, env_config)
 
             return cls.ray_agent
@@ -118,10 +120,13 @@ class RayAgent(Agent, metaclass=ABCMeta):
         self.env_class = self.env_config.get("env_class")
 
         self.env = self.env_class(
-            *self.env_config.get("env_config_args", []),
-            **self.env_config.get("env_config_kwargs", {})
+            self.env_config.get("env_config_args", [])
+            # **self.env_config.get("env_config_kwargs", {})
         )    # env_conf* may be missing if defaults are ok
 
+
+        agent_config["env_config"] = self.env_config.get("env_config_args", [])
+        # register_env("custom_env", lambda config: self.env_class(config))
         self.config = agent_config.copy()
         self.agent = None
         self.reset()
@@ -139,8 +144,7 @@ class RayAgent(Agent, metaclass=ABCMeta):
             action = self.agent.compute_action(obs)
             obs, reward, done, info = self.env.step(action)
             episode_reward += reward
-            if steps_max is not None:
-                steps_done += 1
+            steps_done += 1
         return obs, episode_reward, steps_done
 
     def train(self, stop_condition, autosave=False):
