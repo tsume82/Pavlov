@@ -144,6 +144,21 @@ class RecentGradients(Metric):
         space = Box(low=-np.inf, high=np.inf, shape=(self.chunk_use_last, self.dim))
         return space
 
+class RecentFitness(Metric):
+    name = "RecentFitness"
+    MetricProvider.register_metric(name, __qualname__)
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+        return super().compute(solutions, fitness, **options)
+
+    def get_space(self):
+        return super().get_space()
+
+    def reset(self) -> None:
+        return super().reset()
 
 class Best(Metric):
 

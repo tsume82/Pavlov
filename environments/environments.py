@@ -171,7 +171,7 @@ class SchedulerPolicyEnvironment(gym.Env):
         self.state = self._build_state(evaluated_solutions, fitness)
         reward = self.reward_metric.compute(evaluated_solutions, fitness)
         done = self.kimeme_driver.is_done()
-        return self.state[0], reward, done, {}
+        return self.state[0], reward, done, {} # TODO implement handle multi metrics
 
     def reset(self):
         if not self.kimeme_driver.initialized():

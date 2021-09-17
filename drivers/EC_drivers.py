@@ -16,10 +16,12 @@ class RastrignGADriver(KimemeDriver, metaclass=ABCMeta):
         self.lower_bound = -5.12
         self.upper_bound = 5.12
         self.mut_rate = 0.1
-        self.max_steps = 10
+        self.max_steps = 20
+        self.env_steps = 4
         self.curr_step = 0
         
     def step(self, command):
+        # for i in range(self.env_steps):
         if command == 0:
             self.pop = self.mutation(self.pop)
         else:
