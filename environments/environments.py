@@ -142,10 +142,10 @@ class SchedulerPolicyEnvironment(gym.Env):
         if parameter_tune_config is not None:
             param_max_bounds = np.array([parameter_tune_config[p]["max"] for _, p in parameter_tune_config.items()])
             param_min_bounds = np.array([parameter_tune_config[p]["mix"] for _, p in parameter_tune_config.items()])
-            parameter_space = Box(low=param_min_bounds, high=param_max_bounds, dtype=np.float32)
-            self.action_space = Tuple((Discrete(memes_no), parameter_space))
+            parameter_space = spaces.Box(low=param_min_bounds, high=param_max_bounds, dtype=np.float32)
+            self.action_space = spaces.Tuple((spaces.Discrete(memes_no), parameter_space))
         else:
-            self.action_space = Discrete(memes_no)
+            self.action_space = spaces.Discrete(memes_no)
 
         # reward space, note that the reward must be one-dimensional, so an appropriate metric must be used
         self.reward_metric = MetricProvider.get_metric(reward_metric)(*reward_metric_config)
@@ -171,7 +171,7 @@ class SchedulerPolicyEnvironment(gym.Env):
         self.state = self._build_state(evaluated_solutions, fitness)
         reward = self.reward_metric.compute(evaluated_solutions, fitness)
         done = self.kimeme_driver.is_done()
-        return self.state[0], reward, done, {} # TODO implement handle multi metrics
+        return self.state[0], reward, done, {}
 
     def reset(self):
         if not self.kimeme_driver.initialized():

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from builtins import Exception, map
-from gym.spaces import *
+from gym import spaces
 import warnings
 
 import numpy as np
@@ -44,7 +44,7 @@ class MetricProvider():
                 self.metrics = tuple((self.metrics_types[i](*configs[i]) for i in range(len(self.metrics_types))))
 
             def get_space(self):
-                return Tuple([m.get_space() for m in self.metrics])
+                return spaces.Tuple([m.get_space() for m in self.metrics])
 
             def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
                 # TODO may add mask attribute to compute metrics selectively
@@ -141,8 +141,7 @@ class RecentGradients(Metric):
         self.archive = np.zeros(shape=(0, self.dim))
 
     def get_space(self):
-        space = Box(low=-np.inf, high=np.inf, shape=(self.chunk_use_last, self.dim))
-        return space
+        return spaces.Box(low=-np.inf, high=np.inf, shape=(self.chunk_use_last, self.dim))
 
 class RecentFitness(Metric):
     name = "RecentFitness"
@@ -174,7 +173,7 @@ class Best(Metric):
         self.reset()
 
     def get_space(self):
-        space = Box(low=-np.inf, high=np.inf, shape=(1, 1))
+        space = spaces.Box(low=-np.inf, high=np.inf, shape=(1, 1))
         return space
 
     def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:

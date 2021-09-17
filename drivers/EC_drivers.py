@@ -11,6 +11,7 @@ class RastrignGADriver(KimemeDriver, metaclass=ABCMeta):
     def __init__(self, dim, pop_dim):
         self.dim = dim
         self.pop_dim = pop_dim
+        self.parent_dim = pop_dim // 2
         self.pop = np.empty(0)
         self.init = False
         self.lower_bound = -5.12
@@ -22,19 +23,22 @@ class RastrignGADriver(KimemeDriver, metaclass=ABCMeta):
         
     def step(self, command):
         # for i in range(self.env_steps):
+        parents, _ = self.truncation_selection(self.pop, self.fitness)
+        # parents = self.pop
         if command == 0:
-            self.pop = self.mutation(self.pop)
+            parents = self.mutation(parents)
         else:
-            self.pop = self.crossover(self.pop)
-        fitness = self.evaluate_rastrign(self.pop)
+            parents = self.crossover(parents)
+        fitnessParent = self.evaluate_rastrign(parents)
+        self.pop, self.fitness = self.generational_replacement(self.pop, parents, self.fitness, fitnessParent)
         self.curr_step += 1
-        return self.pop, fitness
+        return self.pop, self.fitness
 
     def reset(self):
         self.curr_step = 0
         self.pop = np.random.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.pop_dim, self.dim))
-        fitness = self.evaluate_rastrign(self.pop)
-        return self.pop, fitness
+        self.fitness = self.evaluate_rastrign(self.pop)
+        return self.pop, self.fitness
 
     def initialized(self):
         return self.init
@@ -52,6 +56,28 @@ class RastrignGADriver(KimemeDriver, metaclass=ABCMeta):
             rastrign = sum([x**2 - 10 * math.cos(2 * math.pi * x) + 10 for x in c])
             fitness = np.append(fitness, [rastrign], axis=0)
         return fitness
+
+    def truncation_selection(self, population, fitness):
+        indSort = np.argsort(fitness)
+        population = population[indSort]
+        fitness = fitness[indSort]
+        return population[:self.pop_dim], fitness[:self.pop_dim]
+
+    def generational_replacement(self, population, offspring, fitnessPop, fitnessOff):
+        num_elites = 1
+        indSort = np.argsort(fitnessPop)
+        population = population[indSort]
+        fitnessPop = fitnessPop[indSort]
+        offspring = np.concatenate((offspring, population[:num_elites]), axis=0)
+        fitnessOff = np.concatenate((fitnessOff, fitnessPop[:num_elites]), axis=0)
+        # offspring.extend(population[:num_elites])
+        # offspring.sort(reverse=True)
+        indSort = np.argsort(fitnessOff)
+        offspring = offspring[indSort]
+        fitnessOff = fitnessOff[indSort]
+        survivors = offspring[:len(population)]
+        fitness = fitnessOff[:len(population)]
+        return survivors, fitness
 
     def mutation(self, population):
         pop = copy.copy(population)
