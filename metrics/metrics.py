@@ -129,7 +129,8 @@ class RecentGradients(Metric):
         grads = considering - np.roll(considering, 1, 0)
         # delete oldest entry, whose gradient is not meaningful having no predecessor in the archive
         # print(f"pre-deletion grads: {grads}")
-        grads = np.delete(grads, 0, axis=0)
+        if considering.shape[0] > 1:
+            grads = np.delete(grads, 0, axis=0)
 
         if options.get("autoreset", False):
             self.reset()
@@ -159,11 +160,16 @@ class Best(Metric):
 
     def get_space(self):
         space = Box(low=-np.inf, high=np.inf, shape=(1, 1))
+        return space
 
     def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
         indexes = np.argmin(fitness, axis=0)
-        curr_best_index = indexes[self.fit_index]
-        curr_best_fit = fitness[curr_best_index, self.fit_index]
+        if len(indexes.shape) == 0:
+            curr_best_index = indexes
+            curr_best_fit = fitness[curr_best_index]
+        else:
+            curr_best_index = indexes[self.fit_index]
+            curr_best_fit = fitness[curr_best_index, self.fit_index]
         if curr_best_fit < self.best:
             self.best = curr_best_fit
             self.best_sol = solutions[curr_best_index]
