@@ -10,13 +10,11 @@ class InvalidEnvironmentRequest(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
-
 # TODO the obj_function must be built, interfacing with the CLI and with Kimeme runtime
 class MemePolicyEnvironment(gym.Env):
     def render(self, mode='human'):
         print("Step {}: state is {}".format(self.curr_step, self.state))
 
-    # TODO accept variable config in input? probably not needed
     def __init__(self, obj_no, H, steps, obj_function, var_boundaries, step_boundaries, start_x=None, dim=None):
         assert (type(start_x) is np.ndarray and len(start_x.shape) == 1) or (type(dim) == int and dim > 0)
 
@@ -27,30 +25,22 @@ class MemePolicyEnvironment(gym.Env):
         self.steps = steps
         self.curr_step = 0
         self.obj_function = obj_function
-        self.archive = np.zeros(shape=(H, self.dim))
-        self.archive_fitness = np.zeros(shape=(H, obj_no))
-
-        print(step_boundaries.shape)
-        print(step_boundaries[:1, :])
-        print(step_boundaries[1:, :])
+        self.archive = np.zeros(shape=(self.H, self.dim))
+        self.archive_fitness = np.zeros(shape=(self.H, self.obj_no))
 
         # deltaX to next solution
         self.action_space = spaces.Box(
-            low=step_boundaries[:1, :],
-            high=step_boundaries[1:, :],
-            shape=(1, self.dim),
+            low=step_boundaries[0],
+            high=step_boundaries[1],
+            shape=((self.dim,)),
             dtype=np.float32
         )
 
-        print(var_boundaries.shape)
-        print(var_boundaries[:1, :])
-        print(var_boundaries[1:, :])
-
         # TODO temporary state, LTO-like, current position, current gradient + recent gradients
         self.observation_space = spaces.Box(
-            low=var_boundaries[:1, :],
-            high=var_boundaries[1:, :],
-            shape=(1, self.dim + self.obj_no + self.obj_no*self.H),
+            low=var_boundaries[0],
+            high=var_boundaries[1],
+            shape=((self.dim + self.obj_no + self.obj_no*self.H,)),
             dtype=np.float32
         )
 
@@ -105,7 +95,7 @@ class MemePolicyEnvironment(gym.Env):
         index = self.curr_step % self.H
         oldest_index = (index+1) % self.H
         # subtract previous fitness, along each axis
-        grads = self.archive_fitness-np.roll(self.archive_fitness, 1, 0)
+        grads = self.archive_fitness-np.roll(self.archive_fitness, 1, axis=0)
         # delete oldest entry, whose gradient is not meaningful having no predecessor in the archive
         np.delete(grads, oldest_index, 0)
         curr_grad = grads[index]
@@ -117,6 +107,18 @@ class MemePolicyEnvironment(gym.Env):
         # print(self.state)
         return self._pack_state(next_location, next_gradient, next_recent_gradient)
 
+class MemePolicyRayEnvironment(MemePolicyEnvironment):
+    # according to the ray doc, the env must have only one param: the env configuration (https://docs.ray.io/en/latest/rllib-env.html)
+    def __init__(self, env_config):
+        obj_no = env_config.get("obj_no")
+        H = env_config.get("H")
+        steps = env_config.get("steps")
+        obj_function = env_config.get("obj_function")
+        var_boundaries = env_config.get("var_boundaries")
+        step_boundaries = env_config.get("step_boundaries")
+        dim = env_config.get("dim", None)
+        start_x = env_config.get("start_x", None)
+        super().__init__(obj_no, H, steps, obj_function, var_boundaries, step_boundaries, start_x, dim)
 
 class SchedulerPolicyEnvironment(gym.Env):
     # TODO steps -> generic stop conditions based on metrics
@@ -133,7 +135,7 @@ class SchedulerPolicyEnvironment(gym.Env):
         """
         # observation space (state), build with a set of metrics
         self.state_metrics = MetricProvider.combine(state_metrics_names)(space_metrics_config)
-        self.observation_space = self.state_metrics.get_space()
+        self.observation_space = self.state_metrics.get_space()[0] # TODO get_space returns a Tuple of spaces but a space is needed
 
         # action space, can also include parameter tuning
         self.memes_no = memes_no
@@ -169,34 +171,28 @@ class SchedulerPolicyEnvironment(gym.Env):
         self.state = self._build_state(evaluated_solutions, fitness)
         reward = self.reward_metric.compute(evaluated_solutions, fitness)
         done = self.kimeme_driver.is_done()
-        return self.state, reward, done, {}
+        return self.state[0], reward, done, {}
 
     def reset(self):
         if not self.kimeme_driver.initialized():
             self.kimeme_driver.initialize()
         start_solutions, start_fitness = self.kimeme_driver.reset()
         self.state = self._build_state(start_solutions, start_fitness)
+        return self.state[0]
 
     def render(self, mode='human'):
         pass
 
-
-"""
-# not needed
-def environment_loader(env_name,config) -> gym.Env:
-    assert type(env_name) is str
-    env = None
-    if env_name.startswith("gym"):
-        env = gym.make(env_name)
-    elif env_name.startswith("TForceMeme"):
-        env = MemePolicyEnvironment(
-            config[""]
-        )
-    # elif ():
-    #    ...
-    else:
-        raise InvalidEnvironmentRequest()
-
-    env.reset()
-    return env
-"""
+class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
+    # according to the ray doc, the env must have only one param: the env configuration (https://docs.ray.io/en/latest/rllib-env.html)
+    def __init__(self, env_config):
+        kimeme_driver = env_config.get("kimeme_driver")
+        steps = env_config.get("steps")
+        memes_no = env_config.get("memes_no")
+        state_metrics_names = env_config.get("state_metrics_names")
+        space_metrics_config = env_config.get("space_metrics_config")
+        reward_metric = env_config.get("reward_metric")
+        reward_metric_config = env_config.get("reward_metric_config")
+        parameter_tune_config = env_config.get("parameter_tune_config",None)
+        super().__init__(kimeme_driver, steps, memes_no, state_metrics_names, space_metrics_config, reward_metric,
+                 reward_metric_config, parameter_tune_config)

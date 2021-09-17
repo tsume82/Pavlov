@@ -16,6 +16,8 @@ class RastrignGADriver(KimemeDriver, metaclass=ABCMeta):
         self.lower_bound = -5.12
         self.upper_bound = 5.12
         self.mut_rate = 0.1
+        self.max_steps = 10
+        self.curr_step = 0
         
     def step(self, command):
         if command == 0:
@@ -23,9 +25,11 @@ class RastrignGADriver(KimemeDriver, metaclass=ABCMeta):
         else:
             self.pop = self.crossover(self.pop)
         fitness = self.evaluate_rastrign(self.pop)
+        self.curr_step += 1
         return self.pop, fitness
 
     def reset(self):
+        self.curr_step = 0
         self.pop = np.random.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.pop_dim, self.dim))
         fitness = self.evaluate_rastrign(self.pop)
         return self.pop, fitness
@@ -37,10 +41,14 @@ class RastrignGADriver(KimemeDriver, metaclass=ABCMeta):
         self.pop = np.random.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.pop_dim, self.dim))
         self.init = True
 
+    def is_done(self):
+        return self.curr_step >= self.max_steps
+
     def evaluate_rastrign(self, population):
-        fitness = []
+        fitness = np.zeros(shape=(0,))
         for c in population:
-            fitness.append(sum([x**2 - 10 * math.cos(2 * math.pi * x) + 10 for x in c]))
+            rastrign = sum([x**2 - 10 * math.cos(2 * math.pi * x) + 10 for x in c])
+            fitness = np.append(fitness, [rastrign], axis=0)
         return fitness
 
     def mutation(self, population):
@@ -57,7 +65,6 @@ class RastrignGADriver(KimemeDriver, metaclass=ABCMeta):
         dads = population[1::2]
         children = []
         for i, (mom, dad) in enumerate(zip(moms, dads)):
-            self.uniform_crossover.index = i
             offspring = self.uniform_crossover(random, mom, dad)
             for o in offspring:
                 children.append(o)
