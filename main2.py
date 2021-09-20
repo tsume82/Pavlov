@@ -1,10 +1,6 @@
-import gym
-import ray
 from environments import SchedulerPolicyRayEnvironment, MemePolicyRayEnvironment
 from agents import AgentBuilder
 from drivers import KimemeSchedulerFileDriver, RastrignGADriver
-from ray.rllib.models.preprocessors import Preprocessor
-from ray.rllib.models import ModelCatalog
 import math
 import numpy as np
 
@@ -27,6 +23,11 @@ rl_configuration_1 = {
 
 rl_configuration_2 = {
     "agent.algorithm": "Ray_PolicyGradient",
+    "agent.algorithm.Ray_PolicyGradient.num_workers" : 0,
+    "agent.algorithm.Ray_PolicyGradient.framework" : "tf",
+    "agent.algorithm.Ray_PolicyGradient.model" : {
+		# "use_lstm": True,
+	},
 	"env.env_class": SchedulerPolicyRayEnvironment,
 	"env.env_config_args": {
 		"kimeme_driver" : RastrignGADriver(2, 50),

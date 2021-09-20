@@ -1,13 +1,8 @@
 from abc import ABC, abstractmethod, ABCMeta
-from tf_agents.agents.reinforce import *
-import tensorflow as tf
-from tensorforce.agents import VanillaPolicyGradient as TForceReinforce
-from tf_agents.networks import actor_distribution_network
 import ray.tune
-from ray.rllib.agents import Trainer as RayTrainer
+# from ray.rllib.agents import Trainer as RayTrainer
 from ray.rllib.agents.pg import PGTrainer
 from ray.tune.registry import register_env
-
 
 TFA_AGENTS = ["TFA_REINFORCE"]
 TFORCE_AGENTS = ["TForce_REINFORCE"]
@@ -24,6 +19,9 @@ class AgentBuilder:
         assert "agent.algorithm" in config.keys()
         algorithm = config["agent.algorithm"]
         if algorithm in TFA_AGENTS:
+            import tensorflow as tf
+            from tf_agents.networks import actor_distribution_network
+            from tf_agents.agents.reinforce import reinforce_agent
             if algorithm == "TFA_REINFORCE":
                 assert "agent.algorithm.REINFORCE.fc_layer" in config.keys
                 actor_net = actor_distribution_network.ActorDistributionNetwork(
@@ -49,6 +47,7 @@ class AgentBuilder:
             # buildTFA function that maps steps to a uniform interface of methods
 
         if algorithm in TFORCE_AGENTS:
+            from tensorforce.agents import VanillaPolicyGradient as TForceReinforce
             if algorithm == "TForce_REINFORCE":
                 max_episode_steps = config["agent.algorithm.TForce_REINFORCE.max_episode_steps"]
                 batch_size = config["agent.algorithm.TForce_REINFORCE.batch_size"]
@@ -126,9 +125,10 @@ class RayAgent(Agent, metaclass=ABCMeta):
 
 
         agent_config["env_config"] = self.env_config.get("env_config_args", [])
-        # register_env("custom_env", lambda config: self.env_class(config))
         self.config = agent_config.copy()
+        print(self.config)
         self.agent = None
+        register_env("custom_env", lambda config: self.env_class(config))
         self.reset()
 
     # The environment is itself responsible for logging the states, the only returned value is the final state
@@ -159,7 +159,7 @@ class RayAgent(Agent, metaclass=ABCMeta):
     def reset(self):
         ray.shutdown()
         ray.init()
-        self.agent = self.agent_class(config=self.config, env=self.env_class)
+        self.agent = self.agent_class(env="custom_env", config=self.config)
 
     def load(self, from_file):
         self.agent.restore(from_file)

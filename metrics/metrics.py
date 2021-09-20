@@ -48,8 +48,7 @@ class MetricProvider():
 
             def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
                 # TODO may add mask attribute to compute metrics selectively
-                result = [m.compute(solutions, fitness, **options) for m in self.metrics]
-                return result
+                return tuple([m.compute(solutions, fitness, **options) for m in self.metrics])
 
             def reset(self) -> None:
                 for m in self.metrics:

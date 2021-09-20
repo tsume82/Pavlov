@@ -135,7 +135,7 @@ class SchedulerPolicyEnvironment(gym.Env):
         """
         # observation space (state), build with a set of metrics
         self.state_metrics = MetricProvider.combine(state_metrics_names)(space_metrics_config)
-        self.observation_space = self.state_metrics.get_space()[0] # TODO get_space returns a Tuple of spaces but a space is needed
+        self.observation_space = self.state_metrics.get_space()
 
         # action space, can also include parameter tuning
         self.memes_no = memes_no
@@ -171,14 +171,14 @@ class SchedulerPolicyEnvironment(gym.Env):
         self.state = self._build_state(evaluated_solutions, fitness)
         reward = self.reward_metric.compute(evaluated_solutions, fitness)
         done = self.kimeme_driver.is_done()
-        return self.state[0], reward, done, {}
+        return self.state, reward, done, {}
 
     def reset(self):
         if not self.kimeme_driver.initialized():
             self.kimeme_driver.initialize()
         start_solutions, start_fitness = self.kimeme_driver.reset()
         self.state = self._build_state(start_solutions, start_fitness)
-        return self.state[0]
+        return self.state
 
     def render(self, mode='human'):
         pass
