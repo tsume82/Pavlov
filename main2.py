@@ -1,6 +1,6 @@
 from environments import SchedulerPolicyRayEnvironment, MemePolicyRayEnvironment
 from agents import AgentBuilder
-from drivers import KimemeSchedulerFileDriver, RastrignGADriver
+from drivers import KimemeSchedulerFileDriver, RastriginGADriver
 import math
 import numpy as np
 
@@ -30,11 +30,11 @@ rl_configuration_2 = {
 	},
 	"env.env_class": SchedulerPolicyRayEnvironment,
 	"env.env_config_args": {
-		"kimeme_driver" : RastrignGADriver(2, 50),
+		"kimeme_driver" : RastriginGADriver(2, 10),
 		"steps" : 10,
 		"memes_no" : 2,
 		"state_metrics_names" : ("RecentGradients",),
-		"space_metrics_config" : ((50, 6, 50, None, 1),),
+		"space_metrics_config" : ((10, 6, 1, None, 10),),
 		"reward_metric" : "Best",
 		"reward_metric_config" : (),
 		"parameter_tune_config" : None,
@@ -54,9 +54,12 @@ def main2():
 	agent = AgentBuilder.build(rl_configuration_2)
 	for i in range(5):
 		obs, episode_reward, steps_done = agent.act()
+		print("─────────────────────────────────────────────",i,"─────────────────────────────────────────────")
 		print(obs)
-		print(episode_reward)
-		print(steps_done)
+		print()
+		print("REWARD: \t", episode_reward)
+		print()
+		print("STEPS: \t", steps_done)
 	
 
 

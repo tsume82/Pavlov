@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from builtins import Exception, map
 from gym import spaces
+from ray.rllib.utils.spaces.repeated import Repeated
 import warnings
 
 import numpy as np
@@ -48,7 +49,7 @@ class MetricProvider():
 
             def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
                 # TODO may add mask attribute to compute metrics selectively
-                return tuple([m.compute(solutions, fitness, **options) for m in self.metrics])
+                return [m.compute(solutions, fitness, **options) for m in self.metrics]
 
             def reset(self) -> None:
                 for m in self.metrics:
@@ -113,11 +114,9 @@ class RecentGradients(Metric):
 
         self.archive = np.vstack((self.archive, dataset))
         # only consider last chunks_use_last chunks of size chunk_size
-        considering = self.archive[[*range(
-            self.archive.shape[0] - 1,
-            max(-1, self.archive.shape[0] - (self.chunk_size * (1 + self.chunk_use_last))),
-            -self.chunk_size
-        )]]
+        considering = self.archive[[*range(self.archive.shape[0] - 1,
+                                    max(-1, self.archive.shape[0] - (self.chunk_size * (1 + self.chunk_use_last))),
+                                    -self.chunk_size)]]
         # print(f"considering archive subset: {considering}")
         # TODO implement max_archive efficiently, avoid continue deletion and use rolling index similar to MemePolicy
         if self.max_archive is not None:
@@ -128,19 +127,20 @@ class RecentGradients(Metric):
         grads = considering - np.roll(considering, 1, 0)
         # delete oldest entry, whose gradient is not meaningful having no predecessor in the archive
         # print(f"pre-deletion grads: {grads}")
-        if considering.shape[0] > 1:
-            grads = np.delete(grads, 0, axis=0)
+        grads = np.delete(grads, 0, axis=0)
 
         if options.get("autoreset", False):
             self.reset()
 
-        return grads
+        return grads.tolist() # Repeated doesn't handle numpy arrays, TODO custom Repeated handling numpy?
 
     def reset(self) -> None:
         self.archive = np.zeros(shape=(0, self.dim))
 
     def get_space(self):
-        return spaces.Box(low=-np.inf, high=np.inf, shape=(self.chunk_use_last, self.dim))
+        # return spaces.Box(low=-np.inf, high=np.inf, shape=(self.chunk_use_last, self.dim))
+        box = spaces.Box(low=-np.inf, high=np.inf, shape=((self.dim,)))
+        return Repeated(box, max_len=self.chunk_use_last)
 
 class RecentFitness(Metric):
     name = "RecentFitness"

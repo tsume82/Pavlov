@@ -19,6 +19,7 @@ class AgentBuilder:
         assert "agent.algorithm" in config.keys()
         algorithm = config["agent.algorithm"]
         if algorithm in TFA_AGENTS:
+            # import this libs only if Ray isn't used, otherwise Ray doesn't work
             import tensorflow as tf
             from tf_agents.networks import actor_distribution_network
             from tf_agents.agents.reinforce import reinforce_agent
@@ -47,6 +48,7 @@ class AgentBuilder:
             # buildTFA function that maps steps to a uniform interface of methods
 
         if algorithm in TFORCE_AGENTS:
+            # import this libs only if Ray isn't used, otherwise Ray doesn't work
             from tensorforce.agents import VanillaPolicyGradient as TForceReinforce
             if algorithm == "TForce_REINFORCE":
                 max_episode_steps = config["agent.algorithm.TForce_REINFORCE.max_episode_steps"]
@@ -126,7 +128,6 @@ class RayAgent(Agent, metaclass=ABCMeta):
 
         agent_config["env_config"] = self.env_config.get("env_config_args", [])
         self.config = agent_config.copy()
-        print(self.config)
         self.agent = None
         register_env("custom_env", lambda config: self.env_class(config))
         self.reset()

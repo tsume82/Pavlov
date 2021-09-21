@@ -8,7 +8,6 @@ from ray.rllib.agents.pg import PGTrainer
 from ray.tune.registry import register_env
 from ray.rllib.utils.spaces.repeated import Repeated
 
-
 DICT_SPACE = spaces.Dict({
     "sensors": spaces.Dict({
         "position": spaces.Box(low=-100, high=100, shape=(3, )),
@@ -29,19 +28,11 @@ DICT_SPACE = spaces.Dict({
 
 DICT_SAMPLES = [DICT_SPACE.sample() for _ in range(10)]
 
-TUPLE_SPACE = spaces.Tuple([
-    spaces.Box(low=-np.inf, high=np.inf, shape=(1, 50))
-    # spaces.Tuple((spaces.Box(low=0, high=1, shape=(10, 10, 3)),
-    #               spaces.Box(low=0, high=1, shape=(10, 10, 3)))),
-    # spaces.Discrete(5),
-])
-TUPLE_SAMPLES = [TUPLE_SPACE.sample() for _ in range(10)]
-
 # Constraints on the Repeated space.
 MAX_PLAYERS = 4
 MAX_ITEMS = 7
 MAX_EFFECTS = 2
-ITEM_SPACE = spaces.Box(-5, 5, shape=(1, ))
+ITEM_SPACE = spaces.Box(low=-np.inf, high=np.inf, shape=(50,))
 EFFECT_SPACE = spaces.Box(9000, 9999, shape=(4, ))
 PLAYER_SPACE = spaces.Dict({
     "location": spaces.Box(-100, 100, shape=(2, )),
@@ -49,8 +40,16 @@ PLAYER_SPACE = spaces.Dict({
     "effects": Repeated(EFFECT_SPACE, max_len=MAX_EFFECTS),
     "status": spaces.Box(-1, 1, shape=(10, )),
 })
-REPEATED_SPACE = Repeated(PLAYER_SPACE, max_len=MAX_PLAYERS)
-REPEATED_SAMPLES = [REPEATED_SPACE.sample() for _ in range(10)]
+REPEATED_SPACE = Repeated(ITEM_SPACE, max_len=MAX_PLAYERS)
+REPEATED_SAMPLES = [ITEM_SPACE.sample() for _ in range(10)]
+
+TUPLE_SPACE = spaces.Tuple([
+    REPEATED_SPACE
+    # spaces.Tuple((spaces.Box(low=0, high=1, shape=(10, 10, 3)),
+    #               spaces.Box(low=0, high=1, shape=(10, 10, 3)))),
+    # spaces.Discrete(5),
+])
+TUPLE_SAMPLES = [REPEATED_SPACE.sample()]
 
 class NestedTupleEnv(gym.Env):
     def __init__(self):
@@ -80,3 +79,5 @@ if __name__ == "__main__":
             },
             "framework": "tf",
         })
+    
+    

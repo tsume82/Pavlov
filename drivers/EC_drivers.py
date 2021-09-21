@@ -7,7 +7,7 @@ import copy
 import inspyred
 import math
 
-class RastrignGADriver(KimemeDriver, metaclass=ABCMeta):
+class RastriginGADriver(KimemeDriver, metaclass=ABCMeta):
     def __init__(self, dim, pop_dim):
         self.dim = dim
         self.pop_dim = pop_dim
@@ -18,10 +18,12 @@ class RastrignGADriver(KimemeDriver, metaclass=ABCMeta):
         self.upper_bound = 5.12
         self.mut_rate = 0.1
         self.max_steps = 20
-        self.env_steps = 4
+        self.env_steps = 3
         self.curr_step = 0
+        self.num_elites = 1
         
     def step(self, command):
+        # stepPop = [], stepFit = []
         # for i in range(self.env_steps):
         parents, _ = self.truncation_selection(self.pop, self.fitness)
         # parents = self.pop
@@ -32,6 +34,8 @@ class RastrignGADriver(KimemeDriver, metaclass=ABCMeta):
         fitnessParent = self.evaluate_rastrign(parents)
         self.pop, self.fitness = self.generational_replacement(self.pop, parents, self.fitness, fitnessParent)
         self.curr_step += 1
+        # stepPop.append(self.pop)
+        # stepFit.append(self.fitness)
         return self.pop, self.fitness
 
     def reset(self):
@@ -64,7 +68,7 @@ class RastrignGADriver(KimemeDriver, metaclass=ABCMeta):
         return population[:self.pop_dim], fitness[:self.pop_dim]
 
     def generational_replacement(self, population, offspring, fitnessPop, fitnessOff):
-        num_elites = 1
+        num_elites = self.num_elites
         indSort = np.argsort(fitnessPop)
         population = population[indSort]
         fitnessPop = fitnessPop[indSort]
