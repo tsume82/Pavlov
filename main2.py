@@ -23,13 +23,12 @@ rl_configuration_1 = {
 
 rl_configuration_2 = {
     "agent.algorithm": "Ray_PolicyGradient",
-    "agent.algorithm.Ray_PolicyGradient.num_workers" : 0,
     "agent.algorithm.Ray_PolicyGradient.framework" : "tf",
     "agent.algorithm.Ray_PolicyGradient.model" : {
 		# "use_lstm": True,
 	},
 	"env.env_class": SchedulerPolicyRayEnvironment,
-	"env.env_config_args": {
+	"env.env_config": {
 		"kimeme_driver" : RastriginGADriver(2, 10),
 		"steps" : 10,
 		"memes_no" : 2,
@@ -52,14 +51,15 @@ def main():
 
 def main2():
 	agent = AgentBuilder.build(rl_configuration_2)
-	for i in range(5):
-		obs, episode_reward, steps_done = agent.act()
-		print("─────────────────────────────────────────────",i,"─────────────────────────────────────────────")
-		print(obs)
-		print()
-		print("REWARD: \t", episode_reward)
-		print()
-		print("STEPS: \t", steps_done)
+	for i in range(1):
+		# obs, episode_reward, steps_done = agent.act()
+		agent.train(stop_condition={"training_iteration": 1})
+		# print("─────────────────────────────────────────────",i,"─────────────────────────────────────────────")
+		# print(obs)
+		# print()
+		# print("REWARD: \t", episode_reward)
+		# print()
+		# print("STEPS: \t", steps_done)
 	
 
 

@@ -126,7 +126,6 @@ class RecentGradients(Metric):
         # subtract previous fitness, along each axis
         grads = considering - np.roll(considering, 1, 0)
         # delete oldest entry, whose gradient is not meaningful having no predecessor in the archive
-        # print(f"pre-deletion grads: {grads}")
         grads = np.delete(grads, 0, axis=0)
 
         if options.get("autoreset", False):

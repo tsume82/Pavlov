@@ -120,16 +120,16 @@ class RayAgent(Agent, metaclass=ABCMeta):
         assert self.env_config.get("env_class") is not None
         self.env_class = self.env_config.get("env_class")
 
-        self.env = self.env_class(
-            self.env_config.get("env_config_args", [])
-            # **self.env_config.get("env_config_kwargs", {})
-        )    # env_conf* may be missing if defaults are ok
+        self.env = self.env_class(self.env_config.get("env_config", []))
 
+        agent_config["env_config"] = self.env_config.get("env_config", {})
+        agent_config["env"] = self.env_class.__name__
 
-        agent_config["env_config"] = self.env_config.get("env_config_args", [])
+        register_env(self.env_class.__name__, lambda config: self.env_class(config))
+
         self.config = agent_config.copy()
         self.agent = None
-        register_env("custom_env", lambda config: self.env_class(config))
+
         self.reset()
 
     # The environment is itself responsible for logging the states, the only returned value is the final state
@@ -149,18 +149,18 @@ class RayAgent(Agent, metaclass=ABCMeta):
         return obs, episode_reward, steps_done
 
     def train(self, stop_condition, autosave=False):
-        result = ray.tune.run(
+        return ray.tune.run(
             self.agent_class,
             config=self.config,
-            # local_dir=log_dir,
+            local_dir="./.logs",
             stop=stop_condition,
             checkpoint_at_end=autosave
-    )
+        )
 
     def reset(self):
         ray.shutdown()
         ray.init()
-        self.agent = self.agent_class(env="custom_env", config=self.config)
+        self.agent = self.agent_class(env=self.env_class.__name__, config=self.config)
 
     def load(self, from_file):
         self.agent.restore(from_file)
