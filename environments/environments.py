@@ -20,8 +20,8 @@ class MemePolicyEnvironment(gym.Env):
 
         self.state = start_x
         self.dim = start_x.shape[0] if start_x is not None else dim
-        self.obj_no = obj_no
-        self.H = H
+        self.obj_no = obj_no # fitness length
+        self.H = H # History Length
         self.steps = steps
         self.curr_step = 0
         self.obj_function = obj_function
@@ -176,6 +176,8 @@ class SchedulerPolicyEnvironment(gym.Env):
     def reset(self):
         if not self.kimeme_driver.initialized():
             self.kimeme_driver.initialize()
+        self.reward_metric.reset()
+        self.state_metrics.reset()
         start_solutions, start_fitness = self.kimeme_driver.reset()
         self.state = self._build_state(start_solutions, start_fitness)
         return self.state
@@ -196,3 +198,5 @@ class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
         parameter_tune_config = env_config.get("parameter_tune_config",None)
         super().__init__(kimeme_driver, steps, memes_no, state_metrics_names, space_metrics_config, reward_metric,
                  reward_metric_config, parameter_tune_config)
+
+

@@ -142,20 +142,31 @@ class RecentGradients(Metric):
         return Repeated(box, max_len=self.chunk_use_last)
 
 class RecentFitness(Metric):
+    """
+        RecentFitness metric, keep track of the fitness within the last history_size steps
+    """
     name = "RecentFitness"
     MetricProvider.register_metric(name, __qualname__)
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, dim, history_size) -> None:
+        self.dim = dim
+        self.history_size = history_size
+        self.archive = None
 
     def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
-        return super().compute(solutions, fitness, **options)
+        self.archive.append(fitness)
+
+        if len(self.archive) > self.history_size:
+            self.archive.pop(0)
+
+        return self.archive
 
     def get_space(self):
-        return super().get_space()
+        box = spaces.Box(low=-np.inf, high=np.inf, shape=((self.dim,)))
+        return Repeated(box, max_len=self.history_size)
 
     def reset(self) -> None:
-        return super().reset()
+        self.archive = []
 
 class Best(Metric):
 

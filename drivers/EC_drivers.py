@@ -11,13 +11,13 @@ class RastriginGADriver(KimemeDriver, metaclass=ABCMeta):
     def __init__(self, dim, pop_dim):
         self.dim = dim
         self.pop_dim = pop_dim
-        self.parent_dim = pop_dim // 2
+        self.num_selected = pop_dim
         self.pop = np.empty(0)
         self.init = False
         self.lower_bound = -5.12
         self.upper_bound = 5.12
         self.mut_rate = 0.1
-        self.max_steps = 5
+        self.max_steps = 50
         self.env_steps = 3
         self.curr_step = 0
         self.num_elites = 1
@@ -65,7 +65,17 @@ class RastriginGADriver(KimemeDriver, metaclass=ABCMeta):
         indSort = np.argsort(fitness)
         population = population[indSort]
         fitness = fitness[indSort]
-        return population[:self.pop_dim], fitness[:self.pop_dim]
+        return population[:self.num_selected], fitness[:self.num_selected]
+
+    def tournament_selection(self, population):
+        tournament_size = 2
+        if tournament_size > len(population):
+            tournament_size = len(population)
+        selected = []
+        for _ in range(self.num_selected):
+            tourn = random.sample(population, tournament_size)
+            selected.append(max(tourn))
+        return selected
 
     def generational_replacement(self, population, offspring, fitnessPop, fitnessOff):
         num_elites = self.num_elites

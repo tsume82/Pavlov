@@ -3,6 +3,7 @@ from agents import AgentBuilder
 from drivers import KimemeSchedulerFileDriver, RastriginGADriver
 import math
 import numpy as np
+from pprint import pprint
 
 def rastrign(ind):
 	return sum([x**2 - 10 * math.cos(2 * math.pi * x) + 10 for x in ind])
@@ -10,7 +11,7 @@ def rastrign(ind):
 rl_configuration_1 = {
     "agent.algorithm": "Ray_PolicyGradient",
 	"env.env_class": MemePolicyRayEnvironment,
-	"env.env_config_args": {
+	"env.env_config": {
 		"obj_no":1,
 		"H":10,
 		"steps":10,
@@ -32,8 +33,9 @@ rl_configuration_2 = {
 		"kimeme_driver" : RastriginGADriver(2, 10),
 		"steps" : 10,
 		"memes_no" : 2,
-		"state_metrics_names" : ("RecentGradients",),
-		"space_metrics_config" : ((10, 6, 1, None, 10),),
+		"state_metrics_names" : ("RecentFitness",),
+		"space_metrics_config" : ((10, 6),),
+		# "space_metrics_config" : ((10, 6, 1, None, 10),),
 		"reward_metric" : "Best",
 		"reward_metric_config" : (),
 		"parameter_tune_config" : None,
@@ -51,15 +53,10 @@ def main():
 
 def main2():
 	agent = AgentBuilder.build(rl_configuration_2)
+	# obs, episode_reward, steps_done = agent.act()
 	for i in range(1):
-		# obs, episode_reward, steps_done = agent.act()
-		agent.train(stop_condition={"training_iteration": 1})
-		# print("─────────────────────────────────────────────",i,"─────────────────────────────────────────────")
-		# print(obs)
-		# print()
-		# print("REWARD: \t", episode_reward)
-		# print()
-		# print("STEPS: \t", steps_done)
+		res = agent.train(stop_condition={"training_iteration": 10}, autosave=True)
+		pprint(res)
 	
 
 

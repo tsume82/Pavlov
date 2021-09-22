@@ -120,7 +120,7 @@ class RayAgent(Agent, metaclass=ABCMeta):
         assert self.env_config.get("env_class") is not None
         self.env_class = self.env_config.get("env_class")
 
-        self.env = self.env_class(self.env_config.get("env_config", []))
+        self.env = self.env_class(self.env_config.get("env_config", {}))
 
         agent_config["env_config"] = self.env_config.get("env_config", {})
         agent_config["env"] = self.env_class.__name__
@@ -149,13 +149,14 @@ class RayAgent(Agent, metaclass=ABCMeta):
         return obs, episode_reward, steps_done
 
     def train(self, stop_condition, autosave=False):
-        return ray.tune.run(
-            self.agent_class,
-            config=self.config,
-            local_dir="./.logs",
-            stop=stop_condition,
-            checkpoint_at_end=autosave
-        )
+        return self.agent.train()
+        # return ray.tune.run(
+        #     self.agent_class,
+        #     config=self.config,
+        #     local_dir="./.logs",
+        #     stop=stop_condition,
+        #     checkpoint_at_end=autosave
+        # )
 
     def reset(self):
         ray.shutdown()
