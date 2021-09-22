@@ -205,6 +205,35 @@ class Best(Metric):
     def get_best(self):
         return self.best, self.best_sol
 
+class BestGradient(Metric):
+
+    name = "BestGradient"
+    MetricProvider.register_metric(name, __qualname__)
+
+    def __init__(self):
+        self.reset()
+
+    def get_space(self):
+        return spaces.Box(low=-np.inf, high=np.inf, shape=(1, 1))
+
+    def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+
+        fitness = np.sort(fitness, axis=0)
+
+        if len(self.prec_fitness) < 1:
+            grad = 0 # zero gradient for the first step
+        else:
+            grad = fitness[0] - self.prec_fitness[0]
+
+        self.prec_fitness = fitness
+
+        return grad
+
+    def reset(self) -> None:
+        self.prec_fitness = []
+
+    def get_best(self):
+        return self.best, self.best_sol
 
 # build up MetricProvider registered metrics class types
 # NB: this must be the last line of metrics.py
