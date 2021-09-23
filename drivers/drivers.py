@@ -1,6 +1,7 @@
 import warnings
 from abc import ABC, abstractmethod, ABCMeta
 import pandas as pd
+import numpy as np
 
 
 class DriverNotReady(Exception):
@@ -36,20 +37,24 @@ class KimemeDriver(ABC):
 
     # TODO overloading of this method with online training/enforcing must also pass the parameter tuning config action
     @abstractmethod
-    def step(self, command):
+    def step(self, command) -> tuple(np.ndarray, np.ndarray): # evaluated solutions, fitness
         pass
 
     @abstractmethod
-    def reset(self):
+    def reset(self) -> tuple(np.ndarray, np.ndarray): # initialized solutions, fitness:
         pass
 
     @abstractmethod
-    def initialized(self):
+    def initialized(self) -> bool:
         pass
 
     @abstractmethod
-    def initialize(self):
+    def initialize(self) -> None:
         pass
+
+    @abstractmethod
+    def is_done(self) -> bool:
+        return False
 
 
 class KimemeFileDriver(KimemeDriver, metaclass=ABCMeta):

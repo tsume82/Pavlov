@@ -6,9 +6,10 @@ import random
 import copy
 import inspyred
 import math
+import cma
 
 class RastriginGADriver(KimemeDriver, metaclass=ABCMeta):
-    def __init__(self, dim, pop_dim):
+    def __init__(self, dim, pop_dim, max_gen=50):
         self.dim = dim
         self.pop_dim = pop_dim
         self.num_selected = pop_dim
@@ -17,16 +18,12 @@ class RastriginGADriver(KimemeDriver, metaclass=ABCMeta):
         self.lower_bound = -5.12
         self.upper_bound = 5.12
         self.mut_rate = 0.1
-        self.max_steps = 50
-        self.env_steps = 3
+        self.max_steps = max_gen
         self.curr_step = 0
         self.num_elites = 1
         
     def step(self, command):
-        # stepPop = [], stepFit = []
-        # for i in range(self.env_steps):
         parents, _ = self.truncation_selection(self.pop, self.fitness)
-        # parents = self.pop
         if command == 0:
             parents = self.mutation(parents)
         else:
@@ -34,8 +31,6 @@ class RastriginGADriver(KimemeDriver, metaclass=ABCMeta):
         fitnessParent = self.evaluate_rastrign(parents)
         self.pop, self.fitness = self.generational_replacement(self.pop, parents, self.fitness, fitnessParent)
         self.curr_step += 1
-        # stepPop.append(self.pop)
-        # stepFit.append(self.fitness)
         return self.pop, self.fitness
 
     def reset(self):
@@ -129,3 +124,44 @@ class RastriginGADriver(KimemeDriver, metaclass=ABCMeta):
             children.append(mom)
             children.append(dad)
         return children
+
+class CMAdrver(KimemeDriver):
+    def __init__(self, dim, pop_size, object_function, init_sigma = 0.5, max_steps = 50) -> None:
+        self.dim = dim
+        self.pop_size = pop_size
+        self.obj_fun = object_function
+        self.max_steps = max_steps
+        self.curr_step = 0
+        self.lower_bound = -5.12
+        self.upper_bound = 5.12
+        self.init_sigma = init_sigma
+        self.options = {
+            'popsize': self.pop_size, 
+            'bounds': [self.lower_bound, self.upper_bound],
+            'AdaptSigma': False
+        }
+        self.reset()
+
+    def step(self, command):
+        self.es.tell(self.solutions, self.fitness)
+        self.es.sigma = command # TODO are bounds needed for sigma?
+        self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
+        self.curr_step += 1
+
+        return self.solutions, self.fitness
+
+    def is_done(self):
+        return self.curr_step >= self.max_steps
+
+    def reset(self):
+        self.curr_step = 0
+        self.solutions = np.random.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
+        self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)
+        self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
+        return self.solutions, self.fitness
+
+    def initialized(self):
+        return True
+
+    def initialize(self):
+        self.reset()

@@ -170,10 +170,15 @@ class SchedulerPolicyEnvironment(gym.Env):
         evaluated_solutions, fitness = self.kimeme_driver.step(action)
         self.state = self._build_state(evaluated_solutions, fitness)
         reward = self.reward_metric.compute(evaluated_solutions, fitness)
+
         done = self.kimeme_driver.is_done()
+        done = done or self.curr_step >= self.steps
+
+        self.curr_step += 1
         return self.state, reward, done, {}
 
     def reset(self):
+        self.curr_step = 0
         if not self.kimeme_driver.initialized():
             self.kimeme_driver.initialize()
         self.reward_metric.reset()
