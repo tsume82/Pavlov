@@ -2,6 +2,7 @@ import warnings
 from abc import ABC, abstractmethod, ABCMeta
 import pandas as pd
 import numpy as np
+from typing import Tuple
 
 
 class DriverNotReady(Exception):
@@ -37,11 +38,11 @@ class KimemeDriver(ABC):
 
     # TODO overloading of this method with online training/enforcing must also pass the parameter tuning config action
     @abstractmethod
-    def step(self, command) -> tuple(np.ndarray, np.ndarray): # evaluated solutions, fitness
+    def step(self, command) -> Tuple[np.ndarray, np.ndarray]: # evaluated solutions, fitness
         pass
 
     @abstractmethod
-    def reset(self) -> tuple(np.ndarray, np.ndarray): # initialized solutions, fitness:
+    def reset(self) -> Tuple[np.ndarray, np.ndarray]: # initialized solutions, fitness:
         pass
 
     @abstractmethod

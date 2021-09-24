@@ -148,7 +148,7 @@ class RayAgent(Agent, metaclass=ABCMeta):
             steps_done += 1
         return obs, episode_reward, steps_done
 
-    def train(self, stop_condition, autosave=False):
+    def train(self, stop_condition={}, autosave=False):
         return self.agent.train()
         # return ray.tune.run(
         #     self.agent_class,

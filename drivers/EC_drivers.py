@@ -1,4 +1,5 @@
 from inspyred.ec import variators
+from numpy.core.numeric import Inf
 from drivers import KimemeDriver
 from abc import ABC, abstractmethod, ABCMeta
 import numpy as np
@@ -7,6 +8,10 @@ import copy
 import inspyred
 import math
 import cma
+
+def rastrigin(population):
+    return sum([x**2 - 10 * math.cos(2 * math.pi * x) + 10 for x in population])
+
 
 class RastriginGADriver(KimemeDriver, metaclass=ABCMeta):
     def __init__(self, dim, pop_dim, max_gen=50):
@@ -125,8 +130,8 @@ class RastriginGADriver(KimemeDriver, metaclass=ABCMeta):
             children.append(dad)
         return children
 
-class CMAdrver(KimemeDriver):
-    def __init__(self, dim, pop_size, object_function, init_sigma = 0.5, max_steps = 50) -> None:
+class CMAdriver(KimemeDriver):
+    def __init__(self, dim, pop_size, object_function=rastrigin, init_sigma = 0.5, max_steps = None) -> None:
         self.dim = dim
         self.pop_size = pop_size
         self.obj_fun = object_function
@@ -138,22 +143,26 @@ class CMAdrver(KimemeDriver):
         self.options = {
             'popsize': self.pop_size, 
             'bounds': [self.lower_bound, self.upper_bound],
-            'AdaptSigma': False
+            'AdaptSigma': False,
+            'verb_disp':0
         }
         self.reset()
 
     def step(self, command):
         self.es.tell(self.solutions, self.fitness)
-        self.es.sigma = command # TODO are bounds needed for sigma?
+        self.es.sigma = command[1]
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
         self.curr_step += 1
+        # print("\t\tSigma:\t",self.es.sigma)
+        # print(np.min(self.fitness))
 
         return self.solutions, self.fitness
 
     def is_done(self):
-        return self.curr_step >= self.max_steps
+        return False if self.max_steps == None else self.curr_step >= self.max_steps
 
     def reset(self):
+        # print("---------------------------------")
         self.curr_step = 0
         self.solutions = np.random.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
         self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)

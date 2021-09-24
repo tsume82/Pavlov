@@ -10,9 +10,10 @@ class InvalidEnvironmentRequest(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
+
 # TODO the obj_function must be built, interfacing with the CLI and with Kimeme runtime
 class MemePolicyEnvironment(gym.Env):
-    def render(self, mode='human'):
+    def render(self, mode="human"):
         print("Step {}: state is {}".format(self.curr_step, self.state))
 
     def __init__(self, obj_no, H, steps, obj_function, var_boundaries, step_boundaries, start_x=None, dim=None):
@@ -20,8 +21,8 @@ class MemePolicyEnvironment(gym.Env):
 
         self.state = start_x
         self.dim = start_x.shape[0] if start_x is not None else dim
-        self.obj_no = obj_no # fitness length
-        self.H = H # History Length
+        self.obj_no = obj_no  # fitness length
+        self.H = H  # History Length
         self.steps = steps
         self.curr_step = 0
         self.obj_function = obj_function
@@ -30,18 +31,15 @@ class MemePolicyEnvironment(gym.Env):
 
         # deltaX to next solution
         self.action_space = spaces.Box(
-            low=step_boundaries[0],
-            high=step_boundaries[1],
-            shape=((self.dim,)),
-            dtype=np.float32
+            low=step_boundaries[0], high=step_boundaries[1], shape=((self.dim,)), dtype=np.float32
         )
 
         # TODO temporary state, LTO-like, current position, current gradient + recent gradients
         self.observation_space = spaces.Box(
             low=var_boundaries[0],
             high=var_boundaries[1],
-            shape=((self.dim + self.obj_no + self.obj_no*self.H,)),
-            dtype=np.float32
+            shape=((self.dim + self.obj_no + self.obj_no * self.H,)),
+            dtype=np.float32,
         )
 
         self.seed()
@@ -53,8 +51,9 @@ class MemePolicyEnvironment(gym.Env):
 
     def _unpack_state(self):
         state_location, state_gradient, state_recent_gradient = np.split(
-            self.state, (self.dim, self.dim+self.obj_no))   # last is equal to self.dim+self.obj_no+self.obj_no*self.H
-        state_recent_gradient.reshape(self.obj_no,self.H)
+            self.state, (self.dim, self.dim + self.obj_no)
+        )  # last is equal to self.dim+self.obj_no+self.obj_no*self.H
+        state_recent_gradient.reshape(self.obj_no, self.H)
         return state_location, state_gradient, state_recent_gradient
 
     def _pack_state(self, state_location, state_gradient, state_recent_gradient, set_state=True):
@@ -65,8 +64,8 @@ class MemePolicyEnvironment(gym.Env):
 
     def _evaluate(self, ind):
         fit = self.obj_function(ind)
-        self.archive[self.curr_step%self.H] = ind
-        self.archive_fitness[self.curr_step%self.H] = fit
+        self.archive[self.curr_step % self.H] = ind
+        self.archive_fitness[self.curr_step % self.H] = fit
         return fit
 
     def reset(self, start_x=None):
@@ -74,7 +73,7 @@ class MemePolicyEnvironment(gym.Env):
             state_location = np.random.random(size=(self.dim,))
         else:
             state_location = start_x
-        self.state = np.concatenate((state_location, np.zeros(self.obj_no + self.obj_no*self.H)))
+        self.state = np.concatenate((state_location, np.zeros(self.obj_no + self.obj_no * self.H)))
         self.curr_step = 0
         self.archive = np.zeros(shape=(self.H, self.dim))
         self.archive_fitness = np.zeros(shape=(self.H, self.obj_no))
@@ -85,7 +84,7 @@ class MemePolicyEnvironment(gym.Env):
         next_location = state_location + action
         fit = self._evaluate(next_location)
         next_state = self.build_state(next_location)
-        done = (self.curr_step >= self.steps)
+        done = self.curr_step >= self.steps
         reward = -fit  # TODO should depend on metrics
         self.curr_step += 1
         return next_state, reward, done, {}
@@ -93,9 +92,9 @@ class MemePolicyEnvironment(gym.Env):
     def compute_curr_gradient(self):
         # TODO test thoroughly
         index = self.curr_step % self.H
-        oldest_index = (index+1) % self.H
+        oldest_index = (index + 1) % self.H
         # subtract previous fitness, along each axis
-        grads = self.archive_fitness-np.roll(self.archive_fitness, 1, axis=0)
+        grads = self.archive_fitness - np.roll(self.archive_fitness, 1, axis=0)
         # delete oldest entry, whose gradient is not meaningful having no predecessor in the archive
         np.delete(grads, oldest_index, 0)
         curr_grad = grads[index]
@@ -106,6 +105,7 @@ class MemePolicyEnvironment(gym.Env):
         next_gradient, next_recent_gradient = self.compute_curr_gradient()  # TODO will depend on metrics
         # print(self.state)
         return self._pack_state(next_location, next_gradient, next_recent_gradient)
+
 
 class MemePolicyRayEnvironment(MemePolicyEnvironment):
     # according to the ray doc, the env must have only one param: the env configuration (https://docs.ray.io/en/latest/rllib-env.html)
@@ -120,10 +120,21 @@ class MemePolicyRayEnvironment(MemePolicyEnvironment):
         start_x = env_config.get("start_x", None)
         super().__init__(obj_no, H, steps, obj_function, var_boundaries, step_boundaries, start_x, dim)
 
+
 class SchedulerPolicyEnvironment(gym.Env):
     # TODO steps -> generic stop conditions based on metrics
-    def __init__(self, kimeme_driver, steps, memes_no, state_metrics_names, space_metrics_config, reward_metric,
-                 reward_metric_config, parameter_tune_config=None):
+    def __init__(
+        self,
+        kimeme_driver,
+        steps,
+        memes_no,
+        state_metrics_names,
+        space_metrics_config,
+        reward_metric,
+        reward_metric_config,
+        parameter_tune_config=None,
+        maximize=True,
+    ):
         """
         action space is divided in 2 parts:
             - meme to activate, Discrete space of dimension meme_no
@@ -140,8 +151,8 @@ class SchedulerPolicyEnvironment(gym.Env):
         # action space, can also include parameter tuning
         self.memes_no = memes_no
         if parameter_tune_config is not None:
-            param_max_bounds = np.array([parameter_tune_config[p]["max"] for _, p in parameter_tune_config.items()])
-            param_min_bounds = np.array([parameter_tune_config[p]["mix"] for _, p in parameter_tune_config.items()])
+            param_max_bounds = np.array([parameter_tune_config[k]["max"] for k, v in parameter_tune_config.items()])
+            param_min_bounds = np.array([parameter_tune_config[k]["min"] for k, v in parameter_tune_config.items()])
             parameter_space = spaces.Box(low=param_min_bounds, high=param_max_bounds, dtype=np.float32)
             self.action_space = spaces.Tuple((spaces.Discrete(memes_no), parameter_space))
         else:
@@ -152,6 +163,7 @@ class SchedulerPolicyEnvironment(gym.Env):
 
         self.state = None  # fetch from kimeme-driver in self.reset()
         self.kimeme_driver = kimeme_driver
+        self.maximize = maximize
         self.steps = steps
         self.curr_step = 0
 
@@ -171,6 +183,9 @@ class SchedulerPolicyEnvironment(gym.Env):
         self.state = self._build_state(evaluated_solutions, fitness)
         reward = self.reward_metric.compute(evaluated_solutions, fitness)
 
+        if not self.maximize: 
+            reward *= -1
+
         done = self.kimeme_driver.is_done()
         done = done or self.curr_step >= self.steps
 
@@ -187,21 +202,21 @@ class SchedulerPolicyEnvironment(gym.Env):
         self.state = self._build_state(start_solutions, start_fitness)
         return self.state
 
-    def render(self, mode='human'):
-        pass
+    def render(self, mode="human"):
+        print("render")
+
 
 class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
     # according to the ray doc, the env must have only one param: the env configuration (https://docs.ray.io/en/latest/rllib-env.html)
     def __init__(self, env_config):
-        kimeme_driver = env_config.get("kimeme_driver")
-        steps = env_config.get("steps")
-        memes_no = env_config.get("memes_no")
-        state_metrics_names = env_config.get("state_metrics_names")
-        space_metrics_config = env_config.get("space_metrics_config")
-        reward_metric = env_config.get("reward_metric")
-        reward_metric_config = env_config.get("reward_metric_config")
-        parameter_tune_config = env_config.get("parameter_tune_config",None)
-        super().__init__(kimeme_driver, steps, memes_no, state_metrics_names, space_metrics_config, reward_metric,
-                 reward_metric_config, parameter_tune_config)
-
-
+        super().__init__(
+            kimeme_driver = env_config.get("kimeme_driver"),
+            steps = env_config.get("steps"),
+            memes_no = env_config.get("memes_no"),
+            state_metrics_names = env_config.get("state_metrics_names"),
+            space_metrics_config = env_config.get("space_metrics_config"),
+            reward_metric = env_config.get("reward_metric"),
+            reward_metric_config = env_config.get("reward_metric_config"),
+            parameter_tune_config = env_config.get("parameter_tune_config", None),
+            maximize = env_config.get("maximize", True),
+        )
