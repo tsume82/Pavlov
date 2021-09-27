@@ -1,4 +1,5 @@
 # from tensorforce.environments import Environment as TForceEnv
+from math import inf
 import numpy as np
 import gym
 from gym import spaces
@@ -12,7 +13,7 @@ class InvalidEnvironmentRequest(Exception):
 
 
 # TODO the obj_function must be built, interfacing with the CLI and with Kimeme runtime
-class MemePolicyEnvironment(gym.Env):
+class MemePolicyEnvironment_prec(gym.Env):
     def render(self, mode="human"):
         print("Step {}: state is {}".format(self.curr_step, self.state))
 
@@ -107,18 +108,124 @@ class MemePolicyEnvironment(gym.Env):
         return self._pack_state(next_location, next_gradient, next_recent_gradient)
 
 
+class MemePolicyEnvironment(gym.Env):
+    """
+    Environment implementing a meme policy: given an observation of the current evolution, the population get perturbed from the agent.
+    """
+
+    def __init__(
+        self,
+        driver,
+        steps,
+        state_metrics_names,
+        space_metrics_config,
+        reward_metric,
+        reward_metric_config,
+        action_space_config=None,
+        obj_function=None,
+        maximize=True,
+    ):
+
+        self.state_metrics = MetricProvider.combine(state_metrics_names)(space_metrics_config)
+        self.observation_space = self.state_metrics.get_space()
+
+        # action space
+        if action_space_config is not None:
+            param_max_bounds = np.array(action_space_config["max"])
+            param_min_bounds = np.array(action_space_config["min"])
+            self.action_space = spaces.Box(low=param_min_bounds, high=param_max_bounds, dtype=np.float32)
+        else:
+            param_max_bounds = np.Inf
+            param_min_bounds = -np.Inf
+            self.action_space = spaces.Box(
+                low=param_min_bounds, high=param_max_bounds, dtype=np.float32, shape=action_space_config["shape"]
+            )
+
+        # reward space, note that the reward must be one-dimensional, so an appropriate metric must be used
+        self.reward_metric = MetricProvider.get_metric(reward_metric)(*reward_metric_config)
+
+        self.state = None  # fetch from kimeme-driver in self.reset()
+        self.driver = driver
+        self.maximize = maximize
+        self.obj_function = obj_function
+        self.steps = steps
+        self.curr_step = 0
+
+        self.seed()
+        self.reset()
+
+    def seed(self, seed=None):
+        self.np_random, seed = seeding.np_random(seed)
+        return [seed]
+
+    def _build_state(self, evaluated_solutions, fitness):
+        return self.state_metrics.compute(evaluated_solutions, fitness)
+
+    def reset(self):
+        self.curr_step = 0
+        if not self.driver.initialized():
+            self.driver.initialize()
+        self.reward_metric.reset()
+        self.state_metrics.reset()
+        if self.driver is not None:
+            self.solutions, start_fitness = self.driver.reset()
+        elif self.obj_function is not None:
+            self.solutions = self.action_space.sample()
+            start_fitness = self.obj_function(self.solutions)
+        else:
+            raise ValueError("obj_function or the driver must be initialized")
+        self.state = self._build_state(self.solutions, start_fitness)
+        return self.state
+
+    def step(self, action):
+        self.solutions += action
+        if self.driver is not None:
+            evaluated_solutions, fitness = self.driver.step(self.solutions)
+        elif self.obj_function is not None:
+            fitness = self.obj_function(self.solutions)
+            evaluated_solutions = self.solutions
+        else:
+            raise ValueError("obj_function or the driver must be initialized")
+
+        self.state = self._build_state(evaluated_solutions, fitness)
+        reward = self.reward_metric.compute(evaluated_solutions, fitness)
+
+        if not self.maximize:
+            reward *= -1
+
+        done = self.driver.is_done()
+        done = done or self.curr_step >= self.steps
+
+        self.curr_step += 1
+        return self.state, reward, done, {}
+
+    def render(self, mode="human"):
+        print("Step {}: state is {}".format(self.curr_step, self.state))
+
+
 class MemePolicyRayEnvironment(MemePolicyEnvironment):
     # according to the ray doc, the env must have only one param: the env configuration (https://docs.ray.io/en/latest/rllib-env.html)
     def __init__(self, env_config):
-        obj_no = env_config.get("obj_no")
-        H = env_config.get("H")
+        driver = env_config.get("driver")
         steps = env_config.get("steps")
-        obj_function = env_config.get("obj_function")
-        var_boundaries = env_config.get("var_boundaries")
-        step_boundaries = env_config.get("step_boundaries")
-        dim = env_config.get("dim", None)
-        start_x = env_config.get("start_x", None)
-        super().__init__(obj_no, H, steps, obj_function, var_boundaries, step_boundaries, start_x, dim)
+        state_metrics_names = env_config.get("state_metrics_names")
+        space_metrics_config = env_config.get("space_metrics_config")
+        reward_metric = env_config.get("reward_metric")
+        reward_metric_config = env_config.get("reward_metric_config")
+        action_space_config = env_config.get("action_space_config", None)
+        obj_function = env_config.get("obj_function", None)
+        maximize = env_config.get("maximize", True)
+        super().__init__(
+            driver,
+            steps,
+            state_metrics_names,
+            space_metrics_config,
+            reward_metric,
+            reward_metric_config,
+            action_space_config,
+            obj_function,
+            maximize,
+        )
 
 
 class SchedulerPolicyEnvironment(gym.Env):
@@ -183,7 +290,7 @@ class SchedulerPolicyEnvironment(gym.Env):
         self.state = self._build_state(evaluated_solutions, fitness)
         reward = self.reward_metric.compute(evaluated_solutions, fitness)
 
-        if not self.maximize: 
+        if not self.maximize:
             reward *= -1
 
         done = self.kimeme_driver.is_done()
@@ -210,13 +317,13 @@ class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
     # according to the ray doc, the env must have only one param: the env configuration (https://docs.ray.io/en/latest/rllib-env.html)
     def __init__(self, env_config):
         super().__init__(
-            kimeme_driver = env_config.get("kimeme_driver"),
-            steps = env_config.get("steps"),
-            memes_no = env_config.get("memes_no"),
-            state_metrics_names = env_config.get("state_metrics_names"),
-            space_metrics_config = env_config.get("space_metrics_config"),
-            reward_metric = env_config.get("reward_metric"),
-            reward_metric_config = env_config.get("reward_metric_config"),
-            parameter_tune_config = env_config.get("parameter_tune_config", None),
-            maximize = env_config.get("maximize", True),
+            kimeme_driver=env_config.get("kimeme_driver"),
+            steps=env_config.get("steps"),
+            memes_no=env_config.get("memes_no"),
+            state_metrics_names=env_config.get("state_metrics_names"),
+            space_metrics_config=env_config.get("space_metrics_config"),
+            reward_metric=env_config.get("reward_metric"),
+            reward_metric_config=env_config.get("reward_metric_config"),
+            parameter_tune_config=env_config.get("parameter_tune_config", None),
+            maximize=env_config.get("maximize", True),
         )
