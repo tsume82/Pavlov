@@ -118,33 +118,35 @@ class MemePolicyEnvironment(gym.Env):
         driver,
         steps,
         state_metrics_names,
-        space_metrics_config,
+        state_metrics_config,
         reward_metric,
         reward_metric_config,
-        action_space_config=None,
+        action_space_config={},
         obj_function=None,
         maximize=True,
     ):
 
-        self.state_metrics = MetricProvider.combine(state_metrics_names)(space_metrics_config)
+        self.state_metrics = MetricProvider.combine(state_metrics_names)(state_metrics_config)
         self.observation_space = self.state_metrics.get_space()
 
         # action space
-        if action_space_config is not None:
-            param_max_bounds = np.array(action_space_config["max"])
-            param_min_bounds = np.array(action_space_config["min"])
-            self.action_space = spaces.Box(low=param_min_bounds, high=param_max_bounds, dtype=np.float32)
-        else:
-            param_max_bounds = np.Inf
-            param_min_bounds = -np.Inf
-            self.action_space = spaces.Box(
-                low=param_min_bounds, high=param_max_bounds, dtype=np.float32, shape=action_space_config["shape"]
+        param_max_bounds = action_space_config.get("max", np.Inf)
+        param_min_bounds = action_space_config.get("min", -np.Inf)
+
+        self.action_space = spaces.Tuple([
+            spaces.Box(
+                low=param_min_bounds if isinstance(param_min_bounds, (int, float)) else param_min_bounds[i],
+                high=param_max_bounds if isinstance(param_max_bounds, (int, float)) else param_max_bounds[i],
+                dtype=np.float32,
+                shape=[action_space_config.get("dim", 2)]
             )
+            for i in range(action_space_config.get("popsize", 10))
+        ])
 
         # reward space, note that the reward must be one-dimensional, so an appropriate metric must be used
         self.reward_metric = MetricProvider.get_metric(reward_metric)(*reward_metric_config)
 
-        self.state = None  # fetch from kimeme-driver in self.reset()
+        self.state = None
         self.driver = driver
         self.maximize = maximize
         self.obj_function = obj_function
@@ -163,26 +165,29 @@ class MemePolicyEnvironment(gym.Env):
 
     def reset(self):
         self.curr_step = 0
-        if not self.driver.initialized():
-            self.driver.initialize()
         self.reward_metric.reset()
         self.state_metrics.reset()
+
         if self.driver is not None:
+            if not self.driver.initialized():
+                self.driver.initialize()
             self.solutions, start_fitness = self.driver.reset()
         elif self.obj_function is not None:
-            self.solutions = self.action_space.sample()
-            start_fitness = self.obj_function(self.solutions)
+            self.solutions = np.array(self.action_space.sample())
+            start_fitness = np.array([self.obj_function(x) for x in self.solutions])
         else:
             raise ValueError("obj_function or the driver must be initialized")
+
         self.state = self._build_state(self.solutions, start_fitness)
         return self.state
 
     def step(self, action):
-        self.solutions += action
+        self.solutions = self.solutions + action
+        
         if self.driver is not None:
             evaluated_solutions, fitness = self.driver.step(self.solutions)
         elif self.obj_function is not None:
-            fitness = self.obj_function(self.solutions)
+            fitness = np.array([self.obj_function(x) for x in self.solutions])
             evaluated_solutions = self.solutions
         else:
             raise ValueError("obj_function or the driver must be initialized")
@@ -193,7 +198,7 @@ class MemePolicyEnvironment(gym.Env):
         if not self.maximize:
             reward *= -1
 
-        done = self.driver.is_done()
+        done = self.driver.is_done() if self.driver is not None else False
         done = done or self.curr_step >= self.steps
 
         self.curr_step += 1
@@ -206,25 +211,16 @@ class MemePolicyEnvironment(gym.Env):
 class MemePolicyRayEnvironment(MemePolicyEnvironment):
     # according to the ray doc, the env must have only one param: the env configuration (https://docs.ray.io/en/latest/rllib-env.html)
     def __init__(self, env_config):
-        driver = env_config.get("driver")
-        steps = env_config.get("steps")
-        state_metrics_names = env_config.get("state_metrics_names")
-        space_metrics_config = env_config.get("space_metrics_config")
-        reward_metric = env_config.get("reward_metric")
-        reward_metric_config = env_config.get("reward_metric_config")
-        action_space_config = env_config.get("action_space_config", None)
-        obj_function = env_config.get("obj_function", None)
-        maximize = env_config.get("maximize", True)
         super().__init__(
-            driver,
-            steps,
-            state_metrics_names,
-            space_metrics_config,
-            reward_metric,
-            reward_metric_config,
-            action_space_config,
-            obj_function,
-            maximize,
+            env_config.get("driver", None),
+            env_config.get("steps"),
+            env_config.get("state_metrics_names"),
+            env_config.get("state_metrics_config"),
+            env_config.get("reward_metric"),
+            env_config.get("reward_metric_config"),
+            env_config.get("action_space_config", {}),
+            env_config.get("obj_function", None),
+            env_config.get("maximize", True),
         )
 
 
@@ -232,11 +228,11 @@ class SchedulerPolicyEnvironment(gym.Env):
     # TODO steps -> generic stop conditions based on metrics
     def __init__(
         self,
-        kimeme_driver,
+        solver_driver,
         steps,
         memes_no,
         state_metrics_names,
-        space_metrics_config,
+        state_metrics_config,
         reward_metric,
         reward_metric_config,
         parameter_tune_config=None,
@@ -252,7 +248,7 @@ class SchedulerPolicyEnvironment(gym.Env):
         observation space: based on metrics, which are build on a list of solutions -> TODO from network table somehow?
         """
         # observation space (state), build with a set of metrics
-        self.state_metrics = MetricProvider.combine(state_metrics_names)(space_metrics_config)
+        self.state_metrics = MetricProvider.combine(state_metrics_names)(state_metrics_config)
         self.observation_space = self.state_metrics.get_space()
 
         # action space, can also include parameter tuning
@@ -260,7 +256,7 @@ class SchedulerPolicyEnvironment(gym.Env):
         if parameter_tune_config is not None:
             param_max_bounds = np.array([parameter_tune_config[k]["max"] for k, v in parameter_tune_config.items()])
             param_min_bounds = np.array([parameter_tune_config[k]["min"] for k, v in parameter_tune_config.items()])
-            parameter_space = spaces.Box(low=param_min_bounds, high=param_max_bounds, dtype=np.float32)
+            parameter_space = spaces.Box(low=param_min_bounds, high=param_max_bounds, dtype=np.float32)  # TODO dict
             self.action_space = spaces.Tuple((spaces.Discrete(memes_no), parameter_space))
         else:
             self.action_space = spaces.Discrete(memes_no)
@@ -269,7 +265,7 @@ class SchedulerPolicyEnvironment(gym.Env):
         self.reward_metric = MetricProvider.get_metric(reward_metric)(*reward_metric_config)
 
         self.state = None  # fetch from kimeme-driver in self.reset()
-        self.kimeme_driver = kimeme_driver
+        self.solver_driver = solver_driver
         self.maximize = maximize
         self.steps = steps
         self.curr_step = 0
@@ -286,14 +282,14 @@ class SchedulerPolicyEnvironment(gym.Env):
 
     def step(self, action):
         # this will actually launch an eventual cli or interface with kimeme via RPC, it will take time
-        evaluated_solutions, fitness = self.kimeme_driver.step(action)
+        evaluated_solutions, fitness = self.solver_driver.step(action)
         self.state = self._build_state(evaluated_solutions, fitness)
         reward = self.reward_metric.compute(evaluated_solutions, fitness)
 
         if not self.maximize:
             reward *= -1
 
-        done = self.kimeme_driver.is_done()
+        done = self.solver_driver.is_done()
         done = done or self.curr_step >= self.steps
 
         self.curr_step += 1
@@ -301,15 +297,16 @@ class SchedulerPolicyEnvironment(gym.Env):
 
     def reset(self):
         self.curr_step = 0
-        if not self.kimeme_driver.initialized():
-            self.kimeme_driver.initialize()
+        if not self.solver_driver.initialized():
+            self.solver_driver.initialize()
         self.reward_metric.reset()
         self.state_metrics.reset()
-        start_solutions, start_fitness = self.kimeme_driver.reset()
+        start_solutions, start_fitness = self.solver_driver.reset()
         self.state = self._build_state(start_solutions, start_fitness)
         return self.state
 
     def render(self, mode="human"):
+        super().render(mode)
         print("render")
 
 
@@ -317,11 +314,11 @@ class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
     # according to the ray doc, the env must have only one param: the env configuration (https://docs.ray.io/en/latest/rllib-env.html)
     def __init__(self, env_config):
         super().__init__(
-            kimeme_driver=env_config.get("kimeme_driver"),
+            solver_driver=env_config.get("solver_driver"),
             steps=env_config.get("steps"),
             memes_no=env_config.get("memes_no"),
             state_metrics_names=env_config.get("state_metrics_names"),
-            space_metrics_config=env_config.get("space_metrics_config"),
+            state_metrics_config=env_config.get("state_metrics_config"),
             reward_metric=env_config.get("reward_metric"),
             reward_metric_config=env_config.get("reward_metric_config"),
             parameter_tune_config=env_config.get("parameter_tune_config", None),

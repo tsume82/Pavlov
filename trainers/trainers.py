@@ -16,7 +16,7 @@ class Trainer(ABC):
 
 class SchedulerTrainer(Trainer):
     def train(self, config, from_file=None):
-
+        pass
 
     def test(self, config):
         pass

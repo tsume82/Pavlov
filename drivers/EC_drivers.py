@@ -1,6 +1,6 @@
 from inspyred.ec import variators
 from numpy.core.numeric import Inf
-from drivers import KimemeDriver
+from drivers import SolverDriver
 from abc import ABC, abstractmethod, ABCMeta
 import numpy as np
 import random
@@ -13,7 +13,7 @@ def rastrigin(population):
     return sum([x**2 - 10 * math.cos(2 * math.pi * x) + 10 for x in population])
 
 
-class RastriginGADriver(KimemeDriver, metaclass=ABCMeta):
+class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
     def __init__(self, dim, pop_dim, max_gen=50):
         self.dim = dim
         self.pop_dim = pop_dim
@@ -130,7 +130,7 @@ class RastriginGADriver(KimemeDriver, metaclass=ABCMeta):
             children.append(dad)
         return children
 
-class CMAdriver(KimemeDriver):
+class CMAdriver(SolverDriver):
     def __init__(self, dim, pop_size, object_function=rastrigin, init_sigma = 0.5, max_steps = None) -> None:
         self.dim = dim
         self.pop_size = pop_size

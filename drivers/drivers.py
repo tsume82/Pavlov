@@ -18,7 +18,7 @@ class KimemeFileDriverError(Exception):
         super().__init__(message)
 
 
-class KimemeDriver(ABC):
+class SolverDriver(ABC):
     """
         This class is in charge of communicating with Kimeme, being the file-based CLI or the interaction via sockets
         The general interface will be defined in conjunction with the kimeme-side modules, which are yet to be designed.
@@ -58,7 +58,7 @@ class KimemeDriver(ABC):
         return False
 
 
-class KimemeFileDriver(KimemeDriver, metaclass=ABCMeta):
+class KimemeFileDriver(SolverDriver, metaclass=ABCMeta):
     """
     This class is in charge of loading a csv dump (maybe also other formats ?) of an evaluation, splitting the
         step-operator iterations and passing them to the an RL environment via the step method.
