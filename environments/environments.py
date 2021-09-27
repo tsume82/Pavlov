@@ -268,6 +268,8 @@ class SchedulerPolicyEnvironment(gym.Env):
         self.solver_driver = solver_driver
         self.maximize = maximize
         self.steps = steps
+        self.last_action = None
+        self.last_reward = None
         self.curr_step = 0
 
         self.seed()
@@ -293,6 +295,8 @@ class SchedulerPolicyEnvironment(gym.Env):
         done = done or self.curr_step >= self.steps
 
         self.curr_step += 1
+        self.last_action = action
+        self.last_reward = reward
         return self.state, reward, done, {}
 
     def reset(self):
@@ -306,8 +310,12 @@ class SchedulerPolicyEnvironment(gym.Env):
         return self.state
 
     def render(self, mode="human"):
-        super().render(mode)
-        print("render")
+        print("                     ┌──────────┐")
+        print("─────────────────────┤Step: {0}\t├─────────────────────".format(self.curr_step))
+        print("                     └──────────┘")
+        print("Action:\t", self.last_action)
+        print("Reward:\t", self.last_reward)
+        print("New State:\t", self.state)
 
 
 class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):

@@ -51,6 +51,7 @@ rl_configuration_2 = {
 cma_es_configuration = {
     "agent.algorithm": "Ray_PolicyGradient",
     "agent.algorithm.Ray_PolicyGradient.framework" : "tf",
+    "agent.algorithm.Ray_PolicyGradient.render_env" : True,
     "agent.algorithm.Ray_PolicyGradient.model" : {
 		"use_lstm": True,
 		'lstm_cell_size': 16,
@@ -84,7 +85,7 @@ def main():
 def main2():
 	agent = AgentBuilder.build(cma_es_configuration)
 	# obs, episode_reward, steps_done = agent.act()
-	for i in range(10):
+	for i in range(1):
 		res = agent.train()
 		# pprint(res)
 		print("-------------------",i,"-------------------")
