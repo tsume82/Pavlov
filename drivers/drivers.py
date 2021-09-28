@@ -5,17 +5,18 @@ import numpy as np
 from typing import Tuple
 import matplotlib.pyplot as plt
 from matplotlib.colors import TABLEAU_COLORS
+
 COLORS = list(TABLEAU_COLORS.values())
 
 
 class Driver(ABC):
     # TODO overloading of this method with online training/enforcing must also pass the parameter tuning config action
     @abstractmethod
-    def step(self, command) -> Tuple[np.ndarray, np.ndarray]: # (evaluated solutions, fitness)
+    def step(self, command) -> Tuple[np.ndarray, np.ndarray]:  # (evaluated solutions, fitness)
         pass
 
     @abstractmethod
-    def reset(self) -> Tuple[np.ndarray, np.ndarray]: # (initialized solutions, fitness)
+    def reset(self) -> Tuple[np.ndarray, np.ndarray]:  # (initialized solutions, fitness)
         pass
 
     @abstractmethod
@@ -34,29 +35,40 @@ class Driver(ABC):
 class SolverDriver(Driver):
     def __init__(self) -> None:
         self.__lines = []
+        self.__add_lines = []
         self.__data = []
+        self.__add_data = []
 
     def render(self, curr_step, fitness, additional_params={}):
         max_fitness = np.max(fitness)
         min_fitness = np.min(fitness)
         median_fitness = np.median(fitness)
         average_fitness = np.mean(fitness)
-        colors = ['black', 'blue', 'green', 'red']
-        labels = ['average', 'median', 'max', 'min']
-        for i, (k, v) in enumerate(additional_params.items()):
-            colors.append(COLORS[i])
-            labels.append(k)
+        colors = ["black", "blue", "green", "red"]
+        labels = ["average", "median", "max", "min"]
         if len(self.__data) < 1:
-            plt.figure("plot data")
+            if len(additional_params) > 0:
+                self.fig, (self.ax1, self.ax2) = plt.subplots(2, sharex=True)
+            else:
+                self.fig, self.ax1 = plt.subplot()
             plt.ion()
             self.__data = [[curr_step], [average_fitness], [median_fitness], [max_fitness], [min_fitness]]
+
+            if len(additional_params) > 0:
+                self.__add_data = [[curr_step]]
+
             for k, v in additional_params.items():
-                self.__data.append([v])
-            for i in range(len(self.__data) - 1):
-                line, = plt.plot(self.__data[0], self.__data[i+1], color=colors[i], label=labels[i])
+                self.__add_data.append([v])
+
+            for i in range(4):
+                (line,) = self.ax1.plot(self.__data[0], self.__data[i + 1], color=colors[i], label=labels[i])
                 self.__lines.append(line)
-            plt.xlabel('Evaluations')
-            plt.ylabel('Fitness')
+
+            for i, (k, v) in enumerate(additional_params.items()):
+                (add_line,) = self.ax2.plot(self.__add_data[0], self.__add_data[i + 1], color=COLORS[i], label=k)
+                self.__add_lines.append(add_line)
+
+            self.ax1.set(xlabel="Evaluations", ylabel="Fitness")
         else:
             self.__data[0].append(curr_step)
             self.__data[1].append(average_fitness)
@@ -64,36 +76,56 @@ class SolverDriver(Driver):
             self.__data[3].append(max_fitness)
             self.__data[4].append(min_fitness)
 
-            for i, (k, v) in enumerate(additional_params.items()):
-                self.__data[5+i].append(v)
-
             for i, line in enumerate(self.__lines):
                 line.set_xdata(np.array(self.__data[0]))
-                line.set_ydata(np.array(self.__data[i+1]))
+                line.set_ydata(np.array(self.__data[i + 1]))
+
+            if len(additional_params) > 0:
+                self.__add_data[0].append(curr_step)
+
+                for i, (k, v) in enumerate(additional_params.items()):
+                    self.__add_data[1 + i].append(v)
+
+                for i, add_line in enumerate(self.__add_lines):
+                    add_line.set_xdata(np.array(self.__add_data[0]))
+                    add_line.set_ydata(np.array(self.__add_data[i + 1]))
 
         ymin = min([min(d) for d in self.__data[1:]])
         ymax = max([max(d) for d in self.__data[1:]])
         yrange = ymax - ymin
-        plt.xlim((0, curr_step))
-        plt.ylim((ymin - 0.1*yrange, ymax + 0.1*yrange))
+        self.ax1.set_xlim((0, curr_step))
+        self.ax1.set_ylim((ymin - 0.1 * yrange, ymax + 0.1 * yrange))
+
+        if len(additional_params) > 0:
+            ymin = min([min(d) for d in self.__add_data[1:]])
+            ymax = max([max(d) for d in self.__add_data[1:]])
+            yrange = ymax - ymin
+            self.ax2.set_xlim((0, curr_step))
+            self.ax2.set_ylim((ymin - 0.1 * yrange, ymax + 0.1 * yrange))
+            self.ax2.legend()
+
         plt.draw()
         plt.pause(0.00001)
-        plt.legend()
-        plt.show()
-    
+        self.ax1.legend()
+
     def reset(self):
         plt.ioff()
-        plt.figure("plot data")
-        plt.cla()
+        if hasattr(self, 'ax1'):
+            self.ax1.cla()
+            plt.close()
         self.__lines = []
+        self.__add_lines = []
         self.__data = []
+        self.__add_data = []
 
 
 # region Kimeme
 class DriverNotReady(Exception):
     def __init__(self, *args: object) -> None:
-        message = "Driver uninitialized. A KimemeDriver must be explicitly initialized before use with the " \
-                  "initialize() method."
+        message = (
+            "Driver uninitialized. A KimemeDriver must be explicitly initialized before use with the "
+            "initialize() method."
+        )
         super().__init__(message)
 
 
@@ -109,6 +141,7 @@ class KimemeFileDriver(SolverDriver, metaclass=ABCMeta):
         step-operator iterations and passing them to the an RL environment via the step method.
     This is one of the ways to train a RL agent on previous runs, probably not the best one.
     """
+
     def __init__(self, filename, var_regex, fitness_regex, extras_columns=None, sep=";"):
         if extras_columns is None:
             extras_columns = []
@@ -179,9 +212,11 @@ class KimemeSchedulerFileDriver(KimemeFileDriver):
     def compute_action(self, variables, next_variables, extras, next_extras):
         operators_involved = next_extras["OperatorCode"].unique()
         if len(operators_involved) > 1:
-            warnings.warn("Multiple operators involved in step action, taking the most common occurrence of "
-                          "\"OperatorCode\". Consider reviewing the dataset and the corresponding project "
-                          "configuration.")
+            warnings.warn(
+                "Multiple operators involved in step action, taking the most common occurrence of "
+                '"OperatorCode". Consider reviewing the dataset and the corresponding project '
+                "configuration."
+            )
             action = next_extras["OperatorCode"].value_counts().argmax()
         else:
             action = operators_involved[0]
@@ -192,5 +227,6 @@ class KimemeMemeFileDriver(KimemeFileDriver):
     # TODO
     def compute_action(self, variables, next_variables, extras, next_extras):
         pass
+
 
 # endregion
