@@ -3,46 +3,19 @@ from abc import ABC, abstractmethod, ABCMeta
 import pandas as pd
 import numpy as np
 from typing import Tuple
+import matplotlib.pyplot as plt
+from matplotlib.colors import TABLEAU_COLORS
+COLORS = list(TABLEAU_COLORS.values())
 
 
-class DriverNotReady(Exception):
-    def __init__(self, *args: object) -> None:
-        message = "Driver uninitialized. A KimemeDriver must be explicitly initialized before use with the " \
-                  "initialize() method."
-        super().__init__(message)
-
-
-class KimemeFileDriverError(Exception):
-    def __init__(self, *args: object) -> None:
-        message = "Invalid step method for KimemeFileDriver, use next_step instead (for offline training)"
-        super().__init__(message)
-
-
-class SolverDriver(ABC):
-    """
-        This class is in charge of communicating with Kimeme, being the file-based CLI or the interaction via sockets
-        The general interface will be defined in conjunction with the kimeme-side modules, which are yet to be designed.
-        This is a draft class at the moment, but it will be needed soon for the scheduler environment
-    """
-
-    """
-    def __init__(self, mode, filename=None, CLI_path=None, port=None,):
-        # "" "
-        :param mode: 0 for file, 1 for cli launch, 2 for interactive
-        :param filename: specify the project zip or the dataset file to load
-        :param CLI_path: path to kimeme CLI executable
-        :param port: communication port for RPC
-        # "" "
-        self.mode = mode
-    """
-
+class Driver(ABC):
     # TODO overloading of this method with online training/enforcing must also pass the parameter tuning config action
     @abstractmethod
-    def step(self, command) -> Tuple[np.ndarray, np.ndarray]: # evaluated solutions, fitness
+    def step(self, command) -> Tuple[np.ndarray, np.ndarray]: # (evaluated solutions, fitness)
         pass
 
     @abstractmethod
-    def reset(self) -> Tuple[np.ndarray, np.ndarray]: # initialized solutions, fitness:
+    def reset(self) -> Tuple[np.ndarray, np.ndarray]: # (initialized solutions, fitness)
         pass
 
     @abstractmethod
@@ -56,6 +29,78 @@ class SolverDriver(ABC):
     @abstractmethod
     def is_done(self) -> bool:
         return False
+
+
+class SolverDriver(Driver):
+    def __init__(self) -> None:
+        self.__lines = []
+        self.__data = []
+
+    def render(self, curr_step, fitness, additional_params={}):
+        max_fitness = np.max(fitness)
+        min_fitness = np.min(fitness)
+        median_fitness = np.median(fitness)
+        average_fitness = np.mean(fitness)
+        colors = ['black', 'blue', 'green', 'red']
+        labels = ['average', 'median', 'max', 'min']
+        for i, (k, v) in enumerate(additional_params.items()):
+            colors.append(COLORS[i])
+            labels.append(k)
+        if len(self.__data) < 1:
+            plt.figure("plot data")
+            plt.ion()
+            self.__data = [[curr_step], [average_fitness], [median_fitness], [max_fitness], [min_fitness]]
+            for k, v in additional_params.items():
+                self.__data.append([v])
+            for i in range(len(self.__data) - 1):
+                line, = plt.plot(self.__data[0], self.__data[i+1], color=colors[i], label=labels[i])
+                self.__lines.append(line)
+            plt.xlabel('Evaluations')
+            plt.ylabel('Fitness')
+        else:
+            self.__data[0].append(curr_step)
+            self.__data[1].append(average_fitness)
+            self.__data[2].append(median_fitness)
+            self.__data[3].append(max_fitness)
+            self.__data[4].append(min_fitness)
+
+            for i, (k, v) in enumerate(additional_params.items()):
+                self.__data[5+i].append(v)
+
+            for i, line in enumerate(self.__lines):
+                line.set_xdata(np.array(self.__data[0]))
+                line.set_ydata(np.array(self.__data[i+1]))
+
+        ymin = min([min(d) for d in self.__data[1:]])
+        ymax = max([max(d) for d in self.__data[1:]])
+        yrange = ymax - ymin
+        plt.xlim((0, curr_step))
+        plt.ylim((ymin - 0.1*yrange, ymax + 0.1*yrange))
+        plt.draw()
+        plt.pause(0.00001)
+        plt.legend()
+        plt.show()
+    
+    def reset(self):
+        plt.ioff()
+        plt.figure("plot data")
+        plt.cla()
+        self.__lines = []
+        self.__data = []
+
+
+# region Kimeme
+class DriverNotReady(Exception):
+    def __init__(self, *args: object) -> None:
+        message = "Driver uninitialized. A KimemeDriver must be explicitly initialized before use with the " \
+                  "initialize() method."
+        super().__init__(message)
+
+
+class KimemeFileDriverError(Exception):
+    def __init__(self, *args: object) -> None:
+        message = "Invalid step method for KimemeFileDriver, use next_step instead (for offline training)"
+        super().__init__(message)
 
 
 class KimemeFileDriver(SolverDriver, metaclass=ABCMeta):
@@ -147,3 +192,5 @@ class KimemeMemeFileDriver(KimemeFileDriver):
     # TODO
     def compute_action(self, variables, next_variables, extras, next_extras):
         pass
+
+# endregion

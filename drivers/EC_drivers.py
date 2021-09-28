@@ -153,8 +153,6 @@ class CMAdriver(SolverDriver):
         self.es.sigma = command[1]
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
         self.curr_step += 1
-        # print("\t\tSigma:\t",self.es.sigma)
-        # print(np.min(self.fitness))
 
         return self.solutions, self.fitness
 
@@ -162,12 +160,15 @@ class CMAdriver(SolverDriver):
         return False if self.max_steps == None else self.curr_step >= self.max_steps
 
     def reset(self):
-        # print("---------------------------------")
+        super().reset()
         self.curr_step = 0
         self.solutions = np.random.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
         self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
         return self.solutions, self.fitness
+    
+    def render(self):
+        super().render(self.curr_step, self.fitness, {"sigma": self.es.sigma[0]})
 
     def initialized(self):
         return True
