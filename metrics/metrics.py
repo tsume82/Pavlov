@@ -173,9 +173,10 @@ class Best(Metric):
     name = "Best"
     MetricProvider.register_metric(name, __qualname__)
 
-    def __init__(self, fit_dim=1, fit_index=0):
+    def __init__(self, maximize=True, fit_dim=1, fit_index=0):
         self.fit_dim = fit_dim
         self.fit_index = fit_index
+        self.maximize = maximize
         assert 0 <= self.fit_index < self.fit_dim
         self.best = None
         self.best_sol = None
@@ -186,17 +187,17 @@ class Best(Metric):
         return space
 
     def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
-        indexes = np.argmin(fitness, axis=0)
+        indexes = np.argmax(fitness, axis=0) if self.maximize else np.argmin(fitness, axis=0)
         if len(indexes.shape) == 0:
             curr_best_index = indexes
             curr_best_fit = fitness[curr_best_index]
         else:
             curr_best_index = indexes[self.fit_index]
             curr_best_fit = fitness[curr_best_index, self.fit_index]
-        if curr_best_fit < self.best:
-            self.best = curr_best_fit
-            self.best_sol = solutions[curr_best_index]
-        return self.best
+        # if curr_best_fit < self.best:
+        #     self.best = curr_best_fit
+        #     self.best_sol = solutions[curr_best_index]
+        return curr_best_fit # self.best or curr_best_fit?
 
     def reset(self) -> None:
         self.best = np.inf

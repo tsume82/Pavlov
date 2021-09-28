@@ -7,20 +7,19 @@ from gym.utils import seeding
 from metrics import *
 
 
-
 class InvalidEnvironmentRequest(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
+
 
 class SolverEnvironment(gym.Env):
     def __init__(self) -> None:
         self.render_mode = "human"
         self.seed()
-    
+
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
-
 
 class MemePolicyEnvironment(SolverEnvironment):
     """
@@ -47,15 +46,17 @@ class MemePolicyEnvironment(SolverEnvironment):
         param_max_bounds = action_space_config.get("max", np.Inf)
         param_min_bounds = action_space_config.get("min", -np.Inf)
 
-        self.action_space = spaces.Tuple([
-            spaces.Box(
-                low=param_min_bounds if isinstance(param_min_bounds, (int, float)) else param_min_bounds[i],
-                high=param_max_bounds if isinstance(param_max_bounds, (int, float)) else param_max_bounds[i],
-                dtype=np.float32,
-                shape=[action_space_config.get("dim", 2)]
-            )
-            for i in range(action_space_config.get("popsize", 10))
-        ])
+        self.action_space = spaces.Tuple(
+            [
+                spaces.Box(
+                    low=param_min_bounds if isinstance(param_min_bounds, (int, float)) else param_min_bounds[i],
+                    high=param_max_bounds if isinstance(param_max_bounds, (int, float)) else param_max_bounds[i],
+                    dtype=np.float32,
+                    shape=[action_space_config.get("dim", 2)],
+                )
+                for i in range(action_space_config.get("popsize", 10))
+            ]
+        )
 
         # reward space, note that the reward must be one-dimensional, so an appropriate metric must be used
         self.reward_metric = MetricProvider.get_metric(reward_metric)(*reward_metric_config)
@@ -92,7 +93,7 @@ class MemePolicyEnvironment(SolverEnvironment):
 
     def step(self, action):
         self.solutions = self.solutions + action
-        
+
         if self.driver is not None:
             evaluated_solutions, fitness = self.driver.step(self.solutions)
         elif self.obj_function is not None:
@@ -162,10 +163,11 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         self.solver_driver = solver_driver
         self.maximize = maximize
         self.steps = steps
+        self.done = False
         self.last_action = None
         self.last_reward = None
         self.curr_step = 0
-
+        self.cumulative_reward = 0
         self.reset()
 
     def _build_state(self, evaluated_solutions, fitness):
@@ -179,17 +181,18 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
 
         if not self.maximize:
             reward *= -1
+        self.cumulative_reward += reward
 
-        done = self.solver_driver.is_done()
-        done = done or self.curr_step >= self.steps
+        self.done = self.solver_driver.is_done() or self.curr_step >= self.steps
 
         self.curr_step += 1
         self.last_action = action
         self.last_reward = reward
-        return self.state, reward, done, {}
+        return self.state, reward, self.done, {}
 
     def reset(self):
         self.curr_step = 0
+        self.cumulative_reward = 0
         if not self.solver_driver.initialized():
             self.solver_driver.initialize()
         self.reward_metric.reset()
@@ -341,4 +344,4 @@ class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
 #         next_gradient, next_recent_gradient = self.compute_curr_gradient()  # TODO will depend on metrics
 #         # print(self.state)
 #         return self._pack_state(next_location, next_gradient, next_recent_gradient)
-#endregion
+# endregion
