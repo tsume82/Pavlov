@@ -164,7 +164,7 @@ class RayAgent(Agent, metaclass=ABCMeta):
         self.agent = self.agent_class(env=self.env_class.__name__, config=self.config)
 
     def load(self, from_file):
-        self.agent.restore(from_file)
+        self.agent.load_checkpoint(from_file)
 
     def save(self, to_file):
         # TODO this may raise exceptions as per documentation, keeping an eye on it

@@ -5,6 +5,7 @@ import math
 import numpy as np
 from pprint import pprint
 import matplotlib.pyplot as plt
+from utils.plot_utils import plot_episodes
 
 
 def rastrign(ind):
@@ -52,12 +53,12 @@ cma_es_configuration = {
     "agent.algorithm.Ray_PolicyGradient.render_env": False,
     "agent.algorithm.Ray_PolicyGradient.batch_mode": "complete_episodes",
     "agent.algorithm.Ray_PolicyGradient.lr": 0.001,
+    "agent.algorithm.Ray_PolicyGradient.train_batch_size": 200,
     "agent.algorithm.Ray_PolicyGradient.model": {
         "use_lstm": True,
         "lstm_cell_size": 16,
         "fcnet_activation": "tanh",
         "fcnet_hiddens": [16],
-
     },
     "env.env_class": SchedulerPolicyRayEnvironment,
     "env.env_config": {
@@ -75,20 +76,25 @@ cma_es_configuration = {
 
 
 def main():
-	agent = AgentBuilder.build(cma_es_configuration)
-	# obs, episode_reward, steps_done = agent.act()
-	for i in range(1000):
-		res = agent.train()
-		# pprint(res)
-		print("                     ╔══════════╗")
-		print("═════════════════════╣It.: {0}\t╠═════════════════════".format(i))
-		print("                     ╚══════════╝")
-		print("Number episodes:\t",res['episodes_total'])
-		print("Min:\t",res["episode_reward_min"])
-		print("Max:\t",res["episode_reward_max"])
-		print("Mean:\t", res["episode_reward_mean"])
-		if i % 100 == 0:
-			agent.save("./.checkpoints")
+    agent = AgentBuilder.build(cma_es_configuration)
+    # agent.load("./.checkpoints/checkpoint-901")
+    p = plot_episodes()
+    # obs, episode_reward, steps_done = agent.act()
+    for i in range(1000):
+        res = agent.train()
+        p.plot(res["hist_stats"]["episode_reward"][: res["episodes_this_iter"]])
+        # pprint(res)
+        print("                     ╔══════════╗")
+        print("═════════════════════╣It.: {0}\t╠═════════════════════".format(i))
+        print("                     ╚══════════╝")
+        print("Number episodes:\t",res['episodes_total'])
+        print("Min:\t",res["episode_reward_min"])
+        print("Max:\t",res["episode_reward_max"])
+        print("Mean:\t", res["episode_reward_mean"])
+
+        # if i != 0 and i % 100 == 0:
+        #     agent.save("./.checkpoints")
+    p.show()
 
 
 if __name__ == "__main__":
