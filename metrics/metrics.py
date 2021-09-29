@@ -141,6 +141,44 @@ class RecentGradients(Metric):
         box = spaces.Box(low=-np.inf, high=np.inf, shape=((self.dim,)))
         return Repeated(box, max_len=self.chunk_use_last)
 
+class DifferenceOfBest(Metric):
+    """
+        Get the difference of the current best fitness and the precedent best fitness
+    """
+
+    name = "DifferenceOfBest"
+    MetricProvider.register_metric(name, __qualname__)
+
+    def __init__(self, fitness_dim = 1, maximize=True, normalize=True):
+        self.prec_best = None
+        self.maximize = maximize
+        self.fitness_dim = fitness_dim
+        self.normalize = normalize
+
+    def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+        if self.prec_best is None:
+            self.prec_best = np.nanmax(fitness, axis=0) if self.maximize else np.nanmin(fitness, axis=0)
+            return np.array([0])
+        else:
+            curr_best = np.nanmax(fitness, axis=0) if self.maximize else np.nanmin(fitness, axis=0)
+            grad = curr_best - self.prec_best # TODO set gradient sign based on the maximization/minimization problem?
+
+            if self.normalize:
+                grad /= np.amax([curr_best, self.prec_best]) * 2
+
+            self.prec_best = curr_best
+
+        return np.array([grad])
+
+    def reset(self) -> None:
+        self.prec_best = None
+
+    def get_space(self):
+        if self.normalize:
+            return spaces.Box(low=-1, high=1, shape=((self.fitness_dim,)))
+        else:
+            return spaces.Box(low=-np.inf, high=np.inf, shape=((self.fitness_dim,)))
+
 class RecentFitness(Metric):
     """
         RecentFitness metric, keep track of the fitness within the last history_size steps
@@ -194,10 +232,10 @@ class Best(Metric):
         else:
             curr_best_index = indexes[self.fit_index]
             curr_best_fit = fitness[curr_best_index, self.fit_index]
-        # if curr_best_fit < self.best:
-        #     self.best = curr_best_fit
-        #     self.best_sol = solutions[curr_best_index]
-        return curr_best_fit # self.best or curr_best_fit?
+        if curr_best_fit < self.best:
+            self.best = curr_best_fit
+            self.best_sol = solutions[curr_best_index]
+        return self.best # self.best or curr_best_fit?
 
     def reset(self) -> None:
         self.best = np.inf

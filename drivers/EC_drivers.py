@@ -11,6 +11,8 @@ import cma
 
 def rastrigin(population):
     return sum([x**2 - 10 * math.cos(2 * math.pi * x) + 10 for x in population])
+def sphere(population):
+    return sum([x**2 for x in population])
 
 
 class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
@@ -131,7 +133,7 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
         return children
 
 class CMAdriver(SolverDriver):
-    def __init__(self, dim, pop_size, object_function=rastrigin, init_sigma = 0.5, max_steps = None) -> None:
+    def __init__(self, dim, pop_size, object_function=sphere, init_sigma = 0.5, max_steps = None) -> None:
         self.dim = dim
         self.pop_size = pop_size
         self.obj_fun = object_function
