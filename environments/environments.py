@@ -151,11 +151,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         self.memes_no = memes_no
         if parameter_tune_config is not None:
             parameter_space = {
-                key: spaces.Box(
-                    low=np.array(value["min"]),
-                    high=np.array(value["max"]),
-                    dtype=np.float32
-                    )
+                key: spaces.Box(low=np.array(value["min"]), high=np.array(value["max"]), dtype=np.float32)
                 for (key, value) in parameter_tune_config.items()
             }
             if memes_no > 1:
@@ -228,15 +224,15 @@ class MemePolicyRayEnvironment(MemePolicyEnvironment):
     # according to the ray doc, the env must have only one param: the env configuration (https://docs.ray.io/en/latest/rllib-env.html)
     def __init__(self, env_config):
         super().__init__(
-            env_config.get("driver", None),
-            env_config.get("steps"),
-            env_config.get("state_metrics_names"),
-            env_config.get("state_metrics_config"),
-            env_config.get("reward_metric"),
-            env_config.get("reward_metric_config"),
-            env_config.get("action_space_config", {}),
-            env_config.get("obj_function", None),
-            env_config.get("maximize", True),
+            driver=env_config.get("driver", None),
+            steps=env_config.get("steps"),
+            state_metrics_names=env_config.get("state_metrics_names"),
+            state_metrics_config=env_config.get("state_metrics_config"),
+            reward_metric=env_config.get("reward_metric"),
+            reward_metric_config=env_config.get("reward_metric_config"),
+            action_space_config=env_config.get("action_space_config", {}),
+            obj_function=env_config.get("obj_function", None),
+            maximize=env_config.get("maximize", True),
         )
 
 
@@ -246,7 +242,7 @@ class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
         super().__init__(
             solver_driver=env_config.get("solver_driver"),
             steps=env_config.get("steps"),
-            memes_no=env_config.get("memes_no"),
+            memes_no=env_config.get("memes_no", 1),
             state_metrics_names=env_config.get("state_metrics_names"),
             state_metrics_config=env_config.get("state_metrics_config"),
             reward_metric=env_config.get("reward_metric"),

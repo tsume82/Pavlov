@@ -160,7 +160,7 @@ class DifferenceOfBest(Metric):
     def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
         if self.prec_best is None:
             self.prec_best = np.nanmax(fitness, axis=0) if self.maximize else np.nanmin(fitness, axis=0)
-            return [0]
+            return [np.array(0)]
         else:
             curr_best = np.nanmax(fitness, axis=0) if self.maximize else np.nanmin(fitness, axis=0)
             grad = curr_best - self.prec_best # TODO set gradient sign based on the maximization/minimization problem?
@@ -168,7 +168,7 @@ class DifferenceOfBest(Metric):
             if self.normalize:
                 grad /= np.amax([curr_best, self.prec_best]) * 2
 
-            self.history.insert(0, grad)
+            self.history.insert(0, np.array(grad))
             if len(self.history) > self.history_max_length:
                 self.history.pop()
 
@@ -188,7 +188,7 @@ class DifferenceOfBest(Metric):
             low = -1
             high = 1
 
-        box = spaces.Box(low=low, high=high, shape=((self.fitness_dim,)))
+        box = spaces.Box(low=low, high=high, shape=([]))
         return Repeated(box, self.history_max_length)
 
 class RecentFitness(Metric):
