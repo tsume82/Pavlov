@@ -144,8 +144,13 @@ class RayAgent(Agent, metaclass=ABCMeta):
         while not done and (steps_max is None or steps_done < steps_max):  # run until episode ends
             action = self.agent.compute_single_action(obs)
             obs, reward, done, info = self.env.step(action)
+
             episode_reward += reward
             steps_done += 1
+
+            if self.config['render_env']:
+                self.env.render()
+
         return obs, episode_reward, steps_done
 
     def train(self, stop_condition={}, autosave=False):

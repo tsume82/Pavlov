@@ -78,16 +78,16 @@ cma_es_configuration = {
 
 # configuration of RL CMA ES matching the paper: Learning Step-Size Adaptation in CMA-ES TODO teacher policy
 # TODO "We obtain the final policy after training for 15 iterations of GPS"
-paper_cma_es_configuration = { 
+paper_cma_es_configuration = {
     "agent.algorithm": "Ray_PolicyGradient",
-    "agent.algorithm.Ray_PolicyGradient.render_env": False,
+    "agent.algorithm.Ray_PolicyGradient.render_env": True,
     "agent.algorithm.Ray_PolicyGradient.batch_mode": "complete_episodes",
     "agent.algorithm.Ray_PolicyGradient.lr": 0.001,
     "agent.algorithm.Ray_PolicyGradient.train_batch_size": 200,
     "agent.algorithm.Ray_PolicyGradient.optimizer": "Adam",
     "agent.algorithm.Ray_PolicyGradient.model": {
         "fcnet_activation": "relu",
-        "fcnet_hiddens": [50,50],
+        "fcnet_hiddens": [50, 50],
     },
     "env.env_class": SchedulerPolicyRayEnvironment,
     "env.env_config": {
@@ -104,29 +104,37 @@ paper_cma_es_configuration = {
 }
 
 
-def main():
+def main(train=True):
     agent_config = paper_cma_es_configuration
-    agent = AgentBuilder.build(agent_config)
-    # agent.load("./.checkpoints/checkpoint-501-FC")
-    p = plot_episodes()
-    for i in range(1000):
-        res = agent.train()
-        p.plot(res["hist_stats"]["episode_reward"][: res["episodes_this_iter"]])
-        # pprint(res)
-        print("                     ╔══════════╗")
-        print("═════════════════════╣It.: {0}\t╠═════════════════════".format(i))
-        print("                     ╚══════════╝")
-        print("Number episodes:\t", res["episodes_total"])
-        print("Min:\t", res["episode_reward_min"])
-        print("Max:\t", res["episode_reward_max"])
-        print("Mean:\t", res["episode_reward_mean"])
 
-        if i != 0 and (i+1) % 100 == 0:
-            agent.save("./.checkpoints")
+    if train:
+        agent = AgentBuilder.build(agent_config)
+        agent.load("./.checkpoints/checkpoint-3000-CMA-paper")
+        p = plot_episodes()
+        for i in range(2000):
+            res = agent.train()
+            p.plot(res["hist_stats"]["episode_reward"][: res["episodes_this_iter"]])
+            # pprint(res)
+            print("                     ╔══════════╗")
+            print("═════════════════════╣It.: {0}\t╠═════════════════════".format(i))
+            print("                     ╚══════════╝")
+            print("Number episodes:\t", res["episodes_total"])
+            print("Min:\t", res["episode_reward_min"])
+            print("Max:\t", res["episode_reward_max"])
+            print("Mean:\t", res["episode_reward_mean"])
 
-    p.save("./.plots/train_CMA.svg", agent_config)
-    p.show()
+            if i != 0 and (i + 1) % 100 == 0:
+                agent.save("./.checkpoints")
+
+        p.save("./.plots/train_CMA.svg", agent_config)
+        p.show()
+
+    else:
+        agent_config["env.env_config"]["args"] = {"block_render_when_done": True}
+        agent = AgentBuilder.build(agent_config)
+        agent.load("./.checkpoints/checkpoint-3000-CMA-paper")
+        agent.act()
 
 
 if __name__ == "__main__":
-    main()
+    main(False)

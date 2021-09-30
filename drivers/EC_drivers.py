@@ -138,6 +138,7 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
 
 class CMAdriver(SolverDriver):
     def __init__(self, dim, pop_size, object_function=sphere, init_sigma=0.5, max_steps=None) -> None:
+        super().__init__()
         self.dim = dim
         self.pop_size = pop_size
         self.obj_fun = object_function
@@ -173,8 +174,8 @@ class CMAdriver(SolverDriver):
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
         return self.solutions, self.fitness
 
-    def render(self):
-        super().render(self.curr_step, self.fitness, {"sigma": self.es.sigma[0]})
+    def render(self, block=False):
+        super().render(self.curr_step, self.fitness, {"sigma": self.es.sigma[0]}, block)
 
     def initialized(self):
         return True

@@ -39,7 +39,7 @@ class SolverDriver(Driver):
         self.__data = []
         self.__add_data = []
 
-    def render(self, curr_step, fitness, additional_params={}):
+    def render(self, curr_step, fitness, additional_params={}, block=False):
         max_fitness = np.max(fitness)
         min_fitness = np.min(fitness)
         median_fitness = np.median(fitness)
@@ -107,6 +107,10 @@ class SolverDriver(Driver):
         plt.draw()
         plt.pause(0.00001)
         self.ax1.legend()
+        if block:
+            plt.ioff()
+            plt.show()
+
 
     def reset(self):
         plt.ioff()

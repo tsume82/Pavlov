@@ -16,6 +16,7 @@ class SolverEnvironment(gym.Env):
     def __init__(self) -> None:
         self.render_mode = "human"
         self.seed()
+        self.block_render_when_done = False
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -132,6 +133,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         reward_metric_config,
         parameter_tune_config=None,
         maximize=True,
+        **args
     ):
         """
         action space is divided in 2 parts:
@@ -173,6 +175,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         self.last_reward = None
         self.curr_step = 0
         self.cumulative_reward = 0
+        self.block_render_when_done = args.get("block_render_when_done", False)
         self.reset()
 
     def _build_state(self, evaluated_solutions, fitness):
@@ -217,7 +220,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
             print("Reward:\t", self.last_reward)
             print("New State:\t", self.state)
         else:
-            self.solver_driver.render()
+            self.solver_driver.render(block=self.done if self.block_render_when_done else False)
 
 
 class MemePolicyRayEnvironment(MemePolicyEnvironment):
@@ -232,7 +235,7 @@ class MemePolicyRayEnvironment(MemePolicyEnvironment):
             reward_metric_config=env_config.get("reward_metric_config"),
             action_space_config=env_config.get("action_space_config", {}),
             obj_function=env_config.get("obj_function", None),
-            maximize=env_config.get("maximize", True),
+            maximize=env_config.get("maximize", True)
         )
 
 
@@ -249,6 +252,7 @@ class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
             reward_metric_config=env_config.get("reward_metric_config"),
             parameter_tune_config=env_config.get("parameter_tune_config", None),
             maximize=env_config.get("maximize", True),
+            **env_config.get("args", {})
         )
 
 
