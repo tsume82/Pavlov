@@ -9,10 +9,13 @@ import inspyred
 import math
 import cma
 
+
 def rastrigin(population):
-    return sum([x**2 - 10 * math.cos(2 * math.pi * x) + 10 for x in population])
+    return sum([x ** 2 - 10 * math.cos(2 * math.pi * x) + 10 for x in population])
+
+
 def sphere(population):
-    return sum([x**2 for x in population])
+    return sum([x ** 2 for x in population])
 
 
 class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
@@ -28,7 +31,7 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
         self.max_steps = max_gen
         self.curr_step = 0
         self.num_elites = 1
-        
+
     def step(self, command):
         parents, _ = self.truncation_selection(self.pop, self.fitness)
         if command == 0:
@@ -59,7 +62,7 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
     def evaluate_rastrign(self, population):
         fitness = np.zeros(shape=(0,))
         for c in population:
-            rastrign = sum([x**2 - 10 * math.cos(2 * math.pi * x) + 10 for x in c])
+            rastrign = sum([x ** 2 - 10 * math.cos(2 * math.pi * x) + 10 for x in c])
             fitness = np.append(fitness, [rastrign], axis=0)
         return fitness
 
@@ -67,7 +70,7 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
         indSort = np.argsort(fitness)
         population = population[indSort]
         fitness = fitness[indSort]
-        return population[:self.num_selected], fitness[:self.num_selected]
+        return population[: self.num_selected], fitness[: self.num_selected]
 
     def tournament_selection(self, population):
         tournament_size = 2
@@ -91,8 +94,8 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
         indSort = np.argsort(fitnessOff)
         offspring = offspring[indSort]
         fitnessOff = fitnessOff[indSort]
-        survivors = offspring[:len(population)]
-        fitness = fitnessOff[:len(population)]
+        survivors = offspring[: len(population)]
+        fitness = fitnessOff[: len(population)]
         return survivors, fitness
 
     def mutation(self, population):
@@ -132,8 +135,9 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
             children.append(dad)
         return children
 
+
 class CMAdriver(SolverDriver):
-    def __init__(self, dim, pop_size, object_function=sphere, init_sigma = 0.5, max_steps = None) -> None:
+    def __init__(self, dim, pop_size, object_function=sphere, init_sigma=0.5, max_steps=None) -> None:
         self.dim = dim
         self.pop_size = pop_size
         self.obj_fun = object_function
@@ -143,16 +147,16 @@ class CMAdriver(SolverDriver):
         self.upper_bound = 5.12
         self.init_sigma = init_sigma
         self.options = {
-            'popsize': self.pop_size, 
-            'bounds': [self.lower_bound, self.upper_bound],
-            'AdaptSigma': False,
-            'verb_disp':0
+            "popsize": self.pop_size,
+            "bounds": [self.lower_bound, self.upper_bound],
+            "AdaptSigma": False,
+            "verb_disp": 0,
         }
         self.reset()
 
     def step(self, command):
         self.es.tell(self.solutions, self.fitness)
-        self.es.sigma = command[1]
+        self.es.sigma = command["step_size"]
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
         self.curr_step += 1
 
@@ -168,7 +172,7 @@ class CMAdriver(SolverDriver):
         self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
         return self.solutions, self.fitness
-    
+
     def render(self):
         super().render(self.curr_step, self.fitness, {"sigma": self.es.sigma[0]})
 
@@ -177,3 +181,8 @@ class CMAdriver(SolverDriver):
 
     def initialize(self):
         self.reset()
+
+    def __repr__(self) -> str:
+        return "CMA solver: [dim: {0}, pop_size: {1}, obj_fun: {2}, max_steps: {3}, init_sigma: {4}]".format(
+            self.dim, self.pop_size, self.obj_fun.__name__, self.max_steps, self.init_sigma
+        )

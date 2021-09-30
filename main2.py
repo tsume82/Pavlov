@@ -1,3 +1,4 @@
+from gin import config
 from environments import SchedulerPolicyRayEnvironment, MemePolicyRayEnvironment
 from agents import AgentBuilder
 from drivers import KimemeSchedulerFileDriver, RastriginGADriver, CMAdriver
@@ -51,7 +52,7 @@ cma_es_configuration = {
     "agent.algorithm": "Ray_PolicyGradient",
     "agent.algorithm.Ray_PolicyGradient.render_env": False,
     "agent.algorithm.Ray_PolicyGradient.batch_mode": "complete_episodes",
-    "agent.algorithm.Ray_PolicyGradient.lr": 0.001,
+    "agent.algorithm.Ray_PolicyGradient.lr": 0.002,
     "agent.algorithm.Ray_PolicyGradient.train_batch_size": 200,
     "agent.algorithm.Ray_PolicyGradient.optimizer": "Adam",
     "agent.algorithm.Ray_PolicyGradient.model": {
@@ -65,35 +66,37 @@ cma_es_configuration = {
         "solver_driver": CMAdriver(10, 6),
         "maximize": False,
         "steps": 20,
-        "memes_no": 1,
         "state_metrics_names": ["DifferenceOfBest"],
         "state_metrics_config": [[]],
         "reward_metric": "Best",
         "reward_metric_config": [False],
+        "memes_no": 1,
         "parameter_tune_config": {"step_size": {"max": 1, "min": 1e-10}},
     },
 }
 
 
 def main():
-    agent = AgentBuilder.build(cma_es_configuration)
+    agent_config = cma_es_configuration
+    agent = AgentBuilder.build(agent_config)
     # agent.load("./.checkpoints/checkpoint-901")
     p = plot_episodes()
-    # obs, episode_reward, steps_done = agent.act()
-    for i in range(1000):
+    for i in range(501):
         res = agent.train()
         p.plot(res["hist_stats"]["episode_reward"][: res["episodes_this_iter"]])
         # pprint(res)
         print("                     ╔══════════╗")
         print("═════════════════════╣It.: {0}\t╠═════════════════════".format(i))
         print("                     ╚══════════╝")
-        print("Number episodes:\t",res['episodes_total'])
-        print("Min:\t",res["episode_reward_min"])
-        print("Max:\t",res["episode_reward_max"])
+        print("Number episodes:\t", res["episodes_total"])
+        print("Min:\t", res["episode_reward_min"])
+        print("Max:\t", res["episode_reward_max"])
         print("Mean:\t", res["episode_reward_mean"])
 
-        # if i != 0 and i % 100 == 0:
-        #     agent.save("./.checkpoints")
+        if i != 0 and i % 100 == 0:
+            agent.save("./.checkpoints")
+
+    p.save("./.plots/train_CMA.svg", agent_config)
     p.show()
 
 

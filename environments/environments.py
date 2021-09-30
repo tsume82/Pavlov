@@ -21,6 +21,7 @@ class SolverEnvironment(gym.Env):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
+
 class MemePolicyEnvironment(SolverEnvironment):
     """
     Environment implementing a meme policy: given an observation of the current evolution, the population get perturbed from the agent.
@@ -149,10 +150,18 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         # action space, can also include parameter tuning
         self.memes_no = memes_no
         if parameter_tune_config is not None:
-            param_max_bounds = np.array([parameter_tune_config[k]["max"] for k, v in parameter_tune_config.items()])
-            param_min_bounds = np.array([parameter_tune_config[k]["min"] for k, v in parameter_tune_config.items()])
-            parameter_space = spaces.Box(low=param_min_bounds, high=param_max_bounds, dtype=np.float32)  # TODO dict
-            self.action_space = spaces.Tuple((spaces.Discrete(memes_no), parameter_space))
+            parameter_space = {
+                key: spaces.Box(
+                    low=np.array(value["min"]),
+                    high=np.array(value["max"]),
+                    dtype=np.float32
+                    )
+                for (key, value) in parameter_tune_config.items()
+            }
+            if memes_no > 1:
+                self.action_space = spaces.Dict({"meme": spaces.Discrete(memes_no), **parameter_space})
+            else:
+                self.action_space = spaces.Dict({**parameter_space})
         else:
             self.action_space = spaces.Discrete(memes_no)
 

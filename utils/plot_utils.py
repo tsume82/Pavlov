@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
+from pprint import pformat
 
 class plot_episodes:
 	def __init__(self) -> None:
@@ -17,6 +17,9 @@ class plot_episodes:
 	def show(self):
 		plt.ioff()
 		plt.show()
+
+	def save(self, path, infos):
+		plt.savefig(path, metadata={"Description": pformat(infos) }) # Description keyword works only in SVG and PNG
 
 	def __plot_multi_episodes(self, cumulative_rewards):
 		colors = ["blue"]
