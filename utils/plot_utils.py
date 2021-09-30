@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from os.path import exists, splitext
 from pprint import pformat
 
 class plot_episodes:
@@ -19,6 +20,12 @@ class plot_episodes:
 		plt.show()
 
 	def save(self, path, infos):
+		i = 1
+		splitted_path = splitext(path)
+		while exists(path):
+			path = splitted_path[0] + "_" + str(i) + splitted_path[1]
+			i+=1
+
 		plt.savefig(path, metadata={"Description": pformat(infos) }) # Description keyword works only in SVG and PNG
 
 	def __plot_multi_episodes(self, cumulative_rewards):

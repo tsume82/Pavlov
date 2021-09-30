@@ -86,7 +86,7 @@ class RecentGradients(Metric):
     name = "RecentGradients"
     MetricProvider.register_metric(name, __qualname__)
 
-    def __init__(self, dim, max_archive=None, chunk_size=1, chunk_num=None, chunk_use_last=1, on_fitness=True):
+    def __init__(self, dim, max_archive=None, chunk_size=1, chunk_num=None, chunk_use_last=2, on_fitness=True):
         super().__init__()
         self.max_archive = max_archive
         self.dim = dim
@@ -149,16 +149,18 @@ class DifferenceOfBest(Metric):
     name = "DifferenceOfBest"
     MetricProvider.register_metric(name, __qualname__)
 
-    def __init__(self, fitness_dim = 1, maximize=True, normalize=True):
+    def __init__(self, history_max_length = 1, fitness_dim = 1, maximize=True, normalize=True):
         self.prec_best = None
         self.maximize = maximize
         self.fitness_dim = fitness_dim
         self.normalize = normalize
+        self.history_max_length = history_max_length
+        self.history = []
 
     def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
         if self.prec_best is None:
             self.prec_best = np.nanmax(fitness, axis=0) if self.maximize else np.nanmin(fitness, axis=0)
-            return np.array([0])
+            return [0]
         else:
             curr_best = np.nanmax(fitness, axis=0) if self.maximize else np.nanmin(fitness, axis=0)
             grad = curr_best - self.prec_best # TODO set gradient sign based on the maximization/minimization problem?
@@ -166,18 +168,28 @@ class DifferenceOfBest(Metric):
             if self.normalize:
                 grad /= np.amax([curr_best, self.prec_best]) * 2
 
+            self.history.insert(0, grad)
+            if len(self.history) > self.history_max_length:
+                self.history.pop()
+
             self.prec_best = curr_best
 
-        return np.array([grad])
+        return self.history
 
     def reset(self) -> None:
         self.prec_best = None
+        self.history = []
 
     def get_space(self):
+        low = -np.inf
+        high = np.inf
+
         if self.normalize:
-            return spaces.Box(low=-1, high=1, shape=((self.fitness_dim,)))
-        else:
-            return spaces.Box(low=-np.inf, high=np.inf, shape=((self.fitness_dim,)))
+            low = -1
+            high = 1
+
+        box = spaces.Box(low=low, high=high, shape=((self.fitness_dim,)))
+        return Repeated(box, self.history_max_length)
 
 class RecentFitness(Metric):
     """

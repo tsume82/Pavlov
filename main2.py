@@ -56,10 +56,11 @@ cma_es_configuration = {
     "agent.algorithm.Ray_PolicyGradient.train_batch_size": 200,
     "agent.algorithm.Ray_PolicyGradient.optimizer": "Adam",
     "agent.algorithm.Ray_PolicyGradient.model": {
-        # "use_lstm": True,
-        # "lstm_cell_size": 16,
-        "fcnet_activation": "tanh",
-        "fcnet_hiddens": [8],
+        "use_lstm": True,
+        "lstm_cell_size": 1,
+        "max_seq_len": 20,
+        # "fcnet_activation": "tanh",
+        # "fcnet_hiddens": [8],
     },
     "env.env_class": SchedulerPolicyRayEnvironment,
     "env.env_config": {
@@ -79,9 +80,9 @@ cma_es_configuration = {
 def main():
     agent_config = cma_es_configuration
     agent = AgentBuilder.build(agent_config)
-    # agent.load("./.checkpoints/checkpoint-901")
+    # agent.load("./.checkpoints/checkpoint-501-FC")
     p = plot_episodes()
-    for i in range(501):
+    for i in range(1000):
         res = agent.train()
         p.plot(res["hist_stats"]["episode_reward"][: res["episodes_this_iter"]])
         # pprint(res)
@@ -93,7 +94,7 @@ def main():
         print("Max:\t", res["episode_reward_max"])
         print("Mean:\t", res["episode_reward_mean"])
 
-        if i != 0 and i % 100 == 0:
+        if i != 0 and (i+1) % 100 == 0:
             agent.save("./.checkpoints")
 
     p.save("./.plots/train_CMA.svg", agent_config)
