@@ -120,7 +120,7 @@ paper_cma_es_configuration_2 = {
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverState"],
-        "state_metrics_config": [[40], [{"step_size": {"max": 1, "min": 1e-10}}]],
+        "state_metrics_config": [[40, False], [{"step_size": {"max": 1, "min": 1e-10}}, 40]],
         "reward_metric": "Best",
         "reward_metric_config": [False],
         "memes_no": 1,
@@ -155,7 +155,7 @@ def main(agent_config, train=True):
     else:
         agent_config["env.env_config"]["args"] = {"block_render_when_done": True}
         agent = AgentBuilder.build(agent_config)
-        agent.load("./.checkpoints/checkpoint-3000-CMA-paper")
+        agent.load("./.checkpoints/CMA 2/checkpoint-3000")
         agent.act()
 
 

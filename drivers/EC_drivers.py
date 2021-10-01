@@ -157,11 +157,11 @@ class CMAdriver(SolverDriver):
 
     def step(self, command):
         self.es.tell(self.solutions, self.fitness)
-        self.es.sigma = command["step_size"]
+        self.es.sigma = command["step_size"][0] # the [0] is because for some reason ray convert the scalar to an array of shape (1,)
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
         self.curr_step += 1
 
-        return self.solutions, self.fitness, {"step_size": np.array(self.es.sigma[0])}
+        return self.solutions, self.fitness, {"step_size": np.array(self.es.sigma)}
 
     def is_done(self):
         return False if self.max_steps == None else self.curr_step >= self.max_steps

@@ -148,7 +148,7 @@ class DifferenceOfBest(Metric):
     name = "DifferenceOfBest"
     MetricProvider.register_metric(name, __qualname__)
 
-    def __init__(self, history_max_length = 1, fitness_dim = 1, maximize=True, normalize=True):
+    def __init__(self, history_max_length = 1, maximize=True, fitness_dim = 1, normalize=True):
         self.prec_best = None
         self.maximize = maximize
         self.fitness_dim = fitness_dim
@@ -290,19 +290,26 @@ class SolverState(Metric):
     name = "SolverState"
     MetricProvider.register_metric(name, __qualname__)
 
-    def __init__(self, solver_states_bounds: dict):
+    def __init__(self, solver_states_bounds: dict, history_max_length=1):
         self.solver_states_bounds = solver_states_bounds
+        self.history = []
+        self.history_max_length = history_max_length
 
     def get_space(self):
-        return spaces.Dict(
+        return Repeated(spaces.Dict(
             {
                 key: spaces.Box(low=np.array(value["min"]), high=np.array(value["max"]))
                 for (key, value) in self.solver_states_bounds.items()
             }
-        )
+        ), max_len=self.history_max_length) # is better Repeated of Dict or Dict of Repeated?
 
     def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
-        return options
+        self.history.insert(0, options)
+
+        if len(self.history) > self.history_max_length:
+            self.history.pop()
+
+        return self.history
 
     def reset(self) -> None:
         return
