@@ -147,6 +147,7 @@ class CMAdriver(SolverDriver):
         self.lower_bound = -5.12
         self.upper_bound = 5.12
         self.init_sigma = init_sigma
+        self.chi_N = dim ** 0.5 * (1 - 1.0 / (4.0 * dim) + 1.0 / (21.0 * dim ** 2))
         self.options = {
             "popsize": self.pop_size,
             "bounds": [self.lower_bound, self.upper_bound],
@@ -157,11 +158,18 @@ class CMAdriver(SolverDriver):
 
     def step(self, command):
         self.es.tell(self.solutions, self.fitness)
-        self.es.sigma = command["step_size"][0] # the [0] is because for some reason ray convert the scalar to an array of shape (1,)
-        self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
-        self.curr_step += 1
 
-        return self.solutions, self.fitness, {"step_size": np.array(self.es.sigma)}
+        # assign the sigma from RL model (the [0] is because for some reason ray convert the scalar to an array of shape (1,))
+        self.es.sigma = command["step_size"][0]
+
+        self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
+
+        conjugate_evolution_path = (
+            np.sqrt(np.sum(np.square(self.es.adapt_sigma.ps))) / self.chi_N - 1
+        )  # one state in "Learning Step-Size Adaptation in CMA-ES" paper
+
+        self.curr_step += 1
+        return self.solutions, self.fitness, {"step_size": np.array(self.es.sigma), "ps": np.array(conjugate_evolution_path)}
 
     def is_done(self):
         return False if self.max_steps == None else self.curr_step >= self.max_steps
@@ -172,7 +180,7 @@ class CMAdriver(SolverDriver):
         self.solutions = np.random.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
         self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
-        return self.solutions, self.fitness, {"step_size": np.array(self.init_sigma)}
+        return self.solutions, self.fitness, {"step_size": np.array(self.init_sigma), "ps": np.array(0)}
 
     def render(self, block=False):
         super().render(self.curr_step, self.fitness, {"step_size": self.es.sigma[0]}, block)

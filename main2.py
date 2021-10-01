@@ -119,8 +119,12 @@ paper_cma_es_configuration_2 = {
         "solver_driver": CMAdriver(10, 6),
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "SolverState"],
-        "state_metrics_config": [[40, False], [{"step_size": {"max": 1, "min": 1e-10}}, 40]],
+        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverState"],
+        "state_metrics_config": [
+            (40, False),
+            ({"step_size": {"max": 1, "min": 1e-10}}, 40),
+            ({"ps": {"max": 1, "min": -1}},)
+        ],
         "reward_metric": "Best",
         "reward_metric_config": [False],
         "memes_no": 1,

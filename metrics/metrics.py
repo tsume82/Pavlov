@@ -9,12 +9,15 @@ import numpy as np
 
 class UnknownMetricException(Exception):
     def __init__(self, name):
-        message = "The metric identifier \"{}\" provided does not correspond to a registered metric implementation".format(
-            name)
+        message = (
+            'The metric identifier "{}" provided does not correspond to a registered metric implementation'.format(
+                name
+            )
+        )
         super().__init__(message)
 
 
-class MetricProvider():
+class MetricProvider:
     _metrics = {}
 
     @classmethod
@@ -30,7 +33,7 @@ class MetricProvider():
 
     @classmethod
     def build(cls):
-        for k,v in cls._metrics.items():
+        for k, v in cls._metrics.items():
             if type(v) == str:
                 cls._metrics[v] = eval(v)
 
@@ -77,9 +80,10 @@ class Metric(ABC):
     def reset(self) -> None:
         pass
 
+
 class RecentGradients(Metric):
     """
-        RecentGradient metric, keep track of fitness gradients, computing it with custom steps over solution list
+    RecentGradient metric, keep track of fitness gradients, computing it with custom steps over solution list
     """
 
     name = "RecentGradients"
@@ -98,9 +102,11 @@ class RecentGradients(Metric):
         self.chunk_size = chunk_size
 
         if chunk_use_last is None and max_archive is None:
-            warnings.warn("Invalid number of chunks to consider (chunk_use_last param): cannot be automatically " +
-                          "inferred with unbounded archive size (use max_archive param to set an archive bound)." +
-                          "Setting chunk_use_last to 1.")
+            warnings.warn(
+                "Invalid number of chunks to consider (chunk_use_last param): cannot be automatically "
+                + "inferred with unbounded archive size (use max_archive param to set an archive bound)."
+                + "Setting chunk_use_last to 1."
+            )
         elif chunk_use_last is None and max_archive is not None:
             chunk_use_last = max_archive // chunk_size
         self.chunk_use_last = chunk_use_last
@@ -113,9 +119,15 @@ class RecentGradients(Metric):
 
         self.archive = np.vstack((self.archive, dataset))
         # only consider last chunks_use_last chunks of size chunk_size
-        considering = self.archive[[*range(self.archive.shape[0] - 1,
-                                    max(-1, self.archive.shape[0] - (self.chunk_size * (1 + self.chunk_use_last))),
-                                    -self.chunk_size)]]
+        considering = self.archive[
+            [
+                *range(
+                    self.archive.shape[0] - 1,
+                    max(-1, self.archive.shape[0] - (self.chunk_size * (1 + self.chunk_use_last))),
+                    -self.chunk_size,
+                )
+            ]
+        ]
         # print(f"considering archive subset: {considering}")
         # TODO implement max_archive efficiently, avoid continue deletion and use rolling index similar to MemePolicy
         if self.max_archive is not None:
@@ -130,7 +142,7 @@ class RecentGradients(Metric):
         if options.get("autoreset", False):
             self.reset()
 
-        return grads.tolist() # Repeated doesn't handle numpy arrays, TODO custom Repeated handling numpy?
+        return grads.tolist()  # Repeated doesn't handle numpy arrays, TODO custom Repeated handling numpy?
 
     def reset(self) -> None:
         self.archive = np.zeros(shape=(0, self.dim))
@@ -140,15 +152,16 @@ class RecentGradients(Metric):
         box = spaces.Box(low=-np.inf, high=np.inf, shape=((self.dim,)))
         return Repeated(box, max_len=self.chunk_use_last)
 
+
 class DifferenceOfBest(Metric):
     """
-        Get the difference of the current best fitness and the precedent best fitness
+    Get the difference of the current best fitness and the precedent best fitness
     """
 
     name = "DifferenceOfBest"
     MetricProvider.register_metric(name, __qualname__)
 
-    def __init__(self, history_max_length = 1, maximize=True, fitness_dim = 1, normalize=True):
+    def __init__(self, history_max_length=1, maximize=True, fitness_dim=1, normalize=True):
         self.prec_best = None
         self.maximize = maximize
         self.fitness_dim = fitness_dim
@@ -162,7 +175,9 @@ class DifferenceOfBest(Metric):
             return [np.array(0)]
         else:
             curr_best = np.nanmax(fitness, axis=0) if self.maximize else np.nanmin(fitness, axis=0)
-            grad = curr_best - self.prec_best # TODO set gradient sign based on the maximization/minimization problem?
+            grad = (
+                curr_best - self.prec_best
+            )  # TODO set gradient sign based on the maximization/minimization problem?
 
             if self.normalize:
                 grad /= np.amax([curr_best, self.prec_best]) * 2
@@ -190,10 +205,12 @@ class DifferenceOfBest(Metric):
         box = spaces.Box(low=low, high=high, shape=([]))
         return Repeated(box, self.history_max_length)
 
+
 class RecentFitness(Metric):
     """
-        RecentFitness metric, keep track of the fitness within the last history_size steps
+    RecentFitness metric, keep track of the fitness within the last history_size steps
     """
+
     name = "RecentFitness"
     MetricProvider.register_metric(name, __qualname__)
 
@@ -216,6 +233,7 @@ class RecentFitness(Metric):
 
     def reset(self) -> None:
         self.archive = []
+
 
 class Best(Metric):
 
@@ -246,7 +264,7 @@ class Best(Metric):
         if curr_best_fit < self.best:
             self.best = curr_best_fit
             self.best_sol = solutions[curr_best_index]
-        return self.best # self.best or curr_best_fit?
+        return self.best  # self.best or curr_best_fit?
 
     def reset(self) -> None:
         self.best = np.inf
@@ -254,6 +272,7 @@ class Best(Metric):
 
     def get_best(self):
         return self.best, self.best_sol
+
 
 class BestGradient(Metric):
 
@@ -271,7 +290,7 @@ class BestGradient(Metric):
         fitness = np.sort(fitness, axis=0)
 
         if len(self.prec_fitness) < 1:
-            grad = 0 # zero gradient for the first step
+            grad = 0  # zero gradient for the first step
         else:
             grad = fitness[0] - self.prec_fitness[0]
 
@@ -285,26 +304,47 @@ class BestGradient(Metric):
     def get_best(self):
         return self.best, self.best_sol
 
+
 class SolverState(Metric):
 
     name = "SolverState"
     MetricProvider.register_metric(name, __qualname__)
 
-    def __init__(self, solver_states_bounds: dict, history_max_length=1):
+    def __init__(self, solver_states_bounds: dict):
         self.solver_states_bounds = solver_states_bounds
-        self.history = []
-        self.history_max_length = history_max_length
 
     def get_space(self):
-        return Repeated(spaces.Dict(
+        return spaces.Dict(
             {
                 key: spaces.Box(low=np.array(value["min"]), high=np.array(value["max"]))
                 for (key, value) in self.solver_states_bounds.items()
             }
-        ), max_len=self.history_max_length) # is better Repeated of Dict or Dict of Repeated?
+        )
 
     def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
-        self.history.insert(0, options)
+        return {key: value for (key, value) in options.items() if key in self.solver_states_bounds.keys()}
+
+    def reset(self):
+        return
+
+
+class SolverStateHistory(SolverState):
+
+    name = "SolverStateHistory"
+    MetricProvider.register_metric(name, __qualname__)
+
+    def __init__(self, solver_states_bounds: dict, history_max_length=1):
+        super().__init__(solver_states_bounds)
+        self.history = []
+        self.history_max_length = history_max_length
+
+    def get_space(self):
+        return Repeated(
+            super().get_space(), max_len=self.history_max_length
+        )  # is better Repeated of Dict or Dict of Repeated?
+
+    def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+        self.history.insert(0, super().compute(solutions, fitness, **options))
 
         if len(self.history) > self.history_max_length:
             self.history.pop()
@@ -312,7 +352,8 @@ class SolverState(Metric):
         return self.history
 
     def reset(self) -> None:
-        return
+        self.history = []
+
 
 # build up MetricProvider registered metrics class types
 # NB: this must be the last line of metrics.py
