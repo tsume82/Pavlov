@@ -77,7 +77,6 @@ class Metric(ABC):
     def reset(self) -> None:
         pass
 
-
 class RecentGradients(Metric):
     """
         RecentGradient metric, keep track of fitness gradients, computing it with custom steps over solution list
@@ -285,6 +284,28 @@ class BestGradient(Metric):
 
     def get_best(self):
         return self.best, self.best_sol
+
+class SolverState(Metric):
+
+    name = "SolverState"
+    MetricProvider.register_metric(name, __qualname__)
+
+    def __init__(self, solver_states_bounds: dict):
+        self.solver_states_bounds = solver_states_bounds
+
+    def get_space(self):
+        return spaces.Dict(
+            {
+                key: spaces.Box(low=np.array(value["min"]), high=np.array(value["max"]))
+                for (key, value) in self.solver_states_bounds.items()
+            }
+        )
+
+    def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+        return options
+
+    def reset(self) -> None:
+        return
 
 # build up MetricProvider registered metrics class types
 # NB: this must be the last line of metrics.py

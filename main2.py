@@ -103,15 +103,38 @@ paper_cma_es_configuration = {
     },
 }
 
+paper_cma_es_configuration_2 = {
+    "agent.algorithm": "Ray_PolicyGradient",
+    "agent.algorithm.Ray_PolicyGradient.render_env": False,
+    "agent.algorithm.Ray_PolicyGradient.batch_mode": "complete_episodes",
+    "agent.algorithm.Ray_PolicyGradient.lr": 0.001,
+    "agent.algorithm.Ray_PolicyGradient.train_batch_size": 200,
+    "agent.algorithm.Ray_PolicyGradient.optimizer": "Adam",
+    "agent.algorithm.Ray_PolicyGradient.model": {
+        "fcnet_activation": "relu",
+        "fcnet_hiddens": [50, 50],
+    },
+    "env.env_class": SchedulerPolicyRayEnvironment,
+    "env.env_config": {
+        "solver_driver": CMAdriver(10, 6),
+        "maximize": False,
+        "steps": 50,
+        "state_metrics_names": ["DifferenceOfBest", "SolverState"],
+        "state_metrics_config": [[40], [{"step_size": {"max": 1, "min": 1e-10}}]],
+        "reward_metric": "Best",
+        "reward_metric_config": [False],
+        "memes_no": 1,
+        "parameter_tune_config": {"step_size": {"max": 1, "min": 1e-10}},
+    },
+}
 
-def main(train=True):
-    agent_config = paper_cma_es_configuration
 
+def main(agent_config, train=True):
     if train:
         agent = AgentBuilder.build(agent_config)
-        agent.load("./.checkpoints/checkpoint-3000-CMA-paper")
+        # agent.load("./.checkpoints/checkpoint-3000-CMA-paper")
         p = plot_episodes()
-        for i in range(2000):
+        for i in range(3000):
             res = agent.train()
             p.plot(res["hist_stats"]["episode_reward"][: res["episodes_this_iter"]])
             # pprint(res)
@@ -123,7 +146,7 @@ def main(train=True):
             print("Max:\t", res["episode_reward_max"])
             print("Mean:\t", res["episode_reward_mean"])
 
-            if i != 0 and (i + 1) % 100 == 0:
+            if i != 0 and (i + 1) % 500 == 0:
                 agent.save("./.checkpoints")
 
         p.save("./.plots/train_CMA.svg", agent_config)
@@ -137,4 +160,4 @@ def main(train=True):
 
 
 if __name__ == "__main__":
-    main(False)
+    main(paper_cma_es_configuration_2, train=True)

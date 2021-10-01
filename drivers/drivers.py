@@ -12,11 +12,11 @@ COLORS = list(TABLEAU_COLORS.values())
 class Driver(ABC):
     # TODO overloading of this method with online training/enforcing must also pass the parameter tuning config action
     @abstractmethod
-    def step(self, command) -> Tuple[np.ndarray, np.ndarray]:  # (evaluated solutions, fitness)
+    def step(self, command) -> Tuple[np.ndarray, np.ndarray, dict]:  # (evaluated solutions, fitness, solver params)
         pass
 
     @abstractmethod
-    def reset(self) -> Tuple[np.ndarray, np.ndarray]:  # (initialized solutions, fitness)
+    def reset(self) -> Tuple[np.ndarray, np.ndarray, dict]:  # (initialized solutions, fitness, solver params)
         pass
 
     @abstractmethod

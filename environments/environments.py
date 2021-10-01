@@ -178,14 +178,14 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         self.block_render_when_done = args.get("block_render_when_done", False)
         self.reset()
 
-    def _build_state(self, evaluated_solutions, fitness):
-        return self.state_metrics.compute(evaluated_solutions, fitness)
+    def _build_state(self, evaluated_solutions, fitness, **solver_params):
+        return self.state_metrics.compute(evaluated_solutions, fitness, **solver_params)
 
     def step(self, action):
         # this will actually launch an eventual cli or interface with kimeme via RPC, it will take time
-        evaluated_solutions, fitness = self.solver_driver.step(action)
-        self.state = self._build_state(evaluated_solutions, fitness)
-        reward = self.reward_metric.compute(evaluated_solutions, fitness)
+        evaluated_solutions, self.fitness, solver_params = self.solver_driver.step(action)
+        self.state = self._build_state(evaluated_solutions, self.fitness, **solver_params)
+        reward = self.reward_metric.compute(evaluated_solutions, self.fitness)
 
         if not self.maximize:
             reward *= -1
@@ -205,8 +205,8 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
             self.solver_driver.initialize()
         self.reward_metric.reset()
         self.state_metrics.reset()
-        start_solutions, start_fitness = self.solver_driver.reset()
-        self.state = self._build_state(start_solutions, start_fitness)
+        start_solutions, start_fitness, solver_params = self.solver_driver.reset()
+        self.state = self._build_state(start_solutions, start_fitness, **solver_params)
         return self.state
 
     def render(self, mode="human"):
@@ -219,7 +219,9 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
             print("Action:\t", self.last_action)
             print("Reward:\t", self.last_reward)
             print("New State:\t", self.state)
-        else:
+        elif mode == "human":
+            if self.done:
+                print("best fitness of the last population: ", np.max(self.fitness) if self.maximize else np.min(self.fitness))
             self.solver_driver.render(block=self.done if self.block_render_when_done else False)
 
 
