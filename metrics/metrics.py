@@ -180,7 +180,8 @@ class DifferenceOfBest(Metric):
             )  # TODO set gradient sign based on the maximization/minimization problem?
 
             if self.normalize:
-                grad /= np.amax([curr_best, self.prec_best]) * 2
+                # grad /= np.amax([curr_best, self.prec_best]) * 2
+                grad /= curr_best
 
             self.history.insert(0, np.array(grad))
             if len(self.history) > self.history_max_length:
@@ -198,9 +199,9 @@ class DifferenceOfBest(Metric):
         low = -np.inf
         high = np.inf
 
-        if self.normalize:
-            low = -1
-            high = 1
+        # if self.normalize:
+        #     low = -1
+        #     high = 1
 
         box = spaces.Box(low=low, high=high, shape=([]))
         return Repeated(box, self.history_max_length)

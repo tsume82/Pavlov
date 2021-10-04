@@ -116,14 +116,14 @@ paper_cma_es_configuration_2 = {
     },
     "env.env_class": SchedulerPolicyRayEnvironment,
     "env.env_config": {
-        "solver_driver": CMAdriver(10, 6),
+        "solver_driver": CMAdriver(10, 6, seed=42),
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverState"],
         "state_metrics_config": [
-            (40, False),
+            (40, True),
             ({"step_size": {"max": 1, "min": 1e-10}}, 40),
-            ({"ps": {"max": 1, "min": -1}},)
+            ({"ps": {"max": 10, "min": -10}},)
         ],
         "reward_metric": "Best",
         "reward_metric_config": [False],
@@ -136,9 +136,9 @@ paper_cma_es_configuration_2 = {
 def main(agent_config, train=True):
     if train:
         agent = AgentBuilder.build(agent_config)
-        # agent.load("./.checkpoints/checkpoint-3000-CMA-paper")
+        agent.load("./.checkpoints/CMA paper sphere/checkpoint-2000")
         p = plot_episodes()
-        for i in range(3000):
+        for i in range(2000):
             res = agent.train()
             p.plot(res["hist_stats"]["episode_reward"][: res["episodes_this_iter"]])
             # pprint(res)
@@ -158,10 +158,11 @@ def main(agent_config, train=True):
 
     else:
         agent_config["env.env_config"]["args"] = {"block_render_when_done": True}
+        agent_config["agent.algorithm.Ray_PolicyGradient.render_env"] = True
         agent = AgentBuilder.build(agent_config)
-        agent.load("./.checkpoints/CMA 2/checkpoint-3000")
+        agent.load("./.checkpoints/CMA paper sphere/checkpoint-500")
         agent.act()
 
 
 if __name__ == "__main__":
-    main(paper_cma_es_configuration_2, train=True)
+    main(paper_cma_es_configuration_2, train=False)

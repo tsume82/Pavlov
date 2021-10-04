@@ -38,6 +38,8 @@ class SolverDriver(Driver):
         self.__add_lines = []
         self.__data = []
         self.__add_data = []
+        self.np_rng = np.random
+        self.seed = None
 
     def render(self, curr_step, fitness, additional_params={}, block=False):
         max_fitness = np.max(fitness)
@@ -121,6 +123,11 @@ class SolverDriver(Driver):
         self.__add_lines = []
         self.__data = []
         self.__add_data = []
+
+    def set_seed(self, seed=None):
+        self.np_rng = np.random.default_rng(seed=seed)
+        self.seed = seed
+        
 
 
 # region Kimeme

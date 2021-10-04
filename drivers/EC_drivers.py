@@ -45,7 +45,7 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
 
     def reset(self):
         self.curr_step = 0
-        self.pop = np.random.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.pop_dim, self.dim))
+        self.pop = self.np_rng.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.pop_dim, self.dim))
         self.fitness = self.evaluate_rastrign(self.pop)
         return self.pop, self.fitness
 
@@ -53,7 +53,7 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
         return self.init
 
     def initialize(self):
-        self.pop = np.random.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.pop_dim, self.dim))
+        self.pop = self.np_rng.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.pop_dim, self.dim))
         self.init = True
 
     def is_done(self):
@@ -137,8 +137,9 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
 
 
 class CMAdriver(SolverDriver):
-    def __init__(self, dim, pop_size, object_function=sphere, init_sigma=0.5, max_steps=None) -> None:
+    def __init__(self, dim, pop_size, object_function=sphere, init_sigma=0.5, max_steps=None, seed=None) -> None:
         super().__init__()
+        super().set_seed(seed)
         self.dim = dim
         self.pop_size = pop_size
         self.obj_fun = object_function
@@ -153,6 +154,7 @@ class CMAdriver(SolverDriver):
             "bounds": [self.lower_bound, self.upper_bound],
             "AdaptSigma": False,
             "verb_disp": 0,
+            "seed": self.seed
         }
         self.reset()
 
@@ -177,13 +179,13 @@ class CMAdriver(SolverDriver):
     def reset(self):
         super().reset()
         self.curr_step = 0
-        self.solutions = np.random.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
+        self.solutions = self.np_rng.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
         self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
         return self.solutions, self.fitness, {"step_size": np.array(self.init_sigma), "ps": np.array(0)}
 
     def render(self, block=False):
-        super().render(self.curr_step, self.fitness, {"step_size": self.es.sigma[0]}, block)
+        super().render(self.curr_step, self.fitness, {"step_size": self.es.sigma}, block)
 
     def initialized(self):
         return True

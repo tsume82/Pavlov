@@ -15,7 +15,6 @@ class InvalidEnvironmentRequest(Exception):
 class SolverEnvironment(gym.Env):
     def __init__(self) -> None:
         self.render_mode = "human"
-        self.seed()
         self.block_render_when_done = False
 
     def seed(self, seed=None):
