@@ -48,63 +48,8 @@ rl_configuration_2 = {
     },
 }
 
-cma_es_configuration = {
-    "agent.algorithm": "Ray_PolicyGradient",
-    "agent.algorithm.Ray_PolicyGradient.render_env": False,
-    "agent.algorithm.Ray_PolicyGradient.batch_mode": "complete_episodes",
-    "agent.algorithm.Ray_PolicyGradient.lr": 0.002,
-    "agent.algorithm.Ray_PolicyGradient.train_batch_size": 200,
-    "agent.algorithm.Ray_PolicyGradient.optimizer": "Adam",
-    "agent.algorithm.Ray_PolicyGradient.model": {
-        "use_lstm": True,
-        "lstm_cell_size": 1,
-        "max_seq_len": 20,
-        # "fcnet_activation": "tanh", # Supported values: "tanh", "relu", "swish" (or "silu"), "linear"
-        # "fcnet_hiddens": [8],
-    },
-    "env.env_class": SchedulerPolicyRayEnvironment,
-    "env.env_config": {
-        "solver_driver": CMAdriver(10, 6),
-        "maximize": False,
-        "steps": 20,
-        "state_metrics_names": ["DifferenceOfBest"],
-        "state_metrics_config": [[]],
-        "reward_metric": "Best",
-        "reward_metric_config": [False],
-        "memes_no": 1,
-        "parameter_tune_config": {"step_size": {"max": 1, "min": 1e-10}},
-    },
-}
-
-# configuration of RL CMA ES matching the paper: Learning Step-Size Adaptation in CMA-ES TODO teacher policy
-# TODO "We obtain the final policy after training for 15 iterations of GPS"
 paper_cma_es_configuration = {
     "agent.algorithm": "Ray_PolicyGradient",
-    "agent.algorithm.Ray_PolicyGradient.render_env": True,
-    "agent.algorithm.Ray_PolicyGradient.batch_mode": "complete_episodes",
-    "agent.algorithm.Ray_PolicyGradient.lr": 0.001,
-    "agent.algorithm.Ray_PolicyGradient.train_batch_size": 200,
-    "agent.algorithm.Ray_PolicyGradient.optimizer": "Adam",
-    "agent.algorithm.Ray_PolicyGradient.model": {
-        "fcnet_activation": "relu",
-        "fcnet_hiddens": [50, 50],
-    },
-    "env.env_class": SchedulerPolicyRayEnvironment,
-    "env.env_config": {
-        "solver_driver": CMAdriver(10, 6),
-        "maximize": False,
-        "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest"],
-        "state_metrics_config": [[40]],
-        "reward_metric": "Best",
-        "reward_metric_config": [False],
-        "memes_no": 1,
-        "parameter_tune_config": {"step_size": {"max": 1, "min": 1e-10}},
-    },
-}
-
-paper_cma_es_configuration_2 = {
-    "agent.algorithm": "Ray_PolicyGradient",
     "agent.algorithm.Ray_PolicyGradient.render_env": False,
     "agent.algorithm.Ray_PolicyGradient.batch_mode": "complete_episodes",
     "agent.algorithm.Ray_PolicyGradient.lr": 0.001,
@@ -116,7 +61,7 @@ paper_cma_es_configuration_2 = {
     },
     "env.env_class": SchedulerPolicyRayEnvironment,
     "env.env_config": {
-        "solver_driver": CMAdriver(10, 6, seed=42),
+        "solver_driver": CMAdriver(10, 6),
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverState"],
@@ -129,6 +74,43 @@ paper_cma_es_configuration_2 = {
         "reward_metric_config": [False],
         "memes_no": 1,
         "parameter_tune_config": {"step_size": {"max": 1, "min": 1e-10}},
+    },
+}
+
+paper_cma_es_configuration_with_conditions = {
+    "agent.algorithm": "Ray_PolicyGradient",
+    "agent.algorithm.Ray_PolicyGradient.render_env": False,
+    "agent.algorithm.Ray_PolicyGradient.batch_mode": "complete_episodes",
+    "agent.algorithm.Ray_PolicyGradient.lr": 0.001,
+    "agent.algorithm.Ray_PolicyGradient.train_batch_size": 200,
+    "agent.algorithm.Ray_PolicyGradient.optimizer": "Adam",
+    "agent.algorithm.Ray_PolicyGradient.model": {
+        "fcnet_activation": "relu",
+        "fcnet_hiddens": [50, 50],
+    },
+    "env.env_class": SchedulerPolicyRayEnvironment,
+    "env.env_config": {
+        "solver_driver": CMAdriver(10, 6),
+        "maximize": False,
+        "steps": 50,
+        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverState"],
+        "state_metrics_config": [
+            (40, True),
+            ({"step_size": {"max": 1, "min": 1e-10}}, 40),
+            ({"ps": {"max": 10, "min": -10}},)
+        ],
+        "reward_metric": "Best",
+        "reward_metric_config": [False],
+        "memes_no": 1,
+        "parameter_tune_config": {"step_size": {"max": 1, "min": 1e-10}},
+        "conditions":[
+            {'dim': 5, 'init_sigma': 0.5},
+            {'dim': 10, 'init_sigma': 0.5},
+            {'dim': 15, 'init_sigma': 0.5},
+            {'dim': 20, 'init_sigma': 0.5},
+            {'dim': 25, 'init_sigma': 0.5},
+            {'dim': 30, 'init_sigma': 0.5},
+        ]
     },
 }
 
@@ -159,10 +141,11 @@ def main(agent_config, train=True):
     else:
         agent_config["env.env_config"]["args"] = {"block_render_when_done": True}
         agent_config["agent.algorithm.Ray_PolicyGradient.render_env"] = True
+        agent_config["env.env_config"]["conditions"] = []
         agent = AgentBuilder.build(agent_config)
         agent.load("./.checkpoints/CMA paper sphere/checkpoint-500")
         agent.act()
 
 
 if __name__ == "__main__":
-    main(paper_cma_es_configuration_2, train=False)
+    main(paper_cma_es_configuration_with_conditions, train=False)

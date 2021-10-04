@@ -5,6 +5,7 @@ import gym
 from gym import spaces
 from gym.utils import seeding
 from metrics import *
+from itertools import cycle
 
 
 class InvalidEnvironmentRequest(Exception):
@@ -132,6 +133,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         reward_metric_config,
         parameter_tune_config=None,
         maximize=True,
+        conditions=[],
         **args
     ):
         """
@@ -169,6 +171,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         self.solver_driver = solver_driver
         self.maximize = maximize
         self.steps = steps
+        self.condition_iterator = cycle(conditions)
         self.done = False
         self.last_action = None
         self.last_reward = None
@@ -204,7 +207,8 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
             self.solver_driver.initialize()
         self.reward_metric.reset()
         self.state_metrics.reset()
-        start_solutions, start_fitness, solver_params = self.solver_driver.reset()
+
+        start_solutions, start_fitness, solver_params = self.solver_driver.reset(next(self.condition_iterator, {}))
         self.state = self._build_state(start_solutions, start_fitness, **solver_params)
         return self.state
 
@@ -220,7 +224,8 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
             print("New State:\t", self.state)
         elif mode == "human":
             if self.done:
-                print("best fitness of the last population: ", np.max(self.fitness) if self.maximize else np.min(self.fitness))
+                best = np.max(self.fitness) if self.maximize else np.min(self.fitness)
+                print("best fitness of the last population: ", best)
             self.solver_driver.render(block=self.done if self.block_render_when_done else False)
 
 
@@ -236,7 +241,7 @@ class MemePolicyRayEnvironment(MemePolicyEnvironment):
             reward_metric_config=env_config.get("reward_metric_config"),
             action_space_config=env_config.get("action_space_config", {}),
             obj_function=env_config.get("obj_function", None),
-            maximize=env_config.get("maximize", True)
+            maximize=env_config.get("maximize", True),
         )
 
 
@@ -253,6 +258,7 @@ class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
             reward_metric_config=env_config.get("reward_metric_config"),
             parameter_tune_config=env_config.get("parameter_tune_config", None),
             maximize=env_config.get("maximize", True),
+            conditions=env_config.get("conditions", []),
             **env_config.get("args", {})
         )
 

@@ -176,13 +176,18 @@ class CMAdriver(SolverDriver):
     def is_done(self):
         return False if self.max_steps == None else self.curr_step >= self.max_steps
 
-    def reset(self):
+    def reset(self, condition = {}):
         super().reset()
+        self.set_condition(condition)
         self.curr_step = 0
         self.solutions = self.np_rng.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
         self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
         return self.solutions, self.fitness, {"step_size": np.array(self.init_sigma), "ps": np.array(0)}
+
+    def set_condition(self, condition):
+        self.dim = condition.get('dim', self.dim)
+        self.init_sigma = condition.get('init_sigma', self.init_sigma)
 
     def render(self, block=False):
         super().render(self.curr_step, self.fitness, {"step_size": self.es.sigma}, block)

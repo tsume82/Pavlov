@@ -16,7 +16,7 @@ class Driver(ABC):
         pass
 
     @abstractmethod
-    def reset(self) -> Tuple[np.ndarray, np.ndarray, dict]:  # (initialized solutions, fitness, solver params)
+    def reset(self, condition = {}) -> Tuple[np.ndarray, np.ndarray, dict]:  # (initialized solutions, fitness, solver params)
         pass
 
     @abstractmethod
