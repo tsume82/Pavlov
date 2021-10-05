@@ -2,21 +2,13 @@ from inspyred.ec import variators
 from numpy.core.numeric import Inf
 from drivers import SolverDriver
 from abc import ABC, abstractmethod, ABCMeta
+from benchmarks import *
 import numpy as np
 import random
 import copy
 import inspyred
 import math
 import cma
-
-
-def rastrigin(population):
-    return sum([x ** 2 - 10 * math.cos(2 * math.pi * x) + 10 for x in population])
-
-
-def sphere(population):
-    return sum([x ** 2 for x in population])
-
 
 class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
     def __init__(self, dim, pop_dim, max_gen=50):
@@ -183,7 +175,7 @@ class CMAdriver(SolverDriver):
         self.solutions = self.np_rng.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
         self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
-        return self.solutions, self.fitness, {"step_size": np.array(self.init_sigma), "ps": np.array(0)}
+        return self.solutions, self.fitness, {"step_size": np.array(self.init_sigma), "ps": np.array(0), "es": self.es}
 
     def set_condition(self, condition):
         self.dim = condition.get('dim', self.dim)
@@ -202,3 +194,20 @@ class CMAdriver(SolverDriver):
         return "CMA solver: [dim: {0}, pop_size: {1}, obj_fun: {2}, max_steps: {3}, init_sigma: {4}]".format(
             self.dim, self.pop_size, self.obj_fun.__name__, self.max_steps, self.init_sigma
         )
+
+
+from agents.teacher import Teacher
+class CSATeacher(Teacher):
+    def should_act(self, observation, info):
+        return np.random.uniform() > 0.7 if info != {} else False
+
+    def act(self, obs, info):
+        es = info["es"]
+        f_vals = info["fitness"]
+        u = es.sigma
+        hsig = es.adapt_sigma.hsig(es)
+        es.hsig = hsig
+        delta = es.adapt_sigma.update2(es, function_values=f_vals)
+        u *= delta
+
+        return u    

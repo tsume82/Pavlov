@@ -198,7 +198,13 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         self.curr_step += 1
         self.last_action = action
         self.last_reward = reward
-        return self.state, reward, self.done, {}
+
+        return (
+            self.state,
+            reward,
+            self.done,
+            {"solutions": evaluated_solutions, "fitness": self.fitness, **solver_params},
+        )
 
     def reset(self):
         self.curr_step = 0
@@ -210,6 +216,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
 
         start_solutions, start_fitness, solver_params = self.solver_driver.reset(next(self.condition_iterator, {}))
         self.state = self._build_state(start_solutions, start_fitness, **solver_params)
+
         return self.state
 
     def render(self, mode="human"):

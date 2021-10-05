@@ -1,13 +1,17 @@
 from abc import ABC, abstractmethod, ABCMeta
 import ray.tune
+
 # from ray.rllib.agents import Trainer as RayTrainer
 from ray.rllib.agents.pg import PGTrainer
 from ray.tune.registry import register_env
 
 TFA_AGENTS = ["TFA_REINFORCE"]
 TFORCE_AGENTS = ["TForce_REINFORCE"]
-RAY_AGENTS = ["Ray_PolicyGradient"]
+# RAY_AGENTS = ["RayPolicyGradient", "RayPGWithTeacher"]
+RAY_AGENTS = {}
 
+def registerRayAgent(name, clazz):
+    RAY_AGENTS[name] = clazz
 
 class AgentBuilder:
     tf_agent = None
@@ -23,12 +27,13 @@ class AgentBuilder:
             import tensorflow as tf
             from tf_agents.networks import actor_distribution_network
             from tf_agents.agents.reinforce import reinforce_agent
+
             if algorithm == "TFA_REINFORCE":
                 assert "agent.algorithm.REINFORCE.fc_layer" in config.keys
                 actor_net = actor_distribution_network.ActorDistributionNetwork(
                     env.observation_spec(),
                     env.action_spec(),
-                    fc_layer_params=config["agent.algorithm.REINFORCE.fc_layer"]
+                    fc_layer_params=config["agent.algorithm.REINFORCE.fc_layer"],
                 )
 
                 train_step_counter = tf.compat.v2.Variable(0)
@@ -38,7 +43,7 @@ class AgentBuilder:
                     actor_network=actor_net,
                     optimizer=optimizer,
                     normalize_returns=True,
-                    train_step_counter=train_step_counter
+                    train_step_counter=train_step_counter,
                 )
 
             if cls.tf_agent is not None:
@@ -50,25 +55,22 @@ class AgentBuilder:
         if algorithm in TFORCE_AGENTS:
             # import this libs only if Ray isn't used, otherwise Ray doesn't work
             from tensorforce.agents import VanillaPolicyGradient as TForceReinforce
+
             if algorithm == "TForce_REINFORCE":
                 max_episode_steps = config["agent.algorithm.TForce_REINFORCE.max_episode_steps"]
                 batch_size = config["agent.algorithm.TForce_REINFORCE.batch_size"]
-                cls.tforce_agent = TForceReinforce(
-                    env.states(),
-                    env.actions(),
-                    max_episode_steps, batch_size
-                )
+                cls.tforce_agent = TForceReinforce(env.states(), env.actions(), max_episode_steps, batch_size)
 
             cls.tforce_agent.initialize()
-            #TODO build_from_TForce()
+            # TODO build_from_TForce()
 
         if algorithm in RAY_AGENTS:
-            # e.g. algorithm == "Ray_PolicyGradient":
+            # e.g. algorithm == "RayPolicyGradient":
             agent_id = "agent.algorithm." + algorithm
             env_id = "env"
-            agent_config = {k[len(agent_id)+1:]: v for k, v in config.items() if k.startswith(agent_id)}
-            env_config = {k[len(env_id)+1:]: v for k, v in config.items() if k.startswith(env_id)}
-            cls.ray_agent = RayPolicyGradient(agent_config, env_config)
+            agent_config = {k[len(agent_id) + 1 :]: v for k, v in config.items() if k.startswith(agent_id)}
+            env_config = {k[len(env_id) + 1 :]: v for k, v in config.items() if k.startswith(env_id)}
+            cls.ray_agent = eval(RAY_AGENTS[algorithm])(agent_config, env_config)
 
             return cls.ray_agent
 
@@ -88,7 +90,7 @@ class Agent(ABC):
         pass
 
     @abstractmethod
-    def train(self, stop_condition):    # TODO episode? set of episodes? (probably the second)
+    def train(self, stop_condition):  # TODO episode? set of episodes? (probably the second)
         pass
 
     @abstractmethod
@@ -115,6 +117,7 @@ class RayAgent(Agent, metaclass=ABCMeta):
     env_config (dict) contains env_class, plus optional env_config_args and env_config_kwargs. These correspond to env 
         class, constructor args and kwargs respectively
     """
+
     def __init__(self, agent_config, env_config):
         self.env_config = env_config.copy()
         assert self.env_config.get("env_class") is not None
@@ -148,7 +151,7 @@ class RayAgent(Agent, metaclass=ABCMeta):
             episode_reward += reward
             steps_done += 1
 
-            if self.config['render_env']:
+            if self.config["render_env"]:
                 self.env.render()
 
         return obs, episode_reward, steps_done
@@ -179,5 +182,44 @@ class RayAgent(Agent, metaclass=ABCMeta):
 class RayPolicyGradient(RayAgent):
     name = "Policy Gradient"
     agent_class = PGTrainer
+    registerRayAgent(__qualname__, __qualname__)
+
+
+class RayPGWithTeacher(RayPolicyGradient):
+    registerRayAgent(__qualname__, __qualname__)
+    """
+    Ray Policy Gradient With Teacher: use a teacher for an action instead of the agent when the teacher decides it
+    additional arguments:
+        agent.algorithm.RayPGWithTeacher.teacher: Teacher class
+        agent.algorithm.RayPGWithTeacher.teacher_config: constructor params
+    """
+
+    def __init__(self, agent_config, env_config):
+        self.teacher = agent_config.pop("teacher")(*agent_config.pop("teacher_config", []))
+        super().__init__(agent_config, env_config)
+
+    def act(self, steps_max=None):
+        episode_reward = 0
+        done = False
+        obs = self.env.reset()
+        info = {}
+        steps_done = 0
+        while not done and (steps_max is None or steps_done < steps_max):
+
+            if self.teacher.should_act(obs, info):
+                action = self.teacher.act(obs, info)
+            else:
+                action = self.agent.compute_single_action(obs)
+
+            obs, reward, done, info = self.env.step(action)
+
+            episode_reward += reward
+            steps_done += 1
+
+            if self.config["render_env"]:
+                self.env.render()
+
+        return obs, episode_reward, steps_done
+
 
 # TODO implement PPO and other Ray-based agents
