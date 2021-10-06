@@ -8,6 +8,8 @@ from pprint import pprint
 import matplotlib.pyplot as plt
 from utils.plot_utils import plot_episodes
 from benchmarks import *
+import warnings
+warnings.filterwarnings("ignore")
 
 
 rl_configuration_1 = {
@@ -120,6 +122,7 @@ paper_cma_es_configuration_with_conditions = {
 paper_cma_es_config_with_cond_teacher = {
     "agent.algorithm": "RayPGWithTeacher",
     "agent.algorithm.RayPGWithTeacher.teacher": CSATeacher,
+    "agent.algorithm.RayPGWithTeacher.teacher_config": {2, 1e-10}, # max, min of the action
     "agent.algorithm.RayPGWithTeacher.render_env": False,
     "agent.algorithm.RayPGWithTeacher.batch_mode": "complete_episodes",
     "agent.algorithm.RayPGWithTeacher.lr": 0.001,
@@ -137,13 +140,13 @@ paper_cma_es_config_with_cond_teacher = {
         "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverState"],
         "state_metrics_config": [
             (40, True),
-            ({"step_size": {"max": 1, "min": 1e-10}}, 40),
+            ({"step_size": {"max": 2, "min": 1e-10}}, 40),
             ({"ps": {"max": 10, "min": -10}},)
         ],
         "reward_metric": "Best",
         "reward_metric_config": [False],
         "memes_no": 1,
-        "parameter_tune_config": {"step_size": {"max": 1, "min": 1e-10}},
+        "parameter_tune_config": {"step_size": {"max": 2, "min": 1e-10}},
         "conditions":[
             {'dim': 5, 'init_sigma': 0.5},
             {'dim': 10, 'init_sigma': 0.5},
@@ -163,6 +166,7 @@ paper_cma_es_config_with_cond_teacher = {
 
 def main(agent_config, train=True, folder="./.checkpoints"):
     max_episodes = 12000
+    # max_episodes = 1
     episodes = 0
     if train:
         agent = AgentBuilder.build(agent_config)
@@ -196,4 +200,4 @@ def main(agent_config, train=True, folder="./.checkpoints"):
 
 
 if __name__ == "__main__":
-    main(paper_cma_es_config_with_cond_teacher, train=False, folder="./.checkpoints/CMA with teacher/")
+    main(paper_cma_es_config_with_cond_teacher, train=True, folder="./.checkpoints/CMA with teacher/")

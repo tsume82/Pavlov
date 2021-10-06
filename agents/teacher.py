@@ -15,3 +15,7 @@ class Teacher(ABC):
 	@abstractmethod
 	def should_act(self, observation: Any, info: dict) -> Any:
 		return False
+
+	@abstractmethod
+	def reset(self) -> None:
+		pass

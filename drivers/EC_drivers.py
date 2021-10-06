@@ -10,6 +10,7 @@ import inspyred
 import math
 import cma
 
+
 class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
     def __init__(self, dim, pop_dim, max_gen=50):
         self.dim = dim
@@ -146,7 +147,7 @@ class CMAdriver(SolverDriver):
             "bounds": [self.lower_bound, self.upper_bound],
             "AdaptSigma": False,
             "verb_disp": 0,
-            "seed": self.seed
+            "seed": self.seed,
         }
         self.reset()
 
@@ -163,23 +164,27 @@ class CMAdriver(SolverDriver):
         )  # one state in "Learning Step-Size Adaptation in CMA-ES" paper
 
         self.curr_step += 1
-        return self.solutions, self.fitness, {"step_size": np.array(self.es.sigma), "ps": np.array(conjugate_evolution_path)}
+        return (
+            self.solutions,
+            self.fitness,
+            {"step_size": np.array(self.es.sigma), "ps": np.array(conjugate_evolution_path), "es": self.es},
+        )
 
     def is_done(self):
         return False if self.max_steps == None else self.curr_step >= self.max_steps
 
-    def reset(self, condition = {}):
+    def reset(self, condition={}):
         super().reset()
         self.set_condition(condition)
         self.curr_step = 0
         self.solutions = self.np_rng.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
         self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
-        return self.solutions, self.fitness, {"step_size": np.array(self.init_sigma), "ps": np.array(0), "es": self.es}
+        return self.solutions, self.fitness, {"step_size": np.array(self.init_sigma), "ps": np.array(0)}
 
     def set_condition(self, condition):
-        self.dim = condition.get('dim', self.dim)
-        self.init_sigma = condition.get('init_sigma', self.init_sigma)
+        self.dim = condition.get("dim", self.dim)
+        self.init_sigma = condition.get("init_sigma", self.init_sigma)
 
     def render(self, block=False):
         super().render(self.curr_step, self.fitness, {"step_size": self.es.sigma}, block)
@@ -196,8 +201,16 @@ class CMAdriver(SolverDriver):
         )
 
 
+from cma.sigma_adaptation import CMAAdaptSigmaCSA
 from agents.teacher import Teacher
+
+
 class CSATeacher(Teacher):
+    def __init__(self, high_bound, low_bound) -> None:
+        self.high_bound = high_bound
+        self.low_bound = low_bound
+        self.reset()
+
     def should_act(self, observation, info):
         return np.random.uniform() > 0.7 if info != {} else False
 
@@ -207,7 +220,12 @@ class CSATeacher(Teacher):
         u = es.sigma
         hsig = es.adapt_sigma.hsig(es)
         es.hsig = hsig
-        delta = es.adapt_sigma.update2(es, function_values=f_vals)
+        delta = self.adapt_sigma.update2(es, function_values=f_vals)
         u *= delta
 
-        return u    
+        new_sigma = max(min(u.real, self.high_bound-0.0001), self.low_bound+0.0001) 
+
+        return {"step_size": [new_sigma]}
+
+    def reset(self) -> None:
+        self.adapt_sigma = CMAAdaptSigmaCSA()

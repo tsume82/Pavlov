@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod, ABCMeta
+from ray.rllib.utils.annotations import override
 import ray.tune
 
 # from ray.rllib.agents import Trainer as RayTrainer
@@ -128,8 +129,6 @@ class RayAgent(Agent, metaclass=ABCMeta):
         agent_config["env_config"] = self.env_config.get("env_config", {})
         agent_config["env"] = self.env_class.__name__
 
-        register_env(self.env_class.__name__, lambda config: self.env_class(config))
-
         self.config = agent_config.copy()
         self.agent = None
 
@@ -169,6 +168,7 @@ class RayAgent(Agent, metaclass=ABCMeta):
     def reset(self):
         ray.shutdown()
         ray.init()
+        register_env(self.env_class.__name__, lambda config: self.env_class(config))
         self.agent = self.agent_class(env=self.env_class.__name__, config=self.config)
 
     def load(self, from_file):
@@ -198,28 +198,28 @@ class RayPGWithTeacher(RayPolicyGradient):
         self.teacher = agent_config.pop("teacher")(*agent_config.pop("teacher_config", []))
         super().__init__(agent_config, env_config)
 
-    def act(self, steps_max=None):
-        episode_reward = 0
-        done = False
-        obs = self.env.reset()
-        info = {}
-        steps_done = 0
-        while not done and (steps_max is None or steps_done < steps_max):
+    def reset(self):
+        ray.shutdown()
+        ray.init()
 
-            if self.teacher.should_act(obs, info):
-                action = self.teacher.act(obs, info)
-            else:
-                action = self.agent.compute_single_action(obs)
+        class env_class_with_teacher(self.env_class):
+            def step(_self, action): # override the enviroment step to add a step with a teacher
 
-            obs, reward, done, info = self.env.step(action)
+                if self.teacher.should_act(_self.state, _self.info):
+                    action = self.teacher.act(_self.state, _self.info)
 
-            episode_reward += reward
-            steps_done += 1
+                _self.state, reward, done, _self.info = super().step(action)
 
-            if self.config["render_env"]:
-                self.env.render()
+                return _self.state, reward, done, _self.info
 
-        return obs, episode_reward, steps_done
+            def reset(_self):
+                self.teacher.reset()
+                _self.info = {}
+                return super().reset()
+
+        self.env_class = env_class_with_teacher
+        register_env(self.env_class.__name__, lambda config: self.env_class(config))
+        self.agent = self.agent_class(env=self.env_class.__name__, config=self.config)
 
 
 # TODO implement PPO and other Ray-based agents
