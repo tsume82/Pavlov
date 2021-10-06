@@ -147,20 +147,20 @@ paper_cma_es_config_with_cond_teacher = {
         "reward_metric_config": [False],
         "memes_no": 1,
         "parameter_tune_config": {"step_size": {"max": 2, "min": 1e-10}},
-        "conditions":[
-            {'dim': 5, 'init_sigma': 0.5},
-            {'dim': 10, 'init_sigma': 0.5},
-            {'dim': 15, 'init_sigma': 0.5},
-            {'dim': 20, 'init_sigma': 0.5},
-            {'dim': 25, 'init_sigma': 0.5},
-            {'dim': 30, 'init_sigma': 0.5},
-            {'dim': 5, 'init_sigma': 1.0},
-            {'dim': 10, 'init_sigma': 1.0},
-            {'dim': 15, 'init_sigma': 1.0},
-            {'dim': 20, 'init_sigma': 1.0},
-            {'dim': 25, 'init_sigma': 1.0},
-            {'dim': 30, 'init_sigma': 1.0},
-        ]
+        # "conditions":[
+        #     {'dim': 5, 'init_sigma': 0.5},
+        #     {'dim': 10, 'init_sigma': 0.5},
+        #     {'dim': 15, 'init_sigma': 0.5},
+        #     {'dim': 20, 'init_sigma': 0.5},
+        #     {'dim': 25, 'init_sigma': 0.5},
+        #     {'dim': 30, 'init_sigma': 0.5},
+        #     {'dim': 5, 'init_sigma': 1.0},
+        #     {'dim': 10, 'init_sigma': 1.0},
+        #     {'dim': 15, 'init_sigma': 1.0},
+        #     {'dim': 20, 'init_sigma': 1.0},
+        #     {'dim': 25, 'init_sigma': 1.0},
+        #     {'dim': 30, 'init_sigma': 1.0},
+        # ]
     },
 }
 
@@ -192,7 +192,7 @@ def main(agent_config, train=True, folder="./.checkpoints"):
 
     else:
         agent_config["env.env_config"]["args"] = {"block_render_when_done": True}
-        agent_config["agent.algorithm.RayPolicyGradient.render_env"] = True
+        agent_config["agent.algorithm.RayPGWithTeacher.render_env"] = True
         agent_config["env.env_config"]["conditions"] = []
         agent = AgentBuilder.build(agent_config)
         agent.load(folder+"/checkpoint-600")
@@ -200,4 +200,4 @@ def main(agent_config, train=True, folder="./.checkpoints"):
 
 
 if __name__ == "__main__":
-    main(paper_cma_es_config_with_cond_teacher, train=True, folder="./.checkpoints/CMA with teacher/")
+    main(paper_cma_es_config_with_cond_teacher, train=False, folder="./.checkpoints/CMA with teacher/")

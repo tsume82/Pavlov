@@ -124,8 +124,6 @@ class RayAgent(Agent, metaclass=ABCMeta):
         assert self.env_config.get("env_class") is not None
         self.env_class = self.env_config.get("env_class")
 
-        self.env = self.env_class(self.env_config.get("env_config", {}))
-
         agent_config["env_config"] = self.env_config.get("env_config", {})
         agent_config["env"] = self.env_class.__name__
 
@@ -169,6 +167,7 @@ class RayAgent(Agent, metaclass=ABCMeta):
         ray.shutdown()
         ray.init()
         register_env(self.env_class.__name__, lambda config: self.env_class(config))
+        self.env = self.env_class(self.env_config.get("env_config", {}))
         self.agent = self.agent_class(env=self.env_class.__name__, config=self.config)
 
     def load(self, from_file):
@@ -218,6 +217,7 @@ class RayPGWithTeacher(RayPolicyGradient):
                 return super().reset()
 
         self.env_class = env_class_with_teacher
+        self.env = self.env_class(self.env_config.get("env_config", {}))
         register_env(self.env_class.__name__, lambda config: self.env_class(config))
         self.agent = self.agent_class(env=self.env_class.__name__, config=self.config)
 
