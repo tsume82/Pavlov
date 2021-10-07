@@ -7,10 +7,10 @@ import numpy as np
 from pprint import pprint
 import matplotlib.pyplot as plt
 from utils.plot_utils import plot_episodes
-from benchmarks import *
+from benchmarks import functions
+from benchmarks import CEC2017
 import warnings
 warnings.filterwarnings("ignore")
-
 
 rl_configuration_1 = {
     "agent.algorithm": "RayPolicyGradient",
@@ -22,7 +22,7 @@ rl_configuration_1 = {
         "reward_metric": "Best",
         "reward_metric_config": [],
         "action_space_config": {"max": 5.12, "min": -5.12, "dim": 2, "popsize": 10},
-        "obj_function": rastrigin,
+        "obj_function": functions.rastrigin,
         "maximize": False,
     },
 }
@@ -60,7 +60,7 @@ paper_cma_es_configuration = {
     },
     "env.env_class": SchedulerPolicyRayEnvironment,
     "env.env_config": {
-        "solver_driver": CMAdriver(10, 6, object_function=sphere),
+        "solver_driver": CMAdriver(10, 6, object_function=functions.sphere),
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverState"],
@@ -89,7 +89,7 @@ paper_cma_es_configuration_with_conditions = {
     },
     "env.env_class": SchedulerPolicyRayEnvironment,
     "env.env_config": {
-        "solver_driver": CMAdriver(10, 6, object_function=rastrigin),
+        "solver_driver": CMAdriver(10, 6, object_function=functions.rastrigin),
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverState"],
@@ -134,7 +134,7 @@ paper_cma_es_config_with_cond_teacher = {
     },
     "env.env_class": SchedulerPolicyRayEnvironment,
     "env.env_config": {
-        "solver_driver": CMAdriver(10, 6, object_function=rastrigin),
+        "solver_driver": CMAdriver(10, 6, object_function=functions.rastrigin),
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverState"],
@@ -195,9 +195,9 @@ def main(agent_config, train=True, folder="./.checkpoints"):
         agent_config["agent.algorithm.RayPGWithTeacher.render_env"] = True
         agent_config["env.env_config"]["conditions"] = []
         agent = AgentBuilder.build(agent_config)
-        agent.load(folder+"/checkpoint-600")
+        agent.load(folder+"/checkpoint-3000")
         agent.act()
 
 
 if __name__ == "__main__":
-    main(paper_cma_es_config_with_cond_teacher, train=False, folder="./.checkpoints/CMA with teacher/")
+    main(paper_cma_es_config_with_cond_teacher, train=False, folder="./.checkpoints/CMA paper sphere/")

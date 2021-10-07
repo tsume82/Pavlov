@@ -1,0 +1,3 @@
+[submodule "benchmarks/CEC2017"]
+	path = benchmarks/CEC2017
+	url = https://github.com/tilleyd/cec2017-py
