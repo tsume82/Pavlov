@@ -3,4 +3,4 @@
 	url = https://github.com/tilleyd/cec2017-py
 [submodule "algorithms/GPS"]
 	path = algorithms/GPS
-	url = https://github.com/cbfinn/gps
+	url = https://github.com/automl/LTO-CMA
