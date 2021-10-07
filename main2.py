@@ -1,11 +1,8 @@
-from gin import config
 from environments import SchedulerPolicyRayEnvironment, MemePolicyRayEnvironment
 from agents import AgentBuilder
 from drivers import KimemeSchedulerFileDriver, RastriginGADriver, CMAdriver, CSATeacher
-import math
 import numpy as np
 from pprint import pprint
-import matplotlib.pyplot as plt
 from utils.plot_utils import plot_episodes
 from benchmarks import functions
 from benchmarks import CEC2017

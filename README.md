@@ -57,6 +57,13 @@ Currently tested with Python 3.6.9, not intended to work with Pytohn 2.x.
 ### Installation
 Create a dedicated virtualenv using the ``requirements.txt`` file (TODO), eventually adding the libraries needed for custom environments or custom metrics
 
+Clone the repository and update the submodules:
+```bash
+git clone https://github.com/tsume82/Pavlov
+git submodule init
+git submodule update --remote
+```
+
 <!-- USAGE EXAMPLES -->
 ## Usage
 TODO
