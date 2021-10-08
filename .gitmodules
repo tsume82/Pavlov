@@ -1,6 +1,3 @@
 [submodule "benchmarks/CEC2017"]
 	path = benchmarks/CEC2017
 	url = https://github.com/tilleyd/cec2017-py
-[submodule "algorithms/GPS"]
-	path = algorithms/GPS
-	url = https://github.com/automl/LTO-CMA

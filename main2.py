@@ -163,6 +163,7 @@ paper_cma_es_config_with_cond_teacher = {
 
 GPS = {
     "agent.algorithm": "RayGuidedPolicySearch",
+    "agent.algorithm.RayGuidedPolicySearch.num_workers": 0,
     # "agent.algorithm.RayGuidedPolicySearch.teacher": CSATeacher,
     # "agent.algorithm.RayGuidedPolicySearch.teacher_config": {2, 1e-10}, # max, min of the action
     # "agent.algorithm.RayGuidedPolicySearch.render_env": True,
@@ -207,8 +208,8 @@ GPS = {
 }
 
 def main(agent_config, train=True, folder="./.checkpoints"):
-    max_episodes = 12000
-    # max_episodes = 1
+    # max_episodes = 12000
+    max_episodes = 2
     episodes = 0
     if train:
         agent = AgentBuilder.build(agent_config)

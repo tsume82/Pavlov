@@ -188,6 +188,7 @@ class RayGuidedPolicySearch(RayAgent):
     name = "Ray Guided Policy Search"
     agent_class = GuidedPolicySearch
     registerRayAgent(__qualname__, __qualname__)
+
 class RayPGWithTeacher(RayPolicyGradient):
     registerRayAgent(__qualname__, __qualname__)
     """
