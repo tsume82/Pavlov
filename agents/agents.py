@@ -4,6 +4,7 @@ import ray.tune
 
 # from ray.rllib.agents import Trainer as RayTrainer
 from ray.rllib.agents.pg import PGTrainer
+from algorithms.GuidedPolicySearch import GuidedPolicySearch
 from ray.tune.registry import register_env
 
 TFA_AGENTS = ["TFA_REINFORCE"]
@@ -148,7 +149,7 @@ class RayAgent(Agent, metaclass=ABCMeta):
             episode_reward += reward
             steps_done += 1
 
-            if self.config["render_env"]:
+            if self.config.get("render_env", False):
                 self.env.render()
 
         return obs, episode_reward, steps_done
@@ -183,7 +184,10 @@ class RayPolicyGradient(RayAgent):
     agent_class = PGTrainer
     registerRayAgent(__qualname__, __qualname__)
 
-
+class RayGuidedPolicySearch(RayAgent):
+    name = "Ray Guided Policy Search"
+    agent_class = GuidedPolicySearch
+    registerRayAgent(__qualname__, __qualname__)
 class RayPGWithTeacher(RayPolicyGradient):
     registerRayAgent(__qualname__, __qualname__)
     """

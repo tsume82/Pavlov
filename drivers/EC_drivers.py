@@ -2,7 +2,7 @@ from inspyred.ec import variators
 from numpy.core.numeric import Inf
 from drivers import SolverDriver
 from abc import ABC, abstractmethod, ABCMeta
-from benchmarks import *
+from benchmarks import functions
 import numpy as np
 import random
 import copy
@@ -130,7 +130,7 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
 
 
 class CMAdriver(SolverDriver):
-    def __init__(self, dim, pop_size, object_function=sphere, init_sigma=0.5, max_steps=None, seed=None) -> None:
+    def __init__(self, dim, pop_size, object_function=functions.sphere, init_sigma=0.5, max_steps=None, seed=None) -> None:
         super().__init__()
         super().set_seed(seed)
         self.dim = dim
@@ -155,7 +155,7 @@ class CMAdriver(SolverDriver):
         self.es.tell(self.solutions, self.fitness)
 
         # assign the sigma from RL model (the [0] is because for some reason ray convert the scalar to an array of shape (1,))
-        self.es.sigma = command["step_size"][0]
+        self.es.sigma = command["step_size"] if len(command["step_size"].shape) == 0 else command["step_size"][0] # TODO debug the action space
 
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
 

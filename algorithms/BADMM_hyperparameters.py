@@ -27,7 +27,6 @@ import copy
 
 
 
-session = tf.Session()
 history_len = 40
 
 TRAIN = True

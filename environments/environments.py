@@ -207,7 +207,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         )
 
     def reset(self):
-        self.curr_step = 0
+        self.curr_step = 1
         self.cumulative_reward = 0
         if not self.solver_driver.initialized():
             self.solver_driver.initialize()

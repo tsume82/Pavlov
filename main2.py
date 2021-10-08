@@ -161,6 +161,51 @@ paper_cma_es_config_with_cond_teacher = {
     },
 }
 
+GPS = {
+    "agent.algorithm": "RayGuidedPolicySearch",
+    # "agent.algorithm.RayGuidedPolicySearch.teacher": CSATeacher,
+    # "agent.algorithm.RayGuidedPolicySearch.teacher_config": {2, 1e-10}, # max, min of the action
+    # "agent.algorithm.RayGuidedPolicySearch.render_env": True,
+    # "agent.algorithm.RayGuidedPolicySearch.batch_mode": "complete_episodes",
+    # "agent.algorithm.RayGuidedPolicySearch.lr": 0.001,
+    # "agent.algorithm.RayGuidedPolicySearch.train_batch_size": 1000,
+    # "agent.algorithm.RayGuidedPolicySearch.optimizer": "Adam",
+    # "agent.algorithm.RayGuidedPolicySearch.model": {
+    #     "fcnet_activation": "relu",
+    #     "fcnet_hiddens": [50, 50],
+    # },
+    "env.env_class": SchedulerPolicyRayEnvironment,
+    "env.env_config": {
+        "solver_driver": CMAdriver(10, 6, object_function=functions.rastrigin),
+        "maximize": False,
+        "steps": 50,
+        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverState"],
+        "state_metrics_config": [
+            (40, True),
+            ({"step_size": {"max": 2, "min": 1e-10}}, 40),
+            ({"ps": {"max": 10, "min": -10}},)
+        ],
+        "reward_metric": "Best",
+        "reward_metric_config": [False],
+        "memes_no": 1,
+        "parameter_tune_config": {"step_size": {"max": 2, "min": 1e-10}},
+        # "conditions":[
+        #     {'dim': 5, 'init_sigma': 0.5},
+        #     {'dim': 10, 'init_sigma': 0.5},
+        #     {'dim': 15, 'init_sigma': 0.5},
+        #     {'dim': 20, 'init_sigma': 0.5},
+        #     {'dim': 25, 'init_sigma': 0.5},
+        #     {'dim': 30, 'init_sigma': 0.5},
+        #     {'dim': 5, 'init_sigma': 1.0},
+        #     {'dim': 10, 'init_sigma': 1.0},
+        #     {'dim': 15, 'init_sigma': 1.0},
+        #     {'dim': 20, 'init_sigma': 1.0},
+        #     {'dim': 25, 'init_sigma': 1.0},
+        #     {'dim': 30, 'init_sigma': 1.0},
+        # ]
+    },
+}
+
 def main(agent_config, train=True, folder="./.checkpoints"):
     max_episodes = 12000
     # max_episodes = 1
@@ -189,12 +234,12 @@ def main(agent_config, train=True, folder="./.checkpoints"):
 
     else:
         agent_config["env.env_config"]["args"] = {"block_render_when_done": True}
-        agent_config["agent.algorithm.RayPGWithTeacher.render_env"] = True
+        agent_config["agent.algorithm.RayGuidedPolicySearch.render_env"] = True
         agent_config["env.env_config"]["conditions"] = []
         agent = AgentBuilder.build(agent_config)
-        agent.load(folder+"/checkpoint-3000")
+        # agent.load(folder+"/checkpoint-3000")
         agent.act()
 
 
 if __name__ == "__main__":
-    main(paper_cma_es_config_with_cond_teacher, train=False, folder="./.checkpoints/CMA paper sphere/")
+    main(GPS, train=True, folder="./.checkpoints/CMA paper sphere/")
