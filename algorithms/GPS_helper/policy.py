@@ -1,6 +1,7 @@
 """ This file defines the base class for the policy. """
 import abc
 import numpy as np
+from cma.sigma_adaptation import CMAAdaptSigmaCSA
 
 class Policy(object):
     """ Computes actions from states/observations. """
@@ -140,3 +141,30 @@ class TfPolicy(Policy):
         cls_init.bias = pol_dict['bias']
         return cls_init
 
+class CSAPolicy(Policy):
+    """
+    Time-varying linear Gaussian policy.
+    U = CSA(sigma, ps, chiN)+ noise, where noise ~ N(0, chol_pol_covar)
+    """
+    def __init__(self, T=50):
+        Policy.__init__(self)
+
+        self.teacher = 0 #np.random.choice([0,1])
+        self.T = T
+        self.adapt_sigma = CMAAdaptSigmaCSA()
+
+    def act(self, x, obs, t, noise, es, f_vals):
+        """
+        Return an action for a state.
+        Args:
+            x: State vector.
+            obs: Observation vector.
+            t: Time step.
+            noise: Action noise. This will be scaled by the variance.
+        """
+        u = es.sigma
+        hsig = es.adapt_sigma.hsig(es)
+        es.hsig = hsig
+        delta = self.adapt_sigma.update2(es, function_values=f_vals)
+        u *= delta
+        return u

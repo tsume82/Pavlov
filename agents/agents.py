@@ -155,6 +155,7 @@ class RayAgent(Agent, metaclass=ABCMeta):
         return obs, episode_reward, steps_done
 
     def train(self, stop_condition={}, autosave=False):
+
         return self.agent.train()
         # return ray.tune.run(
         #     self.agent_class,
@@ -167,9 +168,10 @@ class RayAgent(Agent, metaclass=ABCMeta):
     def reset(self):
         ray.shutdown()
         ray.init()
-        register_env(self.env_class.__name__, lambda config: self.env_class(config))
         self.env = self.env_class(self.env_config.get("env_config", {}))
+        register_env(self.env_class.__name__, lambda config: self.env)
         self.agent = self.agent_class(env=self.env_class.__name__, config=self.config)
+
 
     def load(self, from_file):
         self.agent.load_checkpoint(from_file)

@@ -171,7 +171,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         self.solver_driver = solver_driver
         self.maximize = maximize
         self.steps = steps
-        self.condition_iterator = cycle(conditions)
+        self.condition_iterator = cycle(enumerate(conditions))
         self.done = False
         self.last_action = None
         self.last_reward = None
@@ -203,7 +203,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
             self.state,
             reward,
             self.done,
-            {"solutions": evaluated_solutions, "fitness": self.fitness, **solver_params},
+            {"solutions": evaluated_solutions, "fitness": self.fitness, **{**solver_params, "condition": self.cond_index}},
         )
 
     def reset(self):
@@ -214,8 +214,9 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         self.reward_metric.reset()
         self.state_metrics.reset()
 
-        start_solutions, start_fitness, solver_params = self.solver_driver.reset(next(self.condition_iterator, {}))
-        self.state = self._build_state(start_solutions, start_fitness, **solver_params)
+        self.cond_index, cond = next(self.condition_iterator, (0,{}))
+        start_solutions, start_fitness, solver_params = self.solver_driver.reset(cond)
+        self.state = self._build_state(start_solutions, start_fitness, **{**solver_params, "condition":self.cond_index})
 
         return self.state
 

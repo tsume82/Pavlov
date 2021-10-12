@@ -81,15 +81,15 @@ class Algorithm(object):
         self.cur = [IterationData() for _ in range(self.M)]
         self.prev = [IterationData() for _ in range(self.M)]
 
-        # dynamics = self._hyperparams['dynamics']
-        # for m in range(self.M):
-        #     self.cur[m].traj_info = TrajectoryInfo()
-        #     self.cur[m].traj_info.dynamics = dynamics['type'](dynamics)
+        dynamics = self._hyperparams['dynamics']
+        for m in range(self.M):
+            self.cur[m].traj_info = TrajectoryInfo()
+            self.cur[m].traj_info.dynamics = dynamics['type'](dynamics)
         #     cur_init_traj_distr = extract_condition(
         #         init_traj_distr, self._cond_idx[m]
         #     )
         #     cur_init_traj_distr['cur_cond_idx'] = self._cond_idx[m]
-        #     self.cur[m].traj_distr = cur_init_traj_distr['type'](cur_init_traj_distr, agent)
+            # self.cur[m].traj_distr = cur_init_traj_distr['type'](cur_init_traj_distr, agent)
         
         self.traj_opt = hyperparams['traj_opt']['type'](
             hyperparams['traj_opt']

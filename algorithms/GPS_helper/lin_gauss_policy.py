@@ -39,12 +39,12 @@ class LinearGaussianPolicy(Policy):
             t: Time step.
             noise: Action noise. This will be scaled by the variance.
         """
-        if self.adapt_sigma is None:
-            self.adapt_sigma = CMAAdaptSigmaCSA()
-        self.adapt_sigma.sigma = es.sigma
-        hsig = es.adapt_sigma.hsig(es)
-        es.hsig = hsig
-        es.adapt_sigma.update2(es, function_values=f_vals)
+        # if self.adapt_sigma is None:
+        #     self.adapt_sigma = CMAAdaptSigmaCSA()
+        # self.adapt_sigma.sigma = es.sigma
+        # hsig = es.adapt_sigma.hsig(es)
+        # es.hsig = hsig
+        # es.adapt_sigma.update2(es, function_values=f_vals)
         u = self.K[t].dot(x) + self.k[t]
         u += self.chol_pol_covar[t].T.dot(noise)
         return np.nan_to_num(u)

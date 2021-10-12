@@ -155,7 +155,7 @@ class CMAdriver(SolverDriver):
         self.es.tell(self.solutions, self.fitness)
 
         # assign the sigma from RL model (the [0] is because for some reason ray convert the scalar to an array of shape (1,))
-        self.es.sigma = command["step_size"] if len(command["step_size"].shape) == 0 else command["step_size"][0] # TODO debug the action space
+        self.es.sigma = command["step_size"] if np.isscalar(command["step_size"]) else command["step_size"][0] # TODO debug the action space
 
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
 
@@ -179,8 +179,9 @@ class CMAdriver(SolverDriver):
         self.curr_step = 0
         self.solutions = self.np_rng.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
         self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)
+        self.es.mean_old = self.es.mean
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
-        return self.solutions, self.fitness, {"step_size": np.array(self.init_sigma), "ps": np.array(0)}
+        return self.solutions, self.fitness, {"step_size": np.array(self.init_sigma), "ps": np.array(0), "es": self.es}
 
     def set_condition(self, condition):
         self.dim = condition.get("dim", self.dim)
@@ -195,10 +196,10 @@ class CMAdriver(SolverDriver):
     def initialize(self):
         self.reset()
 
-    def __repr__(self) -> str:
-        return "CMA solver: [dim: {0}, pop_size: {1}, obj_fun: {2}, max_steps: {3}, init_sigma: {4}]".format(
-            self.dim, self.pop_size, self.obj_fun.__name__, self.max_steps, self.init_sigma
-        )
+    # def __repr__(self) -> str:
+    #     return "CMA solver: [dim: {0}, pop_size: {1}, obj_fun: {2}, max_steps: {3}, init_sigma: {4}]".format(
+    #         self.dim, self.pop_size, self.obj_fun.__name__, self.max_steps, self.init_sigma
+    #     )
 
 
 from cma.sigma_adaptation import CMAAdaptSigmaCSA
