@@ -11,4 +11,4 @@ try:
 	# COCO.bbob_biobj_mixint = COCO.Suite("bbob-biobj-mixint", "", "")
 except ModuleNotFoundError as err:
 	print(err)
-	print("Have you built COCO library? Try to run:\n> git submodule update --remote\n> python do.py run-python")
+	print("Have you built COCO library? Try to run:\n> git submodule update --remote\n> cd benchmarks/COCO\n> python do.py run-python")

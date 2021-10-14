@@ -1,12 +1,8 @@
 from environments import SchedulerPolicyRayEnvironment, MemePolicyRayEnvironment
-from agents import AgentBuilder
 from drivers import KimemeSchedulerFileDriver, RastriginGADriver, CMAdriver, CSATeacher
-import numpy as np
-from pprint import pprint
-from utils.plot_utils import plot_episodes
 from benchmarks import CEC2017, functions, COCO
-import warnings
-warnings.filterwarnings("ignore")
+# COCO example usage: CMAdriver(10, 6, object_function=lambda x: COCO.bbob[0](x))
+# COCO objects aren't serializable
 
 rl_configuration_1 = {
     "agent.algorithm": "RayPolicyGradient",
@@ -25,8 +21,8 @@ rl_configuration_1 = {
 
 rl_configuration_2 = {
     "agent.algorithm": "RayPolicyGradient",
-    "agent.algorithm.RayPolicyGradient.framework": "tf",
-    "agent.algorithm.RayPolicyGradient.model": {
+    "agent.algorithm.framework": "tf",
+    "agent.algorithm.model": {
         "use_lstm": True,
     },
     "env.env_class": SchedulerPolicyRayEnvironment,
@@ -45,18 +41,18 @@ rl_configuration_2 = {
 
 paper_cma_es_configuration = {
     "agent.algorithm": "RayPolicyGradient",
-    "agent.algorithm.RayPolicyGradient.render_env": False,
-    "agent.algorithm.RayPolicyGradient.batch_mode": "complete_episodes",
-    "agent.algorithm.RayPolicyGradient.lr": 0.001,
-    "agent.algorithm.RayPolicyGradient.train_batch_size": 200,
-    "agent.algorithm.RayPolicyGradient.optimizer": "Adam",
-    "agent.algorithm.RayPolicyGradient.model": {
+    "agent.algorithm.render_env": False,
+    "agent.algorithm.batch_mode": "complete_episodes",
+    "agent.algorithm.lr": 0.001,
+    "agent.algorithm.train_batch_size": 200,
+    "agent.algorithm.optimizer": "Adam",
+    "agent.algorithm.model": {
         "fcnet_activation": "relu",
         "fcnet_hiddens": [50, 50],
     },
     "env.env_class": SchedulerPolicyRayEnvironment,
     "env.env_config": {
-        "solver_driver": CMAdriver(10, 6, object_function=functions.sphere),
+        "solver_driver": CMAdriver(10, 6, object_function=lambda x: COCO.bbob[0](x)),
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverState"],
@@ -74,12 +70,12 @@ paper_cma_es_configuration = {
 
 paper_cma_es_configuration_with_conditions = {
     "agent.algorithm": "RayPolicyGradient",
-    "agent.algorithm.RayPolicyGradient.render_env": False,
-    "agent.algorithm.RayPolicyGradient.batch_mode": "complete_episodes",
-    "agent.algorithm.RayPolicyGradient.lr": 0.001,
-    "agent.algorithm.RayPolicyGradient.train_batch_size": 1000,
-    "agent.algorithm.RayPolicyGradient.optimizer": "Adam",
-    "agent.algorithm.RayPolicyGradient.model": {
+    "agent.algorithm.render_env": False,
+    "agent.algorithm.batch_mode": "complete_episodes",
+    "agent.algorithm.lr": 0.001,
+    "agent.algorithm.train_batch_size": 1000,
+    "agent.algorithm.optimizer": "Adam",
+    "agent.algorithm.model": {
         "fcnet_activation": "relu",
         "fcnet_hiddens": [50, 50],
     },
@@ -117,14 +113,14 @@ paper_cma_es_configuration_with_conditions = {
 
 paper_cma_es_config_with_cond_teacher = {
     "agent.algorithm": "RayPGWithTeacher",
-    "agent.algorithm.RayPGWithTeacher.teacher": CSATeacher,
-    "agent.algorithm.RayPGWithTeacher.teacher_config": {2, 1e-10}, # max, min of the action
-    "agent.algorithm.RayPGWithTeacher.render_env": False,
-    "agent.algorithm.RayPGWithTeacher.batch_mode": "complete_episodes",
-    "agent.algorithm.RayPGWithTeacher.lr": 0.001,
-    "agent.algorithm.RayPGWithTeacher.train_batch_size": 1000,
-    "agent.algorithm.RayPGWithTeacher.optimizer": "Adam",
-    "agent.algorithm.RayPGWithTeacher.model": {
+    "agent.algorithm.teacher": CSATeacher,
+    "agent.algorithm.teacher_config": {2, 1e-10}, # max, min of the action
+    "agent.algorithm.render_env": False,
+    "agent.algorithm.batch_mode": "complete_episodes",
+    "agent.algorithm.lr": 0.001,
+    "agent.algorithm.train_batch_size": 1000,
+    "agent.algorithm.optimizer": "Adam",
+    "agent.algorithm.model": {
         "fcnet_activation": "relu",
         "fcnet_hiddens": [50, 50],
     },
@@ -159,41 +155,3 @@ paper_cma_es_config_with_cond_teacher = {
         ]
     },
 }
-
-def main(agent_config, train=True, folder="./.checkpoints"):
-    # max_episodes = 12000
-    max_episodes = 1000
-    episodes = 0
-    if train:
-        agent = AgentBuilder.build(agent_config)
-        # agent.load(folder+"/checkpoint-2000")
-        p = plot_episodes()
-        while episodes < max_episodes:
-            res = agent.train()
-            episodes = res["episodes_total"]
-            p.plot(res["hist_stats"]["episode_reward"][: res["episodes_this_iter"]])
-            # pprint(res)
-            print()
-            print("═════════════════════╣Ep.: {0}\t╠═════════════════════".format(episodes))
-            print()
-            # print("Min:\t", res["episode_reward_min"])
-            # print("Max:\t", res["episode_reward_max"])
-            # print("Mean:\t", res["episode_reward_mean"])
-
-            if episodes % 3000 == 0:
-                agent.save(folder)
-
-        # p.save(folder+"/train.svg", agent_config)
-        p.show()
-
-    else:
-        agent_config["env.env_config"]["args"] = {"block_render_when_done": True}
-        agent_config["agent.algorithm.RayGuidedPolicySearch.render_env"] = True
-        agent_config["env.env_config"]["conditions"] = []
-        agent = AgentBuilder.build(agent_config)
-        # agent.load(folder+"/checkpoint-3000")
-        agent.act()
-
-
-if __name__ == "__main__":
-    main(paper_cma_es_configuration, train=True, folder="./.checkpoints/CMA paper sphere/")

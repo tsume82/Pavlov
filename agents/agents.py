@@ -23,7 +23,7 @@ class AgentBuilder:
     @classmethod
     def build(cls, config, env=None, optimizer=None):
         assert "agent.algorithm" in config.keys()
-        algorithm = config["agent.algorithm"]
+        algorithm = config.pop("agent.algorithm")
         if algorithm in TFA_AGENTS:
             # import this libs only if Ray isn't used, otherwise Ray doesn't work
             import tensorflow as tf
@@ -68,7 +68,7 @@ class AgentBuilder:
 
         if algorithm in RAY_AGENTS:
             # e.g. algorithm == "RayPolicyGradient":
-            agent_id = "agent.algorithm." + algorithm
+            agent_id = "agent.algorithm"
             env_id = "env"
             agent_config = {k[len(agent_id) + 1 :]: v for k, v in config.items() if k.startswith(agent_id)}
             env_config = {k[len(env_id) + 1 :]: v for k, v in config.items() if k.startswith(env_id)}
