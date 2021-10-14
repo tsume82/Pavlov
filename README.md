@@ -52,16 +52,24 @@ Additional RL models can be wrapped in Pavlov via the ``Agent`` interface, from 
 Pavlov interface is modelled after TensorFlow one, providing powerful commands to train and test the model configured. The main interface methods are still WIP.
 
 ### Prerequisites
-Currently tested with Python 3.6.9, not intended to work with Pytohn 2.x.
+Currently tested with Python 3.8.11, not intended to work with Pytohn 2.x.
 
 ### Installation
 Create a dedicated virtualenv using the ``requirements.txt`` file (TODO), eventually adding the libraries needed for custom environments or custom metrics
 
-Clone the repository and update the submodules:
+- Clone the repository
 ```bash
 git clone https://github.com/tsume82/Pavlov
+```
+- Update the submodules
+```bash
 git submodule init
 git submodule update --remote
+```
+- build COCO benchmarks (for any problem look their [README](https://github.com/numbbo/coco))
+```bash
+cd benchmarks/COCO
+python do.py run-python
 ```
 
 <!-- USAGE EXAMPLES -->
