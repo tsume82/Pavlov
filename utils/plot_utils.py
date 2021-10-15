@@ -26,7 +26,14 @@ class plot_episodes:
 			path = splitted_path[0] + "_" + str(i) + splitted_path[1]
 			i+=1
 
-		plt.savefig(path, metadata={"Description": pformat(infos) }) # Description keyword works only in SVG and PNG
+		formatted_infos = pformat(infos)
+		with open(splitted_path[0]+".txt", "a") as f:
+			f.write(formatted_infos)
+
+		if splitted_path[1].lower() in ["png", "svg"]: # Description keyword works only in SVG and PNG
+			plt.savefig(path, metadata={"Description": formatted_infos }) 
+		else:
+			plt.savefig(path)
 
 	def __plot_multi_episodes(self, cumulative_rewards):
 		colors = ["blue"]

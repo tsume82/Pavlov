@@ -199,20 +199,20 @@ class DifferenceOfBest(Metric):
         low = -np.inf
         high = np.inf
 
-        # if self.normalize:
-        #     low = -1
-        #     high = 1
+        if self.normalize:
+            low = -2
+            high = 2
 
         box = spaces.Box(low=low, high=high, shape=([]))
         return Repeated(box, self.history_max_length)
 
 
-class RecentFitness(Metric):
+class FitnessHistory(Metric):
     """
     RecentFitness metric, keep track of the fitness within the last history_size steps
     """
 
-    name = "RecentFitness"
+    name = "FitnessHistory"
     MetricProvider.register_metric(name, __qualname__)
 
     def __init__(self, dim, history_size) -> None:
@@ -236,15 +236,57 @@ class RecentFitness(Metric):
         self.archive = []
 
 
+class BestsHistory(Metric):
+    """
+    BestsHistory metric, history of the best fitness values
+    """
+
+    name = "BestsHistory"
+    MetricProvider.register_metric(name, __qualname__)
+    default_bounds = {"max": np.inf, "min": -np.inf}
+
+    def __init__(self, history_size, maximize=True, bounds=default_bounds, normalize=True) -> None:
+        self.history_size = history_size
+        self.maximize = maximize
+        self.normalize = True if normalize and bounds != self.default_bounds else False
+        self.bounds = bounds
+        self.history = None
+
+    def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+        best = np.max(fitness) if self.maximize else np.min(fitness)
+
+        if self.normalize:
+            best = (best - self.bounds["min"]) / (self.bounds["max"] - self.bounds["min"])
+
+        self.history.insert(0, best)
+
+        if len(self.history) > self.history_size:
+            self.history.pop(0)
+
+        return self.history
+
+    def get_space(self):
+        box = spaces.Box(
+            low=0 if self.normalize else self.bounds["min"],
+            high=1 if self.normalize else self.bounds["max"],
+            shape=([]),
+        )
+        return Repeated(box, max_len=self.history_size)
+
+    def reset(self) -> None:
+        self.history = []
+
+
 class Best(Metric):
 
     name = "Best"
     MetricProvider.register_metric(name, __qualname__)
 
-    def __init__(self, maximize=True, fit_dim=1, fit_index=0):
+    def __init__(self, maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0):
         self.fit_dim = fit_dim
         self.fit_index = fit_index
         self.maximize = maximize
+        self.use_best_of_run = use_best_of_run
         assert 0 <= self.fit_index < self.fit_dim
         self.best = None
         self.best_sol = None
@@ -265,42 +307,11 @@ class Best(Metric):
         if curr_best_fit < self.best:
             self.best = curr_best_fit
             self.best_sol = solutions[curr_best_index]
-        return self.best  # self.best or curr_best_fit?
+        return self.best if self.use_best_of_run else curr_best_fit  # self.best or curr_best_fit?
 
     def reset(self) -> None:
         self.best = np.inf
         self.best_sol = None
-
-    def get_best(self):
-        return self.best, self.best_sol
-
-
-class BestGradient(Metric):
-
-    name = "BestGradient"
-    MetricProvider.register_metric(name, __qualname__)
-
-    def __init__(self):
-        self.reset()
-
-    def get_space(self):
-        return spaces.Box(low=-np.inf, high=np.inf, shape=(1, 1))
-
-    def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
-
-        fitness = np.sort(fitness, axis=0)
-
-        if len(self.prec_fitness) < 1:
-            grad = 0  # zero gradient for the first step
-        else:
-            grad = fitness[0] - self.prec_fitness[0]
-
-        self.prec_fitness = fitness
-
-        return grad
-
-    def reset(self) -> None:
-        self.prec_fitness = []
 
     def get_best(self):
         return self.best, self.best_sol

@@ -191,42 +191,11 @@ class RayGuidedPolicySearch(RayAgent):
     agent_class = GuidedPolicySearch
     registerRayAgent(__qualname__, __qualname__)
 
-class RayPGWithTeacher(RayPolicyGradient):
+
+from ray.rllib.agents.ppo import PPOTrainer
+class RayProximalPolicyOptimization(RayAgent):
+    name = "Proximal Policy Optimization"
+    agent_class = PPOTrainer
     registerRayAgent(__qualname__, __qualname__)
-    """
-    Ray Policy Gradient With Teacher: use a teacher for an action instead of the agent when the teacher decides it
-    additional arguments:
-        agent.algorithm.RayPGWithTeacher.teacher: Teacher class
-        agent.algorithm.RayPGWithTeacher.teacher_config: constructor params
-    """
-
-    def __init__(self, agent_config, env_config):
-        self.teacher = agent_config.pop("teacher")(*agent_config.pop("teacher_config", []))
-        super().__init__(agent_config, env_config)
-
-    def reset(self):
-        ray.shutdown()
-        ray.init()
-
-        class env_class_with_teacher(self.env_class):
-            def step(_self, action): # override the enviroment step to add a step with a teacher
-
-                if self.teacher.should_act(_self.state, _self.info):
-                    action = self.teacher.act(_self.state, _self.info)
-
-                _self.state, reward, done, _self.info = super().step(action)
-
-                return _self.state, reward, done, _self.info
-
-            def reset(_self):
-                self.teacher.reset()
-                _self.info = {}
-                return super().reset()
-
-        self.env_class = env_class_with_teacher
-        self.env = self.env_class(self.env_config.get("env_config", {}))
-        register_env(self.env_class.__name__, lambda config: self.env_class(config))
-        self.agent = self.agent_class(env=self.env_class.__name__, config=self.config)
-
-
+    
 # TODO implement PPO and other Ray-based agents
