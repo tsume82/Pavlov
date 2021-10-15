@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from os.path import exists, splitext
+from os.path import exists, splitext, dirname
 from pprint import pformat
 
 class plot_episodes:
@@ -19,7 +19,7 @@ class plot_episodes:
 		plt.ioff()
 		plt.show()
 
-	def save(self, path, infos):
+	def save(self, path, infos, info_file_name=None):
 		i = 1
 		splitted_path = splitext(path)
 		while exists(path):
@@ -27,8 +27,9 @@ class plot_episodes:
 			i+=1
 
 		formatted_infos = pformat(infos)
-		with open(splitted_path[0]+".txt", "a") as f:
-			f.write(formatted_infos)
+		if info_file_name and isinstance(info_file_name, str):
+			with open(dirname(path)+"/"+info_file_name, "w") as f:
+				f.write(formatted_infos)
 
 		if splitted_path[1].lower() in ["png", "svg"]: # Description keyword works only in SVG and PNG
 			plt.savefig(path, metadata={"Description": formatted_infos }) 

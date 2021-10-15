@@ -183,7 +183,7 @@ class DifferenceOfBest(Metric):
                 # grad /= np.amax([curr_best, self.prec_best]) * 2
                 grad /= curr_best
 
-            self.history.insert(0, np.array(grad))
+            self.history.insert(0, grad)
             if len(self.history) > self.history_max_length:
                 self.history.pop()
 
@@ -200,8 +200,8 @@ class DifferenceOfBest(Metric):
         high = np.inf
 
         if self.normalize:
-            low = -2
-            high = 2
+            low = -3
+            high = 3
 
         box = spaces.Box(low=low, high=high, shape=([]))
         return Repeated(box, self.history_max_length)
