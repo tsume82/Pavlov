@@ -371,15 +371,23 @@ class AvgPosition(Metric):
     name = "AvgPosition"
     MetricProvider.register_metric(name, __qualname__)
 
-    def __init__(self, dim, bounds = {"max":np.inf, "min":-np.inf}) -> None:
+    def __init__(self, dim, bounds = {"max":np.inf, "min":-np.inf}, withVariance=False) -> None:
         self.dim = dim
         self.bounds = bounds
+        self.withVariance = withVariance
 
     def get_space(self):
-        return spaces.Box(low=self.bounds["min"], high=self.bounds["high"], shape=([self.dim]))
+        if not self.withVariance:
+            return spaces.Box(low=self.bounds["min"], high=self.bounds["max"], shape=([self.dim]))
+        return spaces.Tuple([
+            spaces.Box(low=self.bounds["min"], high=self.bounds["max"], shape=([self.dim])),
+            spaces.Box(low=-50, high=50, shape=([self.dim]))
+            ])
 
     def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
-        return np.average(solutions, axis=0)
+        if not self.withVariance:
+            return np.average(solutions, axis=0)
+        return np.average(solutions, axis=0), np.var(solutions, axis=0)
 
     def reset(self) -> None:
         pass

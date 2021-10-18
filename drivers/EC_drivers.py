@@ -1,12 +1,11 @@
 from inspyred.ec import variators
 from numpy.core.numeric import Inf
-from drivers import SolverDriver
+from drivers import SolverDriver, registerDriver
 from abc import ABC, abstractmethod, ABCMeta
 from benchmarks import functions
 import numpy as np
 import random
 import copy
-import inspyred
 import math
 import cma
 
@@ -128,14 +127,13 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
             children.append(dad)
         return children
 
-
 class CMAdriver(SolverDriver):
     def __init__(self, dim, pop_size, object_function=functions.sphere, init_sigma=0.5, max_steps=None, seed=None) -> None:
         super().__init__()
         super().set_seed(seed)
         self.dim = dim
         self.pop_size = pop_size
-        self.obj_fun = object_function
+        self.obj_fun = object_function if not isinstance(object_function, str) else functions.all[object_function]
         self.max_steps = max_steps
         self.curr_step = 0
         self.lower_bound = -5.12
@@ -201,32 +199,5 @@ class CMAdriver(SolverDriver):
             self.dim, self.pop_size, self.obj_fun.__name__, self.max_steps, self.init_sigma
         )
 
-
-from cma.sigma_adaptation import CMAAdaptSigmaCSA
-from agents.teacher import Teacher
-
-
-class CSATeacher(Teacher):
-    def __init__(self, high_bound, low_bound) -> None:
-        self.high_bound = high_bound
-        self.low_bound = low_bound
-        self.reset()
-
-    def should_act(self, observation, info):
-        return np.random.uniform() > 0.7 if info != {} else False
-
-    def act(self, obs, info):
-        es = info["es"]
-        f_vals = info["fitness"]
-        u = es.sigma
-        hsig = es.adapt_sigma.hsig(es)
-        es.hsig = hsig
-        delta = self.adapt_sigma.update2(es, function_values=f_vals)
-        u *= delta
-
-        new_sigma = max(min(u.real, self.high_bound-0.0001), self.low_bound+0.0001) 
-
-        return {"step_size": [new_sigma]}
-
-    def reset(self) -> None:
-        self.adapt_sigma = CMAAdaptSigmaCSA()
+registerDriver("RastriginGADriver", RastriginGADriver)
+registerDriver("CMAdriver", CMAdriver)

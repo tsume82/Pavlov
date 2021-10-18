@@ -5,9 +5,15 @@ import numpy as np
 from typing import Tuple
 import matplotlib.pyplot as plt
 from matplotlib.colors import TABLEAU_COLORS
-
 COLORS = list(TABLEAU_COLORS.values())
 
+DRIVERS = {}
+def registerDriver(name, clazz):
+    DRIVERS[name] = clazz
+def buildRegister():
+    for k, v in DRIVERS.items():
+        if type(v) == str:
+            DRIVERS[k] = eval(v)
 
 class Driver(ABC):
     # TODO overloading of this method with online training/enforcing must also pass the parameter tuning config action

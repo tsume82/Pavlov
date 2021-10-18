@@ -1,15 +1,11 @@
-from posixpath import splitext
-import sys
 import argparse
-import types
 from agents import AgentBuilder
-from pprint import pprint, pformat
 from utils.plot_utils import plot_episodes
+from utils.config_utils import loadConfiguration, saveConfiguration
 from examples.configurations import paper_cma_es_configuration, paper_cma_es_configuration_2, ppo_configuration
-
 import warnings
-
 warnings.filterwarnings("ignore")
+
 from os import listdir, makedirs
 from os.path import isfile, join, basename, isdir
 
@@ -46,7 +42,8 @@ def train_agent(agent_config, folder="./.checkpoints", **kwargs):
 
         if episodes % episodes_to_checkpoint < res["episodes_this_iter"]:
             agent.save(folder)
-            p.save(folder + "/train.svg", agent_config, "config.txt")
+            p.save(folder + "/train.svg", agent_config)
+            saveConfiguration(agent_config, folder)
 
     p.show()
 
@@ -65,6 +62,9 @@ def test_agent(agent_config, folder="./.checkpoints", **kwargs):
 
 
 def main(agent_config, train=True, folder="./.checkpoints", **kwargs):
+    if not isinstance(agent_config, dict):
+        config_file = agent_config if isfile(agent_config) else folder
+        agent_config = loadConfiguration(config_file)
     if train:
         # train_agent(agent_config, folder, **kwargs)
         multi_experiment_train(agent_config, folder, **kwargs)
@@ -104,4 +104,4 @@ if __name__ == "__main__":
     folder = kwargs.pop("dir")
     folder = folder if folder else "./.checkpoints/CMA ppo"
 
-    main(ppo_configuration, train=train, folder=folder, **kwargs)
+    main("ppo_configuration", train=train, folder=folder, **kwargs)

@@ -5,6 +5,7 @@ import ray.tune
 from ray.rllib.agents.pg import PGTrainer
 from algorithms.GuidedPolicySearch import GuidedPolicySearch
 from ray.tune.registry import register_env
+from environments import ENVIRONMENTS
 
 TFA_AGENTS = ["TFA_REINFORCE"]
 TFORCE_AGENTS = ["TForce_REINFORCE"]
@@ -13,6 +14,10 @@ RAY_AGENTS = {}
 
 def registerRayAgent(name, clazz):
     RAY_AGENTS[name] = clazz
+def buildRegister():
+    for k, v in RAY_AGENTS.items():
+        if type(v) == str:
+            RAY_AGENTS[k] = eval(v)
 
 class AgentBuilder:
     tf_agent = None
@@ -22,7 +27,7 @@ class AgentBuilder:
     @classmethod
     def build(cls, config, env=None, optimizer=None):
         assert "agent.algorithm" in config.keys()
-        algorithm = config.pop("agent.algorithm")
+        algorithm = config["agent.algorithm"]
         if algorithm in TFA_AGENTS:
             # import this libs only if Ray isn't used, otherwise Ray doesn't work
             import tensorflow as tf
@@ -71,7 +76,8 @@ class AgentBuilder:
             env_id = "env"
             agent_config = {k[len(agent_id) + 1 :]: v for k, v in config.items() if k.startswith(agent_id)}
             env_config = {k[len(env_id) + 1 :]: v for k, v in config.items() if k.startswith(env_id)}
-            cls.ray_agent = eval(RAY_AGENTS[algorithm])(agent_config, env_config)
+            agent_config.pop("")
+            cls.ray_agent = RAY_AGENTS[algorithm](agent_config, env_config)
 
             return cls.ray_agent
 
@@ -122,7 +128,8 @@ class RayAgent(Agent, metaclass=ABCMeta):
     def __init__(self, agent_config, env_config):
         self.env_config = env_config.copy()
         assert self.env_config.get("env_class") is not None
-        self.env_class = self.env_config.get("env_class")
+        env_class = self.env_config.get("env_class")
+        self.env_class = env_class if not isinstance(env_class, str) else ENVIRONMENTS[env_class]
 
         agent_config["env_config"] = self.env_config.get("env_config", {})
         agent_config["env"] = self.env_class.__name__
@@ -197,3 +204,4 @@ class RayProximalPolicyOptimization(RayAgent):
     registerRayAgent(__qualname__, __qualname__)
     
 # TODO implement PPO and other Ray-based agents
+buildRegister()

@@ -1,5 +1,5 @@
 from environments import SchedulerPolicyRayEnvironment, MemePolicyRayEnvironment
-from drivers import KimemeSchedulerFileDriver, RastriginGADriver, CMAdriver, CSATeacher
+from drivers import KimemeSchedulerFileDriver, RastriginGADriver, CMAdriver
 from benchmarks import CEC2017, functions
 # COCO example usage: CMAdriver(10, 6, object_function=lambda x: COCO.bbob[0](x))
 # COCO objects aren't serializable
@@ -147,17 +147,17 @@ ppo_configuration = {
     "agent.algorithm.vf_clip_param": 500,
     "agent.algorithm.model": {
         "fcnet_activation": "relu",
-        "fcnet_hiddens": [20, 20],
+        "fcnet_hiddens": [10, 10],
     },
-    "env.env_class": SchedulerPolicyRayEnvironment,
+    "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
-        "solver_driver": CMAdriver(10, 10, object_function=functions.rastrigin),
+        "solver_driver": "CMAdriver",
+        "solver_driver_args": [10, 10, "rastrigin"],
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest",'BestsHistory'],
+        "state_metrics_names": ["AvgPosition"],
         "state_metrics_config": [
-            (40, False),
-            (40, False, {"max": 300,"min": 0})
+            (10, {"max": 5.12, "min":-5.12}, True),
         ],
         "reward_metric": "Best",
         "reward_metric_config": [False, False], # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)

@@ -6,7 +6,15 @@ from gym import spaces
 from gym.utils import seeding
 from metrics import *
 from itertools import cycle
+from drivers import DRIVERS
 
+ENVIRONMENTS = {}
+def registerEnvironment(env, clazz):
+    ENVIRONMENTS[env] = clazz
+def buildRegister():
+    for k, v in ENVIRONMENTS.items():
+        if type(v) == str:
+            ENVIRONMENTS[k] = eval(v)
 
 class InvalidEnvironmentRequest(Exception):
     def __init__(self, *args: object) -> None:
@@ -27,10 +35,10 @@ class MemePolicyEnvironment(SolverEnvironment):
     """
     Environment implementing a meme policy: given an observation of the current evolution, the population get perturbed from the agent.
     """
-
+    registerEnvironment(__qualname__, __qualname__)
     def __init__(
         self,
-        driver,
+        solver_driver,
         steps,
         state_metrics_names,
         state_metrics_config,
@@ -39,6 +47,7 @@ class MemePolicyEnvironment(SolverEnvironment):
         action_space_config={},
         obj_function=None,
         maximize=True,
+        solver_driver_args=[]
     ):
         super().__init__()
         self.state_metrics = MetricProvider.combine(state_metrics_names)(state_metrics_config)
@@ -63,8 +72,16 @@ class MemePolicyEnvironment(SolverEnvironment):
         # reward space, note that the reward must be one-dimensional, so an appropriate metric must be used
         self.reward_metric = MetricProvider.get_metric(reward_metric)(*reward_metric_config)
 
+        if isinstance(solver_driver, str):
+            if solver_driver in DRIVERS:
+                self.solver_driver = solver_driver(*solver_driver_args)
+            else:
+                raise KeyError("{} driver not registered".format(solver_driver))
+        else:
+            self.solver_driver = solver_driver
+
         self.state = None
-        self.driver = driver
+        self.driver = solver_driver
         self.maximize = maximize
         self.obj_function = obj_function
         self.steps = steps
@@ -80,10 +97,10 @@ class MemePolicyEnvironment(SolverEnvironment):
         self.reward_metric.reset()
         self.state_metrics.reset()
 
-        if self.driver is not None:
-            if not self.driver.initialized():
-                self.driver.initialize()
-            self.solutions, start_fitness = self.driver.reset()
+        if self.solver_driver is not None:
+            if not self.solver_driver.initialized():
+                self.solver_driver.initialize()
+            self.solutions, start_fitness = self.solver_driver.reset()
         elif self.obj_function is not None:
             self.solutions = np.array(self.action_space.sample())
             start_fitness = np.array([self.obj_function(x) for x in self.solutions])
@@ -96,8 +113,8 @@ class MemePolicyEnvironment(SolverEnvironment):
     def step(self, action):
         self.solutions = self.solutions + action
 
-        if self.driver is not None:
-            evaluated_solutions, fitness = self.driver.step(self.solutions)
+        if self.solver_driver is not None:
+            evaluated_solutions, fitness = self.solver_driver.step(self.solutions)
         elif self.obj_function is not None:
             fitness = np.array([self.obj_function(x) for x in self.solutions])
             evaluated_solutions = self.solutions
@@ -110,7 +127,7 @@ class MemePolicyEnvironment(SolverEnvironment):
         if not self.maximize:
             reward *= -1
 
-        done = self.driver.is_done() if self.driver is not None else False
+        done = self.solver_driver.is_done() if self.solver_driver is not None else False
         done = done or self.curr_step >= self.steps
 
         self.curr_step += 1
@@ -122,6 +139,7 @@ class MemePolicyEnvironment(SolverEnvironment):
 
 class SchedulerPolicyEnvironment(SolverEnvironment):
     # TODO steps -> generic stop conditions based on metrics
+    registerEnvironment(__qualname__, __qualname__)
     def __init__(
         self,
         solver_driver,
@@ -132,6 +150,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         reward_metric,
         reward_metric_config,
         parameter_tune_config=None,
+        solver_driver_args=[],
         maximize=True,
         conditions=[],
         **args
@@ -167,8 +186,16 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         # reward space, note that the reward must be one-dimensional, so an appropriate metric must be used
         self.reward_metric = MetricProvider.get_metric(reward_metric)(*reward_metric_config)
 
+        if isinstance(solver_driver, str):
+            if solver_driver in DRIVERS:
+                self.solver_driver = DRIVERS[solver_driver](*solver_driver_args)
+            else:
+                raise KeyError("{} driver not registered".format(solver_driver))
+        else:
+            self.solver_driver = solver_driver
+
+
         self.state = None  # fetch from kimeme-driver in self.reset()
-        self.solver_driver = solver_driver
         self.maximize = maximize
         self.steps = steps
         self.condition_iterator = cycle(enumerate(conditions))
@@ -239,6 +266,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
 
 class MemePolicyRayEnvironment(MemePolicyEnvironment):
     # according to the ray doc, the env must have only one param: the env configuration (https://docs.ray.io/en/latest/rllib-env.html)
+    registerEnvironment(__qualname__, __qualname__)
     def __init__(self, env_config):
         super().__init__(
             driver=env_config.get("driver", None),
@@ -250,11 +278,13 @@ class MemePolicyRayEnvironment(MemePolicyEnvironment):
             action_space_config=env_config.get("action_space_config", {}),
             obj_function=env_config.get("obj_function", None),
             maximize=env_config.get("maximize", True),
+            solver_driver_args=env_config.get("solver_driver_args", [])
         )
 
 
 class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
     # according to the ray doc, the env must have only one param: the env configuration (https://docs.ray.io/en/latest/rllib-env.html)
+    registerEnvironment(__qualname__, __qualname__)
     def __init__(self, env_config):
         super().__init__(
             solver_driver=env_config.get("solver_driver"),
@@ -266,11 +296,12 @@ class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
             reward_metric_config=env_config.get("reward_metric_config"),
             parameter_tune_config=env_config.get("parameter_tune_config", None),
             maximize=env_config.get("maximize", True),
+            solver_driver_args=env_config.get("solver_driver_args", []),
             conditions=env_config.get("conditions", []),
             **env_config.get("args", {})
         )
 
-
+buildRegister()
 # region old code
 # class MemePolicyEnvironment_prec(SolverEnvironment):
 #     """
