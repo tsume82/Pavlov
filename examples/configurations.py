@@ -141,7 +141,7 @@ ppo_configuration = {
 	"agent.algorithm": "RayProximalPolicyOptimization",
     "agent.algorithm.render_env": False,
     "agent.algorithm.batch_mode": "complete_episodes",
-    # "agent.algorithm.lr": 0.001,
+    # "agent.algorithm.lr": 1e-7,
     "agent.algorithm.train_batch_size": 200,
     "agent.algorithm.optimizer": "Adam",
     "agent.algorithm.vf_clip_param": 500,
@@ -154,7 +154,7 @@ ppo_configuration = {
         "solver_driver": CMAdriver(10, 10, object_function=functions.rastrigin),
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "BestsHistory"],
+        "state_metrics_names": ["DifferenceOfBest",'BestsHistory'],
         "state_metrics_config": [
             (40, False),
             (40, False, {"max": 300,"min": 0})

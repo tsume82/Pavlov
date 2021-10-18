@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod, ABCMeta
 from ray.rllib.utils.annotations import override
 import ray.tune
-
 # from ray.rllib.agents import Trainer as RayTrainer
 from ray.rllib.agents.pg import PGTrainer
 from algorithms.GuidedPolicySearch import GuidedPolicySearch
@@ -177,7 +176,6 @@ class RayAgent(Agent, metaclass=ABCMeta):
         self.agent.load_checkpoint(from_file)
 
     def save(self, to_file):
-        # TODO this may raise exceptions as per documentation, keeping an eye on it
         self.agent.save_checkpoint(to_file)
 
 

@@ -196,10 +196,10 @@ class CMAdriver(SolverDriver):
     def initialize(self):
         self.reset()
 
-    # def __repr__(self) -> str:
-    #     return "CMA solver: [dim: {0}, pop_size: {1}, obj_fun: {2}, max_steps: {3}, init_sigma: {4}]".format(
-    #         self.dim, self.pop_size, self.obj_fun.__name__, self.max_steps, self.init_sigma
-    #     )
+    def __repr__(self) -> str:
+        return "CMA solver: [dim: {0}, pop_size: {1}, obj_fun: {2}, max_steps: {3}, init_sigma: {4}]".format(
+            self.dim, self.pop_size, self.obj_fun.__name__, self.max_steps, self.init_sigma
+        )
 
 
 from cma.sigma_adaptation import CMAAdaptSigmaCSA

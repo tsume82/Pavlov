@@ -200,8 +200,8 @@ class DifferenceOfBest(Metric):
         high = np.inf
 
         if self.normalize:
-            low = -3
-            high = 3
+            low = -5
+            high = 5
 
         box = spaces.Box(low=low, high=high, shape=([]))
         return Repeated(box, self.history_max_length)
@@ -366,6 +366,23 @@ class SolverStateHistory(SolverState):
     def reset(self) -> None:
         self.history = []
 
+
+class AvgPosition(Metric):
+    name = "AvgPosition"
+    MetricProvider.register_metric(name, __qualname__)
+
+    def __init__(self, dim, bounds = {"max":np.inf, "min":-np.inf}) -> None:
+        self.dim = dim
+        self.bounds = bounds
+
+    def get_space(self):
+        return spaces.Box(low=self.bounds["min"], high=self.bounds["high"], shape=([self.dim]))
+
+    def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+        return np.average(solutions, axis=0)
+
+    def reset(self) -> None:
+        pass
 
 # build up MetricProvider registered metrics class types
 # NB: this must be the last line of metrics.py
