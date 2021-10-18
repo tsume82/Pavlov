@@ -127,8 +127,11 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
             children.append(dad)
         return children
 
+
 class CMAdriver(SolverDriver):
-    def __init__(self, dim, pop_size, object_function=functions.sphere, init_sigma=0.5, max_steps=None, seed=None) -> None:
+    def __init__(
+        self, dim, pop_size, object_function=functions.sphere, init_sigma=0.5, max_steps=None, seed=None
+    ) -> None:
         super().__init__()
         super().set_seed(seed)
         self.dim = dim
@@ -153,7 +156,9 @@ class CMAdriver(SolverDriver):
         self.es.tell(self.solutions, self.fitness)
 
         # assign the sigma from RL model (the [0] is because for some reason ray convert the scalar to an array of shape (1,))
-        self.es.sigma = command["step_size"] if np.isscalar(command["step_size"]) else command["step_size"][0] # TODO debug the action space
+        self.es.sigma = (
+            command["step_size"] if np.isscalar(command["step_size"]) else command["step_size"][0]
+        )  # TODO debug the action space
 
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
 
@@ -165,7 +170,12 @@ class CMAdriver(SolverDriver):
         return (
             self.solutions,
             self.fitness,
-            {"step_size": np.array(self.es.sigma), "ps": np.array(conjugate_evolution_path), "es": self.es},
+            {
+                "step_size": np.array(self.es.sigma),
+                "ps": np.array(conjugate_evolution_path),
+                "es": self.es,
+                "curr_step": self.curr_step,
+            },
         )
 
     def is_done(self):
@@ -179,7 +189,11 @@ class CMAdriver(SolverDriver):
         self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)
         self.es.mean_old = self.es.mean
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
-        return self.solutions, self.fitness, {"step_size": np.array(self.init_sigma), "ps": np.array(0), "es": self.es}
+        return (
+            self.solutions,
+            self.fitness,
+            {"step_size": np.array(self.init_sigma), "ps": np.array(0), "es": self.es, "curr_step": self.curr_step},
+        )
 
     def set_condition(self, condition):
         self.dim = condition.get("dim", self.dim)
@@ -198,6 +212,7 @@ class CMAdriver(SolverDriver):
         return "CMA solver: [dim: {0}, pop_size: {1}, obj_fun: {2}, max_steps: {3}, init_sigma: {4}]".format(
             self.dim, self.pop_size, self.obj_fun.__name__, self.max_steps, self.init_sigma
         )
+
 
 registerDriver("RastriginGADriver", RastriginGADriver)
 registerDriver("CMAdriver", CMAdriver)

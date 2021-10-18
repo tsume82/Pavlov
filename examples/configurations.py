@@ -146,8 +146,8 @@ ppo_configuration = {
     "agent.algorithm.optimizer": "Adam",
     "agent.algorithm.vf_clip_param": 500,
     "agent.algorithm.model": {
-        "fcnet_activation": "relu",
-        "fcnet_hiddens": [10, 10],
+        "fcnet_activation": "tanh",
+        "fcnet_hiddens": [30, 30],
     },
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {

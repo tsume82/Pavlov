@@ -399,6 +399,8 @@ class AvgPosition(Metric):
     def reset(self) -> None:
         pass
 
+
+
 # build up MetricProvider registered metrics class types
 # NB: this must be the last line of metrics.py
 MetricProvider.build()

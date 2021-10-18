@@ -9,12 +9,17 @@ from itertools import cycle
 from drivers import DRIVERS
 
 ENVIRONMENTS = {}
+
+
 def registerEnvironment(env, clazz):
     ENVIRONMENTS[env] = clazz
+
+
 def buildRegister():
     for k, v in ENVIRONMENTS.items():
         if type(v) == str:
             ENVIRONMENTS[k] = eval(v)
+
 
 class InvalidEnvironmentRequest(Exception):
     def __init__(self, *args: object) -> None:
@@ -25,6 +30,8 @@ class SolverEnvironment(gym.Env):
     def __init__(self) -> None:
         self.render_mode = "human"
         self.block_render_when_done = False
+        self.save_trajectory = False
+        self.trajectory = {}
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -35,7 +42,9 @@ class MemePolicyEnvironment(SolverEnvironment):
     """
     Environment implementing a meme policy: given an observation of the current evolution, the population get perturbed from the agent.
     """
+
     registerEnvironment(__qualname__, __qualname__)
+
     def __init__(
         self,
         solver_driver,
@@ -47,7 +56,7 @@ class MemePolicyEnvironment(SolverEnvironment):
         action_space_config={},
         obj_function=None,
         maximize=True,
-        solver_driver_args=[]
+        solver_driver_args=[],
     ):
         super().__init__()
         self.state_metrics = MetricProvider.combine(state_metrics_names)(state_metrics_config)
@@ -140,6 +149,7 @@ class MemePolicyEnvironment(SolverEnvironment):
 class SchedulerPolicyEnvironment(SolverEnvironment):
     # TODO steps -> generic stop conditions based on metrics
     registerEnvironment(__qualname__, __qualname__)
+
     def __init__(
         self,
         solver_driver,
@@ -194,7 +204,6 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         else:
             self.solver_driver = solver_driver
 
-
         self.state = None  # fetch from kimeme-driver in self.reset()
         self.maximize = maximize
         self.steps = steps
@@ -205,6 +214,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         self.curr_step = 0
         self.cumulative_reward = 0
         self.block_render_when_done = args.get("block_render_when_done", False)
+        self.save_trajectory = args.get("save_trajectory", False)
         self.reset()
 
     def _build_state(self, evaluated_solutions, fitness, **solver_params):
@@ -226,11 +236,20 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         self.last_action = action
         self.last_reward = reward
 
+        if self.save_trajectory:
+            self.trajectory["solutions"] = np.vstack([self.trajectory["solutions"], evaluated_solutions])
+            self.trajectory["fitness"] = np.vstack([self.trajectory["fitness"], self.fitness])
+            self.trajectory["actions"].append(action)
+
         return (
             self.state,
             reward,
             self.done,
-            {"solutions": evaluated_solutions, "fitness": self.fitness, **{**solver_params, "condition": self.cond_index}},
+            {
+                "solutions": evaluated_solutions,
+                "fitness": self.fitness,
+                **{**solver_params, "condition": self.cond_index},
+            },
         )
 
     def reset(self):
@@ -241,9 +260,18 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         self.reward_metric.reset()
         self.state_metrics.reset()
 
-        self.cond_index, cond = next(self.condition_iterator, (0,{}))
+        self.cond_index, cond = next(self.condition_iterator, (0, {}))
         start_solutions, start_fitness, solver_params = self.solver_driver.reset(cond)
-        self.state = self._build_state(start_solutions, start_fitness, **{**solver_params, "condition":self.cond_index})
+        self.state = self._build_state(
+            start_solutions, start_fitness, **{**solver_params, "condition": self.cond_index}
+        )
+
+        if self.save_trajectory:
+            self.trajectory = {
+                "solutions":np.array(start_solutions),
+                "fitness":np.array(start_fitness),
+                "actions":[]
+            }
 
         return self.state
 
@@ -267,6 +295,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
 class MemePolicyRayEnvironment(MemePolicyEnvironment):
     # according to the ray doc, the env must have only one param: the env configuration (https://docs.ray.io/en/latest/rllib-env.html)
     registerEnvironment(__qualname__, __qualname__)
+
     def __init__(self, env_config):
         super().__init__(
             driver=env_config.get("driver", None),
@@ -278,13 +307,14 @@ class MemePolicyRayEnvironment(MemePolicyEnvironment):
             action_space_config=env_config.get("action_space_config", {}),
             obj_function=env_config.get("obj_function", None),
             maximize=env_config.get("maximize", True),
-            solver_driver_args=env_config.get("solver_driver_args", [])
+            solver_driver_args=env_config.get("solver_driver_args", []),
         )
 
 
 class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
     # according to the ray doc, the env must have only one param: the env configuration (https://docs.ray.io/en/latest/rllib-env.html)
     registerEnvironment(__qualname__, __qualname__)
+
     def __init__(self, env_config):
         super().__init__(
             solver_driver=env_config.get("solver_driver"),
@@ -300,6 +330,7 @@ class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
             conditions=env_config.get("conditions", []),
             **env_config.get("args", {})
         )
+
 
 buildRegister()
 # region old code

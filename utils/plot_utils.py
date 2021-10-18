@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from os.path import exists, splitext, dirname
-from pprint import pformat
+import json
 
 class plot_episodes:
 	def __init__(self) -> None:
@@ -27,12 +27,12 @@ class plot_episodes:
 			i+=1
 			path = splitted_path[0] + "_" + str(i) + splitted_path[1]
 
-		formatted_infos = pformat(infos)
+		formatted_infos = json.dumps(infos, skipkeys=True)
 		if info_file_name and isinstance(info_file_name, str):
 			with open(dirname(path)+"/"+info_file_name, "w") as f:
 				f.write(formatted_infos)
 
-		if splitted_path[1].lower() in ["png", "svg"]: # Description keyword works only in SVG and PNG
+		if splitted_path[1].lower() in [".png", ".svg"]: # Description keyword works only in SVG and PNG
 			plt.savefig(path, metadata={"Description": formatted_infos }) 
 		else:
 			plt.savefig(path)
@@ -63,10 +63,10 @@ class plot_episodes:
 		self.num_episodes += len(cumulative_rewards)
 		plt.xlim((0, self.num_episodes))
 		plt.ylim((ymin - 0.1 * yrange, ymax + 0.1 * yrange))
+		plt.grid(True)
 		plt.draw()
 		plt.pause(0.001)
 		plt.legend()
-		# plt.show()
 
 	def __plot_single_episode(self, cumulative_reward):
 		colors = ["blue"]
@@ -94,7 +94,23 @@ class plot_episodes:
 		plt.xlim((0, self.num_episodes))
 		plt.ylim((ymin - 0.1 * yrange, ymax + 0.1 * yrange))
 		self.num_episodes += 1
+		plt.grid(True)
 		plt.draw()
-		plt.pause(0.00001)
+		plt.pause(0.001)
 		plt.legend()
-		plt.show()
+
+def plot_experiment(experiment):
+	fig, axs = plt.subplots(2, sharex=True)
+	length = len(experiment[0]["fitness"])
+	avg = np.empty(shape=[0,length])
+	for traj in experiment:
+		actions = []
+		for step in traj["actions"]:
+			actions.append(step.get("step_size", None)) # TODO handle different actions spaces
+		popAvg = np.average(traj["fitness"], axis=1)
+		avg = np.vstack([avg,popAvg])
+		axs[0].plot([*range(length)], popAvg, color="blue", alpha=0.5)
+		axs[1].plot([*range(1,length)], actions, color="black", alpha=0.5)
+	axs[0].plot([*range(length)], np.average(avg, axis=0), color="red")
+	plt.ioff()
+	plt.show()
