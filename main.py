@@ -49,13 +49,13 @@ def train_agent(agent_config, folder="./.checkpoints", **kwargs):
 
 
 def test_agent(agent_config, folder="./.checkpoints", **kwargs):
-    checkpoint_number = kwargs.get("checkpoint_number", None)
+    checkpoint = kwargs.get("checkpoint", None)
     agent_config["env.env_config"]["args"] = {"block_render_when_done": True}
     agent_config["agent.algorithm.render_env"] = True
     agent_config["env.env_config"]["conditions"] = []
     agent = AgentBuilder.build(agent_config)
     checkpoint = (
-        folder + "/checkpoint-" + str(checkpoint_number) if checkpoint_number else folder+"/"+getLastCheckpoint(folder)
+        folder +"/"+checkpoint if checkpoint else folder+"/"+getLastCheckpoint(folder)
     )
     agent.load(checkpoint)
     agent.act()
@@ -86,12 +86,12 @@ def multi_experiment_train(agent_config, folder, **kwargs):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="launch the training/testing of an agent")
-    parser.add_argument("train", nargs='?', type=str, default=True)
-    parser.add_argument("--dir", "-d", type=str, default=None)
-    parser.add_argument("--cp_num", dest="checkpoint_number", type=int, help="checkpoint_number", default=None)
-    parser.add_argument("--max_ep", dest="max_episodes", type=int, help="max_episodes", default=3000)
-    parser.add_argument("--checkpoint", "-c", dest="checkpoint", type=str, help="checkpoint", default=None)
-    parser.add_argument("--ep_to_cp", dest="episodes_to_checkpoint", type=int, help="episodes_to_checkpoint", default=3000)
+    parser.add_argument("train", nargs='?', type=str, default=True, help="train: '1', 'true' or 'train' for training mode, otherwise test mode is selected")
+    parser.add_argument("--dir", "-d", type=str, default=None, help="directory: the directory of the experiment")
+    parser.add_argument("--max_ep", dest="max_episodes", type=int, help="max_episodes: maximum number of episodes in training", default=3000)
+    parser.add_argument("--checkpoint", "-cp", dest="checkpoint", type=str, help="checkpoint: the name of the checkpoint file to test or training starting from that checkpoint. If no checkpoint is passed, automatically is choosen the last one during test", default=None)
+    parser.add_argument("--ep_to_cp", dest="episodes_to_checkpoint", type=int, help="episodes_to_checkpoint: the number of episodes before saving a checkpoint", default=3000)
+    parser.add_argument("--config","-c", nargs="?", default=False, const=True, help="config: the configuraton file of the experiment, if the flag has no arguments the config.json file in the experiment directory is used")
     # TODO argument for agent configuration
     args = parser.parse_args()
 
@@ -102,6 +102,9 @@ if __name__ == "__main__":
 
     train = kwargs.pop("train")
     folder = kwargs.pop("dir")
+    config = kwargs.pop("config")
     folder = folder if folder else "./.checkpoints/CMA ppo"
 
-    main("ppo_configuration", train=train, folder=folder, **kwargs)
+    configuration = config if isinstance(config, str) else "" if config else ppo_configuration
+
+    main(configuration, train=train, folder=folder, **kwargs)

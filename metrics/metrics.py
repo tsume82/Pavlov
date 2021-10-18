@@ -161,11 +161,12 @@ class DifferenceOfBest(Metric):
     name = "DifferenceOfBest"
     MetricProvider.register_metric(name, __qualname__)
 
-    def __init__(self, history_max_length=1, maximize=True, fitness_dim=1, normalize=True):
+    def __init__(self, history_max_length=1, maximize=True, fitness_dim=1, normalize=True, normBetween0and1 = False):
         self.prec_best = None
         self.maximize = maximize
         self.fitness_dim = fitness_dim
         self.normalize = normalize
+        self.normBetween0and1 = normBetween0and1
         self.history_max_length = history_max_length
         self.history = []
 
@@ -180,8 +181,10 @@ class DifferenceOfBest(Metric):
             )  # TODO set gradient sign based on the maximization/minimization problem?
 
             if self.normalize:
-                # grad /= np.amax([curr_best, self.prec_best]) * 2
-                grad /= curr_best
+                if self.normBetween0and1:
+                    grad /= np.amax([curr_best, self.prec_best]) * 2
+                else:
+                    grad /= curr_best
 
             self.history.insert(0, grad)
             if len(self.history) > self.history_max_length:
@@ -200,8 +203,12 @@ class DifferenceOfBest(Metric):
         high = np.inf
 
         if self.normalize:
-            low = -5
-            high = 5
+            if self.normBetween0and1:
+                low = -1
+                high = 1
+            else:
+                low = -5
+                high = 5
 
         box = spaces.Box(low=low, high=high, shape=([]))
         return Repeated(box, self.history_max_length)

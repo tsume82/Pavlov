@@ -22,9 +22,10 @@ class plot_episodes:
 	def save(self, path, infos, info_file_name=None):
 		i = 1
 		splitted_path = splitext(path)
+		path = splitted_path[0] + "_" + str(i) + splitted_path[1]
 		while exists(path):
-			path = splitted_path[0] + "_" + str(i) + splitted_path[1]
 			i+=1
+			path = splitted_path[0] + "_" + str(i) + splitted_path[1]
 
 		formatted_infos = pformat(infos)
 		if info_file_name and isinstance(info_file_name, str):
