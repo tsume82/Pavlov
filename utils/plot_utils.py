@@ -109,8 +109,8 @@ def plot_experiment(experiment):
 			actions.append(step.get("step_size", None)) # TODO handle different actions spaces
 		popAvg = np.average(traj["fitness"], axis=1)
 		avg = np.vstack([avg,popAvg])
-		axs[0].plot([*range(length)], popAvg, color="blue", alpha=0.5)
-		axs[1].plot([*range(1,length)], actions, color="black", alpha=0.5)
+		axs[0].plot([*range(length)], popAvg, color="blue", alpha=0.4)
+		axs[1].plot([*range(1,length)], actions, color="black", alpha=0.4)
 	axs[0].plot([*range(length)], np.average(avg, axis=0), color="red")
 	plt.ioff()
 	plt.show()

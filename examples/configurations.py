@@ -144,7 +144,7 @@ ppo_configuration = {
     # "agent.algorithm.lr": 1e-7,
     "agent.algorithm.train_batch_size": 200,
     "agent.algorithm.optimizer": "Adam",
-    "agent.algorithm.vf_clip_param": 500,
+    "agent.algorithm.vf_clip_param": 5000,
     "agent.algorithm.model": {
         "fcnet_activation": "tanh",
         "fcnet_hiddens": [30, 30],
@@ -152,12 +152,13 @@ ppo_configuration = {
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
         "solver_driver": "CMAdriver",
-        "solver_driver_args": [10, 10, "sphere"],
+        "solver_driver_args": [10, 10, "schwefel"],
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["AvgPosition"],
+        "state_metrics_names": ["DifferenceOfBest", "SolverState"],
         "state_metrics_config": [
-            (10, {"max": 5.12, "min":-5.12}, True),
+            (40, False, 1, True, True),
+            ({"step_size": {"max": 3, "min": 1e-10}},)
         ],
         "reward_metric": "Best",
         "reward_metric_config": [False, False], # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)

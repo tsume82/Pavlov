@@ -26,7 +26,7 @@ def train_agent(agent_config, folder="./.checkpoints", **kwargs):
     episodes = 0
     agent = AgentBuilder.build(agent_config)
     if checkpoint:
-        agent.load(folder + checkpoint)
+        agent.load(folder +"/"+ checkpoint)
     p = plot_episodes()
     while episodes < max_episodes:
         res = agent.train()
@@ -70,10 +70,12 @@ def test_multiple_times(agent_config, folder="./.checkpoints", **kwargs):
     )
     agent.load(checkpoint)
     experiment = []
-    for _ in range(kwargs["num_runs"]):
+    for i in range(kwargs["num_runs"]):
+        print("\rrun: {}/{}\t".format(i+1,kwargs["num_runs"]), end="")
         agent.act()
         experiment.append(agent.env.trajectory)
         agent.env.reset()
+    print()
     plot_experiment(experiment)
 
 
