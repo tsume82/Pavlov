@@ -2,7 +2,7 @@ from inspyred.ec import variators
 from numpy.core.numeric import Inf
 from drivers import SolverDriver, registerDriver
 from abc import ABC, abstractmethod, ABCMeta
-from benchmarks import functions
+from benchmarks.utils import loadFunction
 import numpy as np
 import random
 import copy
@@ -130,13 +130,13 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
 
 class CMAdriver(SolverDriver):
     def __init__(
-        self, dim, pop_size, object_function=functions.sphere, init_sigma=0.5, max_steps=None, seed=None
+        self, dim, pop_size, object_function="sphere", init_sigma=0.5, max_steps=None, seed=None
     ) -> None:
         super().__init__()
         super().set_seed(seed)
         self.dim = dim
         self.pop_size = pop_size
-        self.obj_fun = object_function if not isinstance(object_function, str) else functions.all[object_function]
+        self.obj_fun = object_function if not isinstance(object_function, str) else loadFunction(object_function)
         self.max_steps = max_steps
         self.curr_step = 0
         self.lower_bound = -5.12
