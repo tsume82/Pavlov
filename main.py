@@ -6,15 +6,16 @@ from examples.configurations import paper_cma_es_configuration, paper_cma_es_con
 import warnings
 warnings.filterwarnings("ignore")
 
-from os import listdir, makedirs
+from os import listdir, makedirs, environ
 from os.path import isfile, join, basename, isdir
-
+environ["RAY_PICKLE_VERBOSE_DEBUG"] = "1"
 
 def getLastCheckpoint(folder):
     checkpoints = [f for f in listdir(folder) if isfile(join(folder, f)) and "checkpoint" in basename(f)]
     if len(checkpoints) == 0:
         raise Exception("There are no checkpoints in "+folder)
     last = max(checkpoints, key=lambda f: int(basename(f).split("-")[1]))
+    print("loaded {}".format(last))
     return last
 
 

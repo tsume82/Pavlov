@@ -152,7 +152,7 @@ ppo_configuration = {
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
         "solver_driver": "CMAdriver",
-        "solver_driver_args": [10, 10, "schwefel"],
+        "solver_driver_args": [10, 10, "discus"],
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverState"],
