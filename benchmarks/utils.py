@@ -1,9 +1,14 @@
 from benchmarks import functions
 from benchmarks import COCO
 
+try:
+    from cma import bbobbenchmarks
+except ModuleNotFoundError as err:
+    bbobbenchmarks = None
+
 # doc: https://hal.inria.fr/inria-00362633v2/document
 # TODO probably use better names
-COCO_OBJ_FN_NAMES = {
+BBOB_OBJ_FN_NAMES = {
     "sphere": 1,
     "ellipsoid": 2,
     "rastrigin": 3,
@@ -31,18 +36,31 @@ COCO_OBJ_FN_NAMES = {
 }
 
 
-def loadFunction(name: str, dim=10, options={}):
-	"""
-	function to facilitate the configuration of the drivers. dim and options are only necessary for COCO's benchmark
-	"""
-	name = name.lower()
-	if name in functions.all.keys():
-		return functions.all[name]
-	if name in COCO_OBJ_FN_NAMES.keys():
-		# TODO possibility to use other suites ('bbob-biobj', 'bbob-largescale', 'bbob-mixint', 'bbob-biobj-mixint')
-		arg1 = "instances: {}".format(options.get("instances", 1))
-		arg2 = "function_indices: {}, dimensions: {}".format(COCO_OBJ_FN_NAMES[name], dim)
-		# can't do differently because COCO's objects can't be pickled
-		return lambda x: COCO.Suite("bbob", arg1, arg2)[0](x)
-	# TODO use CEC2017, for now COCO have all we need
-	return None
+def loadFunction(name: str, dim=10, options={}, lib: str = None):
+    """
+    function to facilitate the configuration of the drivers. Load an object function from its name
+
+    name: name of the object function to load
+    dim: dimension of the input space (necessary only for COCO's benchmark)
+    options: options for selecting functions e.g. the instance of the function (necessary only for COCO's benchmark)
+    lib: what library to use. "local", "COCO", "cma", default search on all
+    """
+    name = name.lower()
+    if lib:
+        lib = lib.lower()
+        assert lib in ["local", "coco", "cma"]
+    if (not lib or lib == "local") and name in functions.all.keys():
+        return functions.all[name]
+    if (not lib or lib == "coco") and name in BBOB_OBJ_FN_NAMES.keys():
+            # TODO possibility to use other suites ('bbob-biobj', 'bbob-largescale', 'bbob-mixint', 'bbob-biobj-mixint')
+            arg1 = "instances: {}".format(options.get("instances", 1))
+            arg2 = "function_indices: {}, dimensions: {}".format(BBOB_OBJ_FN_NAMES[name], dim)
+            # can't do differently because COCO's objects can't be pickled
+            return lambda x: COCO.Suite("bbob", arg1, arg2)[0](x)
+    if (not lib or lib == "cma") and name in BBOB_OBJ_FN_NAMES.keys():
+        if bbobbenchmarks:
+            return bbobbenchmarks.instantiate(BBOB_OBJ_FN_NAMES[name])[0]
+        else:
+            raise ModuleNotFoundError("cma module not found")
+    raise AttributeError("'{}' object function doesn't exists".format(name))
+    # TODO use CEC2017, for now COCO have all we need
