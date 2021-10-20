@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib.ticker import (AutoMinorLocator, MultipleLocator)
 import numpy as np
 from os.path import exists, splitext, dirname
 import json
@@ -101,8 +102,16 @@ class plot_episodes:
 
 def plot_experiment(experiment, title="", title_act="step size"):
 	fig, axs = plt.subplots(2, sharex=True)
+	# Top
 	axs[0].title.set_text(title)
+	axs[0].set_yscale("log", subs=[2,4,6,8])
+	axs[0].grid(True, which="both")
+	axs[0].tick_params(axis='y', which="minor", grid_alpha=0.3)
+	# Bottom
 	axs[1].title.set_text(title_act)
+	axs[1].yaxis.set_minor_locator(AutoMinorLocator(2))
+	axs[1].grid(True, which="both")
+	axs[1].tick_params(axis='y', which="minor", grid_alpha=0.3)
 	length = len(experiment[0]["fitness"])
 	avg = np.empty(shape=[0,length])
 	for traj in experiment:
@@ -113,6 +122,5 @@ def plot_experiment(experiment, title="", title_act="step size"):
 		avg = np.vstack([avg,popAvg])
 		axs[0].plot([*range(length)], popAvg, color="blue", alpha=0.4)
 		axs[1].plot([*range(1,length)], actions, color="black", alpha=0.4)
-	axs[0].plot([*range(length)], np.average(avg, axis=0), color="red")
-	plt.grid()
+	axs[0].plot([*range(length)], np.average(avg, axis=0), color="red", alpha=0.5)
 	plt.show()

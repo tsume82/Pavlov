@@ -76,7 +76,7 @@ def test_multiple_times(agent_config, folder="./.checkpoints", **kwargs):
         agent.act()
         experiment.append(agent.env.trajectory)
         agent.env.reset()
-    title = agent_config["env.env_config"].get("solver_driver_args", "")[3]
+    title = agent_config["env.env_config"].get("solver_driver_args", "")[2]
     plot_experiment(experiment, title=title if isinstance(title, str) else "fitness")
 
 
