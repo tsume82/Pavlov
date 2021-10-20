@@ -51,16 +51,16 @@ def loadFunction(name: str, dim=10, options={}, lib: str = None):
         assert lib in ["local", "coco", "cma"]
     if (not lib or lib == "local") and name in functions.all.keys():
         return functions.all[name]
+    if (not lib or lib == "cma") and name in BBOB_OBJ_FN_NAMES.keys():
+        if bbobbenchmarks:
+            return bbobbenchmarks.instantiate(BBOB_OBJ_FN_NAMES[name])[0]
+        elif lib == "cma":
+            raise ModuleNotFoundError("cma module not found")
     if (not lib or lib == "coco") and name in BBOB_OBJ_FN_NAMES.keys():
             # TODO possibility to use other suites ('bbob-biobj', 'bbob-largescale', 'bbob-mixint', 'bbob-biobj-mixint')
             arg1 = "instances: {}".format(options.get("instances", 1))
             arg2 = "function_indices: {}, dimensions: {}".format(BBOB_OBJ_FN_NAMES[name], dim)
             # can't do differently because COCO's objects can't be pickled
             return lambda x: COCO.Suite("bbob", arg1, arg2)[0](x)
-    if (not lib or lib == "cma") and name in BBOB_OBJ_FN_NAMES.keys():
-        if bbobbenchmarks:
-            return bbobbenchmarks.instantiate(BBOB_OBJ_FN_NAMES[name])[0]
-        else:
-            raise ModuleNotFoundError("cma module not found")
     raise AttributeError("'{}' object function doesn't exists".format(name))
     # TODO use CEC2017, for now COCO have all we need
