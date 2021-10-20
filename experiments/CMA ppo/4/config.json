@@ -21,7 +21,7 @@
 			"griewank"
 		],
 		"maximize": false,
-		"steps": 50,
+		"steps": 500,
 		"state_metrics_names": [
 			"DifferenceOfBest",
 			"SolverState"
