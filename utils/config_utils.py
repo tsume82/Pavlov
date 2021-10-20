@@ -1,5 +1,5 @@
 import json
-from os.path import isdir
+from os.path import isfile
 # TODO save configuration with pickle? (CONS: not readable, PROS: can save anything)
 
 def saveConfiguration(agent_config, folder):
@@ -7,8 +7,9 @@ def saveConfiguration(agent_config, folder):
 		json.dump(agent_config, f)
 
 def loadConfiguration(folder):
-	if isdir(folder):
-		folder = folder + "/config.json"
-	with open(folder, "r") as f:
-		return json.load(f)
+	config_file = folder + "/config.json"
+	if isfile(config_file):
+		with open(config_file, "r") as f:
+			return json.load(f)
+	return None
 

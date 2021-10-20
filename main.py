@@ -2,13 +2,13 @@ import argparse
 from agents import AgentBuilder
 from utils.plot_utils import plot_episodes, plot_experiment
 from utils.config_utils import loadConfiguration, saveConfiguration
-from examples.configurations import paper_cma_es_configuration, paper_cma_es_configuration_2, ppo_configuration
+from examples.configurations import ALL_CONFIGURATIONS
 import warnings
 warnings.filterwarnings("ignore")
 
 from os import listdir, makedirs, environ
 from os.path import isfile, join, basename, isdir
-environ["RAY_PICKLE_VERBOSE_DEBUG"] = "1"
+# environ["RAY_PICKLE_VERBOSE_DEBUG"] = "1"
 
 def getLastCheckpoint(folder):
     checkpoints = [f for f in listdir(folder) if isfile(join(folder, f)) and "checkpoint" in basename(f)]
@@ -76,14 +76,15 @@ def test_multiple_times(agent_config, folder="./.checkpoints", **kwargs):
         agent.act()
         experiment.append(agent.env.trajectory)
         agent.env.reset()
-    print()
-    plot_experiment(experiment)
+    title = agent_config["env.env_config"].get("solver_driver_args", "")[3]
+    plot_experiment(experiment, title=title if isinstance(title, str) else "fitness")
 
 
 def main(agent_config, train=True, folder="./.checkpoints", **kwargs):
     if not isinstance(agent_config, dict):
         config_file = agent_config if isfile(agent_config) else folder
-        agent_config = loadConfiguration(config_file)
+        config = loadConfiguration(config_file)
+        agent_config = config if config else ALL_CONFIGURATIONS[agent_config]
     if train:
         # train_agent(agent_config, folder, **kwargs)
         multi_experiment_train(agent_config, folder, **kwargs)
@@ -124,9 +125,9 @@ if __name__ == "__main__":
 
     train = kwargs.pop("train")
     folder = kwargs.pop("dir")
-    config = kwargs.pop("config")
     folder = folder if folder else "./.checkpoints/CMA ppo"
 
-    configuration = config if isinstance(config, str) else "" if config else ppo_configuration
+    config = kwargs.pop("config")
+    configuration = config if isinstance(config, str) else "" if config else "ppo_configuration"
 
     main(configuration, train=train, folder=folder, **kwargs)

@@ -49,7 +49,7 @@
 			false
 		],
 		"memes_no": 1,
-		"parameter_tune_config": {
+		"action_space_config": {
 			"step_size": {
 				"max": 3,
 				"min": 1e-10

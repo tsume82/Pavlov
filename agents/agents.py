@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod, ABCMeta
 from ray.rllib.utils.annotations import override
 import ray.tune
+import numpy as np
 # from ray.rllib.agents import Trainer as RayTrainer
 from ray.rllib.agents.pg import PGTrainer
 from algorithms.GuidedPolicySearch import GuidedPolicySearch
@@ -148,8 +149,9 @@ class RayAgent(Agent, metaclass=ABCMeta):
         done = False
         obs = self.env.reset()
         steps_done = 0
+        RNN_state = np.zeros(shape=(2,self.config.get("model",0).get("lstm_cell_size",0)))
         while not done and (steps_max is None or steps_done < steps_max):  # run until episode ends
-            action = self.agent.compute_single_action(obs)
+            action, RNN_state = self.agent.compute_single_action(obs, RNN_state)
             obs, reward, done, info = self.env.step(action)
 
             episode_reward += reward

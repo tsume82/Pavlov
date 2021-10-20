@@ -99,8 +99,10 @@ class plot_episodes:
 		plt.pause(0.001)
 		plt.legend()
 
-def plot_experiment(experiment):
+def plot_experiment(experiment, title="", title_act="step size"):
 	fig, axs = plt.subplots(2, sharex=True)
+	axs[0].title.set_text(title)
+	axs[1].title.set_text(title_act)
 	length = len(experiment[0]["fitness"])
 	avg = np.empty(shape=[0,length])
 	for traj in experiment:
@@ -112,5 +114,5 @@ def plot_experiment(experiment):
 		axs[0].plot([*range(length)], popAvg, color="blue", alpha=0.4)
 		axs[1].plot([*range(1,length)], actions, color="black", alpha=0.4)
 	axs[0].plot([*range(length)], np.average(avg, axis=0), color="red")
-	plt.ioff()
+	plt.grid()
 	plt.show()

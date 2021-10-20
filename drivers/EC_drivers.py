@@ -160,6 +160,10 @@ class CMAdriver(SolverDriver):
             command["step_size"] if np.isscalar(command["step_size"]) else command["step_size"][0]
         )  # TODO debug the action space
 
+        # xmean = command.get("xmean", None)
+        # if xmean:
+        #     xmean = xmean if np.isscalar(xmean) else xmean[0]
+
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
 
         conjugate_evolution_path = (

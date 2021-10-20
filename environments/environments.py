@@ -159,7 +159,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
         state_metrics_config,
         reward_metric,
         reward_metric_config,
-        parameter_tune_config=None,
+        action_space_config=None,
         solver_driver_args=[],
         maximize=True,
         conditions=[],
@@ -181,10 +181,10 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
 
         # action space, can also include parameter tuning
         self.memes_no = memes_no
-        if parameter_tune_config is not None:
+        if action_space_config is not None:
             parameter_space = {
                 key: spaces.Box(low=np.array(value["min"]), high=np.array(value["max"]), dtype=np.float32)
-                for (key, value) in parameter_tune_config.items()
+                for (key, value) in action_space_config.items()
             }
             if memes_no > 1:
                 self.action_space = spaces.Dict({"meme": spaces.Discrete(memes_no), **parameter_space})
@@ -324,7 +324,7 @@ class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
             state_metrics_config=env_config.get("state_metrics_config"),
             reward_metric=env_config.get("reward_metric"),
             reward_metric_config=env_config.get("reward_metric_config"),
-            parameter_tune_config=env_config.get("parameter_tune_config", None),
+            action_space_config=env_config.get("action_space_config", None),
             maximize=env_config.get("maximize", True),
             solver_driver_args=env_config.get("solver_driver_args", []),
             conditions=env_config.get("conditions", []),

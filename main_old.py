@@ -33,7 +33,7 @@ def main():
     env = SchedulerPolicyEnvironment(
         driver, steps, memes_no,
         ("RecentGradients",), ((2, 6, 1, None, 1),),
-        "Best", (), parameter_tune_config=None
+        "Best", (), action_space_config=None
     )
 
     print(env.kimeme_driver.next_step())

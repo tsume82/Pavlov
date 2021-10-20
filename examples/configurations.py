@@ -1,8 +1,6 @@
 from environments import SchedulerPolicyRayEnvironment, MemePolicyRayEnvironment
 from drivers import KimemeSchedulerFileDriver, RastriginGADriver, CMAdriver
-from benchmarks import CEC2017, functions
-# COCO example usage: CMAdriver(10, 6, object_function=lambda x: COCO.bbob[0](x))
-# COCO objects aren't serializable
+from benchmarks import functions
 
 rl_configuration_1 = {
     "agent.algorithm": "RayPolicyGradient",
@@ -35,10 +33,10 @@ rl_configuration_2 = {
         # "space_metrics_config" : ((10, 6, 1, None, 10),),
         "reward_metric": "Best",
         "reward_metric_config": [],
-        "parameter_tune_config": None,
+        "action_space_config": None,
     },
 }
-# Bad for rastrigin
+# Bad for rastrigin like functions
 paper_cma_es_configuration = {
     "agent.algorithm": "RayPolicyGradient",
     "agent.algorithm.render_env": False,
@@ -59,12 +57,12 @@ paper_cma_es_configuration = {
         "state_metrics_config": [
             (40, True),
             ({"step_size": {"max": 1, "min": 1e-10}}, 40),
-            ({"ps": {"max": 10, "min": -10}},)
+            ({"ps": {"max": 10, "min": -10}},),
         ],
         "reward_metric": "Best",
         "reward_metric_config": [False],
         "memes_no": 1,
-        "parameter_tune_config": {"step_size": {"max": 1, "min": 1e-10}},
+        "action_space_config": {"step_size": {"max": 1, "min": 1e-10}},
     },
 }
 paper_cma_es_configuration_2 = {
@@ -84,13 +82,11 @@ paper_cma_es_configuration_2 = {
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest"],
-        "state_metrics_config": [
-            (40, True)
-        ],
+        "state_metrics_config": [(40, True)],
         "reward_metric": "Best",
         "reward_metric_config": [False],
         "memes_no": 1,
-        "parameter_tune_config": {"step_size": {"max": 1, "min": 1e-10}},
+        "action_space_config": {"step_size": {"max": 1, "min": 1e-10}},
     },
 }
 paper_cma_es_configuration_with_conditions = {
@@ -113,32 +109,31 @@ paper_cma_es_configuration_with_conditions = {
         "state_metrics_config": [
             (40, True),
             ({"step_size": {"max": 1, "min": 1e-10}}, 40),
-            ({"ps": {"max": 10, "min": -10}},)
+            ({"ps": {"max": 10, "min": -10}},),
         ],
         "reward_metric": "Best",
         "reward_metric_config": [False],
         "memes_no": 1,
-        "parameter_tune_config": {"step_size": {"max": 1, "min": 1e-10}},
-        "conditions":[
-            {'dim': 5, 'init_sigma': 0.5},
-            {'dim': 10, 'init_sigma': 0.5},
-            {'dim': 15, 'init_sigma': 0.5},
-            {'dim': 20, 'init_sigma': 0.5},
-            {'dim': 25, 'init_sigma': 0.5},
-            {'dim': 30, 'init_sigma': 0.5},
-            {'dim': 5, 'init_sigma': 1.0},
-            {'dim': 10, 'init_sigma': 1.0},
-            {'dim': 15, 'init_sigma': 1.0},
-            {'dim': 20, 'init_sigma': 1.0},
-            {'dim': 25, 'init_sigma': 1.0},
-            {'dim': 30, 'init_sigma': 1.0},
-        ]
+        "action_space_config": {"step_size": {"max": 1, "min": 1e-10}},
+        "conditions": [
+            {"dim": 5, "init_sigma": 0.5},
+            {"dim": 10, "init_sigma": 0.5},
+            {"dim": 15, "init_sigma": 0.5},
+            {"dim": 20, "init_sigma": 0.5},
+            {"dim": 25, "init_sigma": 0.5},
+            {"dim": 30, "init_sigma": 0.5},
+            {"dim": 5, "init_sigma": 1.0},
+            {"dim": 10, "init_sigma": 1.0},
+            {"dim": 15, "init_sigma": 1.0},
+            {"dim": 20, "init_sigma": 1.0},
+            {"dim": 25, "init_sigma": 1.0},
+            {"dim": 30, "init_sigma": 1.0},
+        ],
     },
 }
-
 # No paper based
 ppo_configuration = {
-	"agent.algorithm": "RayProximalPolicyOptimization",
+    "agent.algorithm": "RayProximalPolicyOptimization",
     "agent.algorithm.render_env": False,
     "agent.algorithm.batch_mode": "complete_episodes",
     # "agent.algorithm.lr": 1e-7,
@@ -156,18 +151,50 @@ ppo_configuration = {
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverState"],
+        "state_metrics_config": [(40, False, 1, True, True), ({"step_size": {"max": 3, "min": 1e-10}},)],
+        "reward_metric": "Best",
+        "reward_metric_config": [False, False],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
+        "memes_no": 1,
+        "action_space_config": {"step_size": {"max": 3, "min": 1e-10}},
+    },
+}
+ppo_configuration_2 = {
+    "agent.algorithm": "RayProximalPolicyOptimization",
+    "agent.algorithm.render_env": False,
+    "agent.algorithm.batch_mode": "complete_episodes",
+    # "agent.algorithm.lr": 1e-7,
+    "agent.algorithm.train_batch_size": 200,
+    "agent.algorithm.optimizer": "Adam",
+    # "agent.algorithm.entropy_coeff": 0.001,
+    "agent.algorithm.vf_clip_param": 500,
+    "agent.algorithm.num_workers": 0,
+    "agent.algorithm.model": {
+        # "fcnet_activation": "tanh",
+        # "fcnet_hiddens": [30, 30],
+        "use_lstm":True,
+        "max_seq_len":40,
+        "lstm_cell_size":30,
+        # "lstm_use_prev_action": True
+    },
+    "env.env_class": "SchedulerPolicyRayEnvironment",
+    "env.env_config": {
+        "solver_driver": "CMAdriver",
+        "solver_driver_args": [10, 10, "sphere"],
+        "maximize": False,
+        "steps": 50,
+        "state_metrics_names": ["DifferenceOfBest"],
         "state_metrics_config": [
-            (40, False, 1, True, True),
-            ({"step_size": {"max": 3, "min": 1e-10}},)
+            (10, False, 1, True, True), 
+            ({"step_size": {"max": 3, "min": 0}},)
         ],
         "reward_metric": "Best",
-        "reward_metric_config": [False, False], # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
+        "reward_metric_config": [False, False],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
         "memes_no": 1,
-        "parameter_tune_config": {"step_size": {"max": 3, "min": 1e-10}},
+        "action_space_config": {"step_size": {"max": 3, "min": 1e-12}},
     },
 }
 pg_configuration = {
-	"agent.algorithm": "RayPolicyGradient",
+    "agent.algorithm": "RayPolicyGradient",
     "agent.algorithm.render_env": False,
     "agent.algorithm.batch_mode": "complete_episodes",
     "agent.algorithm.lr": 0.001,
@@ -188,8 +215,11 @@ pg_configuration = {
             (40, False),
         ],
         "reward_metric": "Best",
-        "reward_metric_config": [False, False], # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
+        "reward_metric_config": [False, False],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
         "memes_no": 1,
-        "parameter_tune_config": {"step_size": {"max": 3, "min": 1e-10}},
+        "action_space_config": {"step_size": {"max": 3, "min": 1e-10}},
     },
 }
+
+# dict of all configurations in this file
+ALL_CONFIGURATIONS = {k: v for k, v in locals().items() if not "__" in k and isinstance(v, dict)}
