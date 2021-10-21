@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib.widgets import Button 
 from matplotlib.ticker import (AutoMinorLocator, MultipleLocator)
 import numpy as np
 from os.path import exists, splitext, dirname
@@ -34,22 +35,19 @@ class plot_episodes:
 				f.write(formatted_infos)
 
 		if splitted_path[1].lower() in [".png", ".svg"]: # Description keyword works only in SVG and PNG
-			plt.savefig(path, metadata={"Description": formatted_infos }) 
+			self.fig.savefig(path, metadata={"Description": formatted_infos }) 
 		else:
-			plt.savefig(path)
+			self.fig.savefig(path)
 
 	def __plot_multi_episodes(self, cumulative_rewards):
 		colors = ["blue"]
 		labels = ["cumulative reward"]
 		if self.num_episodes == 0:
-			plt.figure("plot data")
-			plt.ion()
+			self.__init_plot()
 			self.data = [[*range(len(cumulative_rewards))], cumulative_rewards]
 			for i in range(1):
-				(line,) = plt.plot(self.data[0], self.data[i + 1], color=colors[i], label=labels[i])
+				(line,) = self.ax.plot(self.data[0], self.data[i + 1], color=colors[i], label=labels[i])
 				self.lines.append(line)
-			plt.xlabel("Episodes")
-			plt.ylabel("Cumulative Reward")
 		else:
 			self.data[0].extend([*range(self.num_episodes, self.num_episodes + len(cumulative_rewards))])
 			self.data[1].extend(cumulative_rewards)
@@ -62,25 +60,22 @@ class plot_episodes:
 		ymax = max([max(d) for d in self.data[1:]])
 		yrange = ymax - ymin
 		self.num_episodes += len(cumulative_rewards)
-		plt.xlim((0, self.num_episodes))
-		plt.ylim((ymin - 0.1 * yrange, ymax + 0.1 * yrange))
-		plt.grid(True)
+		self.ax.set_xlim((0, self.num_episodes))
+		self.ax.set_ylim((ymin - 0.1 * yrange, ymax + 0.1 * yrange))
+		self.ax.grid(True)
+		self.ax.legend()
 		plt.draw()
 		plt.pause(0.001)
-		plt.legend()
 
 	def __plot_single_episode(self, cumulative_reward):
 		colors = ["blue"]
 		labels = ["cumulative_reward"]
 		if self.num_episodes == 0:
-			plt.figure("plot data")
-			plt.ion()
+			self.__init_plot()
 			self.data = [[self.num_episodes], [cumulative_reward]]
 			for i in range(1):
-				(line,) = plt.plot(self.data[0], self.data[i + 1], color=colors[i], label=labels[i])
+				(line,) = self.ax.plot(self.data[0], self.data[i + 1], color=colors[i], label=labels[i])
 				self.lines.append(line)
-			plt.xlabel("Episodes")
-			plt.ylabel("Cumulative Reward")
 		else:
 			self.data[0].append(self.num_episodes)
 			self.data[1].append(cumulative_reward)
@@ -92,13 +87,26 @@ class plot_episodes:
 		ymin = min([min(d) for d in self.data[1:]])
 		ymax = max([max(d) for d in self.data[1:]])
 		yrange = ymax - ymin
-		plt.xlim((0, self.num_episodes))
-		plt.ylim((ymin - 0.1 * yrange, ymax + 0.1 * yrange))
+		self.ax.set_xlim((0, self.num_episodes))
+		self.ax.set_ylim((ymin - 0.1 * yrange, ymax + 0.1 * yrange))
 		self.num_episodes += 1
-		plt.grid(True)
+		self.ax.grid(True)
+		self.ax.legend()
 		plt.draw()
 		plt.pause(0.001)
-		plt.legend()
+	
+	def __init_plot(self):
+		self.fig = plt.figure("plot data")
+		plt.ion()
+		self.ax = self.fig.subplots()
+		self.ax.set_xlabel("Episodes")
+		self.ax.set_ylabel("Cumulative Reward")
+		# self.button = Button(plt.axes([0.81, 0.0, 0.15, 0.075]), "Log Scale")
+		# def toggle_fun(val):
+		# 	newscale = "log" if self.ax.get_yaxis().get_scale() != "log" else "linear"
+		# 	print(newscale)
+		# 	self.ax.set_yscale(newscale)
+		# self.button.on_clicked(toggle_fun)
 
 def plot_experiment(experiment, title="", title_act="step size"):
 	fig, axs = plt.subplots(2, sharex=True)

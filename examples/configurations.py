@@ -135,6 +135,7 @@ paper_cma_es_configuration_with_conditions = {
 ppo_configuration = {
     "agent.algorithm": "RayProximalPolicyOptimization",
     "agent.algorithm.render_env": False,
+    "agent.algorithm.num_workers": 0,
     "agent.algorithm.batch_mode": "complete_episodes",
     # "agent.algorithm.lr": 1e-7,
     "agent.algorithm.train_batch_size": 200,
@@ -147,11 +148,11 @@ ppo_configuration = {
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
         "solver_driver": "CMAdriver",
-        "solver_driver_args": [10, 10, "discus"],
+        "solver_driver_args": [10, 10, "discus"], # discus, ellipsoid, katsuura, rastrigin, rosenbrock, bent cigar, sphere
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverState"],
-        "state_metrics_config": [(40, False, 1, True, True), ({"step_size": {"max": 3, "min": 1e-10}},)],
+        "state_metrics_config": [(40, False, 1, True, False), ({"step_size": {"max": 3, "min": 0}},)],
         "reward_metric": "Best",
         "reward_metric_config": [False, False],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
         "memes_no": 1,

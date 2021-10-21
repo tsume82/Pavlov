@@ -115,6 +115,7 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint", "-cp", dest="checkpoint", type=str, help="checkpoint: the name of the checkpoint file to test or training starting from that checkpoint. If no checkpoint is passed, automatically is choosen the last one during test", default=None)
     parser.add_argument("--ep_to_cp", dest="episodes_to_checkpoint", type=int, help="episodes_to_checkpoint: the number of episodes before saving a checkpoint", default=3000)
     parser.add_argument("--config","-c", nargs="?", default=False, const=True, help="config: the configuraton file of the experiment, if the flag has no arguments the config.json file in the experiment directory is used")
+    # parser.add_argument("--multi-config","-mc", dest="multi_config", help="multi config: test or train from multiple configurations")
     # TODO argument for agent configuration
     args = parser.parse_args()
 

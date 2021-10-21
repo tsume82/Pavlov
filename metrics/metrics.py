@@ -166,7 +166,7 @@ class DifferenceOfBest(Metric):
         self.maximize = maximize
         self.fitness_dim = fitness_dim
         self.normalize = normalize
-        self.normBetween0and1 = normBetween0and1
+        self.normBetween0and1 = normBetween0and1 # it works only if ∀x ∈ fitness | x>0
         self.history_max_length = history_max_length
         self.history = []
 
@@ -182,7 +182,7 @@ class DifferenceOfBest(Metric):
 
             if self.normalize:
                 if self.normBetween0and1:
-                    grad /= np.amax([curr_best, self.prec_best]) * 2
+                    grad /= (np.amax([curr_best, self.prec_best])/1.99)
                 else:
                     grad /= curr_best
 
@@ -207,8 +207,8 @@ class DifferenceOfBest(Metric):
                 low = -1
                 high = 1
             else:
-                low = -5
-                high = 5
+                low = -1e7
+                high = 1e7
 
         box = spaces.Box(low=low, high=high, shape=([]))
         return Repeated(box, self.history_max_length)
