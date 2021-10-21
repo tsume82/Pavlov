@@ -11,15 +11,16 @@ import argparse
 """
 
 parser = argparse.ArgumentParser()
-parser.add_argument("name", nargs='?', type=str, default="discus")
-parser.add_argument("-x", nargs=2, type=int, default=[-100, 100], help="range on the x axis")
-parser.add_argument("-y", nargs=2, type=int, default=[-100, 100], help="range on the y axis")
+parser.add_argument("function", nargs='?', type=str, default="discus")
+parser.add_argument("-lib", type=str, default=None, help="The library where to take the benchmark function")
+parser.add_argument("-x", nargs=2, type=float, default=[-100, 100], help="range on the x axis")
+parser.add_argument("-y", nargs=2, type=float, default=[-100, 100], help="range on the y axis")
 parser.add_argument("-res", dest="resolution", type=int, default=100, help="resolution of the plot. high resolution: ~200, medium: ~100")
 args = parser.parse_args()
 
-function=loadFunction(args.name)
+function=loadFunction(args.function, lib=args.lib)
 
-fig = plt.figure(args.name)
+fig = plt.figure(args.function)
 ax = plt.axes(projection='3d')
 
 x = np.linspace(args.x[0], args.x[1], args.resolution)
@@ -34,5 +35,3 @@ ax.set_ylabel('y')
 ax.set_zlabel('z')
 
 plt.show()
-
-

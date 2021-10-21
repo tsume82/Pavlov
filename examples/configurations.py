@@ -148,7 +148,7 @@ ppo_configuration = {
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
         "solver_driver": "CMAdriver",
-        "solver_driver_args": [10, 10, "discus"], # discus, ellipsoid, katsuura, rastrigin, rosenbrock, bent cigar, sphere
+        "solver_driver_args": [10, 10, "discus"], # discus, ellipsoid, katsuura, rastrigin 2, rosenbrock, bent cigar, sphere
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverState"],

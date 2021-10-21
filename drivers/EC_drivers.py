@@ -139,13 +139,13 @@ class CMAdriver(SolverDriver):
         self.obj_fun = object_function if not isinstance(object_function, str) else loadFunction(object_function)
         self.max_steps = max_steps
         self.curr_step = 0
-        self.lower_bound = -5.12
-        self.upper_bound = 5.12
+        self.lower_bound = None
+        self.upper_bound = None
         self.init_sigma = init_sigma
         self.chi_N = dim ** 0.5 * (1 - 1.0 / (4.0 * dim) + 1.0 / (21.0 * dim ** 2))
         self.options = {
             "popsize": self.pop_size,
-            "bounds": [self.lower_bound, self.upper_bound],
+            "bounds": [self.lower_bound, self.upper_bound], # in the paper here they have [None, None]
             "AdaptSigma": False,
             "verb_disp": 0,
             "seed": self.seed,
@@ -189,7 +189,8 @@ class CMAdriver(SolverDriver):
         super().reset()
         self.set_condition(condition)
         self.curr_step = 0
-        self.solutions = self.np_rng.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
+        # self.solutions = self.np_rng.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
+        self.solutions = self.np_rng.randn(size=(self.dim,)) # function used in the paper to initialize the candidates
         self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)
         self.es.mean_old = self.es.mean
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)

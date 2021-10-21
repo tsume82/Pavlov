@@ -87,13 +87,13 @@ def main(agent_config, train=True, folder="./.checkpoints", **kwargs):
         agent_config = config if config else ALL_CONFIGURATIONS[agent_config]
     if train:
         # train_agent(agent_config, folder, **kwargs)
-        multi_experiment_train(agent_config, folder, **kwargs)
+        create_folder_and_train(agent_config, folder, **kwargs)
     elif kwargs["num_runs"]:
         test_multiple_times(agent_config, folder, **kwargs)
     else:
         test_agent(agent_config, folder, **kwargs)
 
-def multi_experiment_train(agent_config, folder, **kwargs):
+def create_folder_and_train(agent_config, folder, **kwargs):
     if kwargs.get("checkpoint", None):
         train_agent(agent_config, folder, **kwargs)
     else:
