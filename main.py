@@ -18,7 +18,6 @@ def getLastCheckpoint(folder):
     print("loaded {}".format(last))
     return last
 
-
 def train_agent(agent_config, folder="./.checkpoints", **kwargs):
     max_episodes = kwargs.get("max_episodes", 12000)
     checkpoint = kwargs.get("checkpoint", None)
@@ -72,26 +71,12 @@ def test_multiple_times(agent_config, folder="./.checkpoints", **kwargs):
     agent.load(checkpoint)
     experiment = []
     for i in range(kwargs["num_runs"]):
-        print("\rrun: {}/{}\t".format(i+1,kwargs["num_runs"]), end="")
+        print("\rrun: {}/{}\t".format(i+1,kwargs["num_runs"]), end="\n" if i+1 == kwargs["num_runs"] else "")
         agent.act()
         experiment.append(agent.env.trajectory)
         agent.env.reset()
     title = agent_config["env.env_config"].get("solver_driver_args", "")[2]
     plot_experiment(experiment, title=title if isinstance(title, str) else "fitness")
-
-
-def main(agent_config, train=True, folder="./.checkpoints", **kwargs):
-    if not isinstance(agent_config, dict):
-        config_file = agent_config if isfile(agent_config) else folder
-        config = loadConfiguration(config_file)
-        agent_config = config if config else ALL_CONFIGURATIONS[agent_config]
-    if train:
-        # train_agent(agent_config, folder, **kwargs)
-        create_folder_and_train(agent_config, folder, **kwargs)
-    elif kwargs["num_runs"]:
-        test_multiple_times(agent_config, folder, **kwargs)
-    else:
-        test_agent(agent_config, folder, **kwargs)
 
 def create_folder_and_train(agent_config, folder, **kwargs):
     if kwargs.get("checkpoint", None):
@@ -105,6 +90,25 @@ def create_folder_and_train(agent_config, folder, **kwargs):
         makedirs(folder+next)
         train_agent(agent_config, folder+next, **kwargs)
 
+def main(agent_config, train=True, folder="./.checkpoints", **kwargs):
+    def parse_config_and_run(config):
+        if isinstance(config, str):
+            config = loadConfiguration(config if config else folder)
+        assert isinstance(config, dict)
+        if train:
+            # train_agent(config, folder, **kwargs)
+            create_folder_and_train(config, folder, **kwargs)
+        elif kwargs["num_runs"]:
+            test_multiple_times(config, folder, **kwargs)
+        else:
+            test_agent(config, folder, **kwargs)
+
+    if isinstance(agent_config, list):
+        for _config in agent_config:
+            parse_config_and_run(_config)
+    else:
+        parse_config_and_run(agent_config)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="launch the training/testing of an agent")
@@ -115,8 +119,7 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint", "-cp", dest="checkpoint", type=str, help="checkpoint: the name of the checkpoint file to test or training starting from that checkpoint. If no checkpoint is passed, automatically is choosen the last one during test", default=None)
     parser.add_argument("--ep_to_cp", dest="episodes_to_checkpoint", type=int, help="episodes_to_checkpoint: the number of episodes before saving a checkpoint", default=3000)
     parser.add_argument("--config","-c", nargs="?", default=False, const=True, help="config: the configuraton file of the experiment, if the flag has no arguments the config.json file in the experiment directory is used")
-    # parser.add_argument("--multi-config","-mc", dest="multi_config", help="multi config: test or train from multiple configurations")
-    # TODO argument for agent configuration
+    parser.add_argument("--multi-config","-mc", dest="multi_config", default=None, help="multi config: test or train from multiple configurations")
     args = parser.parse_args()
 
     if isinstance(args.train, str):
@@ -129,6 +132,12 @@ if __name__ == "__main__":
     folder = folder if folder else "./.checkpoints/CMA ppo"
 
     config = kwargs.pop("config")
-    configuration = config if isinstance(config, str) else "" if config else "ppo_configuration"
+    multi_config = kwargs.pop("multi_config")
+
+    if multi_config:
+        configuration = loadConfiguration(multi_config)
+        assert isinstance(configuration, list)
+    else:
+        configuration = config if isinstance(config, str) else "" if config else "ppo_configuration"
 
     main(configuration, train=train, folder=folder, **kwargs)

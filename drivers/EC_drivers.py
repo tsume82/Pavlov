@@ -136,7 +136,7 @@ class CMAdriver(SolverDriver):
         super().set_seed(seed)
         self.dim = dim
         self.pop_size = pop_size
-        self.obj_fun = object_function if not isinstance(object_function, str) else loadFunction(object_function)
+        self.obj_fun = object_function if not isinstance(object_function, (str, int)) else loadFunction(object_function, lib="cma")
         self.max_steps = max_steps
         self.curr_step = 0
         self.lower_bound = None
@@ -190,7 +190,7 @@ class CMAdriver(SolverDriver):
         self.set_condition(condition)
         self.curr_step = 0
         # self.solutions = self.np_rng.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
-        self.solutions = self.np_rng.randn(size=(self.dim,)) # function used in the paper to initialize the candidates
+        self.solutions = np.random.randn(self.dim) # function used in the paper to initialize the candidates
         self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)
         self.es.mean_old = self.es.mean
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)

@@ -1,6 +1,19 @@
 from environments import SchedulerPolicyRayEnvironment, MemePolicyRayEnvironment
 from drivers import KimemeSchedulerFileDriver, RastriginGADriver, CMAdriver
 from benchmarks import functions
+from copy import deepcopy
+
+
+def update_and_return(config, key):
+    copied_conf = deepcopy(config)
+
+    def update(d, u):  # update a single value in a nested dict
+        for k, v in u.items():
+            d[k] = update(d.get(k, {}), v) if isinstance(v, dict) else v
+        return d
+
+    return update(copied_conf, key)
+
 
 rl_configuration_1 = {
     "agent.algorithm": "RayPolicyGradient",
@@ -148,7 +161,8 @@ ppo_configuration = {
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
         "solver_driver": "CMAdriver",
-        "solver_driver_args": [10, 10, "discus"], # discus, ellipsoid, katsuura, rastrigin 2, rosenbrock, bent cigar, sphere
+        # discus, ellipsoid, katsuura, rastrigin 2, rosenbrock, bent cigar, sphere
+        "solver_driver_args": [10, 10, "discus"],
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverState"],
@@ -172,9 +186,9 @@ ppo_configuration_2 = {
     "agent.algorithm.model": {
         # "fcnet_activation": "tanh",
         # "fcnet_hiddens": [30, 30],
-        "use_lstm":True,
-        "max_seq_len":40,
-        "lstm_cell_size":30,
+        "use_lstm": True,
+        "max_seq_len": 40,
+        "lstm_cell_size": 30,
         # "lstm_use_prev_action": True
     },
     "env.env_class": "SchedulerPolicyRayEnvironment",
@@ -184,10 +198,7 @@ ppo_configuration_2 = {
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest"],
-        "state_metrics_config": [
-            (10, False, 1, True, True), 
-            ({"step_size": {"max": 3, "min": 0}},)
-        ],
+        "state_metrics_config": [(10, False, 1, True, True), ({"step_size": {"max": 3, "min": 0}},)],
         "reward_metric": "Best",
         "reward_metric_config": [False, False],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
         "memes_no": 1,
@@ -222,5 +233,11 @@ pg_configuration = {
     },
 }
 
+all_ppo_configurations = [
+    update_and_return(ppo_configuration, {"env.env_config": {"solver_driver_args": [10, 10, fun]}, "agent.algorithm.vf_clip_param": clip})
+    for clip, fun in zip([1000000,5000,5000,5000,5000,5000,5000,1000,100,5000],[12, 11, 2, 23, 15, 8, 17, 20, 1, 16])
+]
+
+
 # dict of all configurations in this file
-ALL_CONFIGURATIONS = {k: v for k, v in locals().items() if not "__" in k and isinstance(v, dict)}
+ALL_CONFIGURATIONS = {k: v for k, v in locals().items() if not "__" in k and isinstance(v, (dict, list))}

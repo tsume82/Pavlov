@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Button 
-from matplotlib.ticker import (AutoMinorLocator, MultipleLocator)
+from matplotlib.widgets import Button
+from matplotlib.ticker import (AutoMinorLocator, StrMethodFormatter)
 import numpy as np
 from os.path import exists, splitext, dirname
 import json
@@ -110,9 +110,40 @@ class plot_episodes:
 
 def plot_experiment(experiment, title="", title_act="step size"):
 	fig, axs = plt.subplots(2, sharex=True)
+
+	length = len(experiment[0]["fitness"])
+	avg = np.empty(shape=[0,length])
+	min_fit = np.inf
+	max_fit = -np.inf
+	for traj in experiment:
+		actions = []
+		for step in traj["actions"]:
+			actions.append(step.get("step_size", None)) # TODO handle different actions spaces
+		popAvg = np.average(traj["fitness"], axis=1)
+		min_fit = min(np.min(traj["fitness"]), min_fit)
+		max_fit = max(np.max(traj["fitness"]), max_fit)
+		popmin = np.min(traj["fitness"], axis=1)
+		popmax = np.max(traj["fitness"], axis=1)
+		avg = np.vstack([avg,popAvg])
+		axs[0].fill_between([*range(length)], popmin, popmax, color="darkorange", alpha=0.15)
+		axs[0].plot([*range(length)], popAvg, color="blue", alpha=0.4)
+		axs[1].plot([*range(1,length)], actions, color="black", alpha=0.4)
+	axs[0].plot([*range(length)], np.average(avg, axis=0), color="red", alpha=0.5)
+
+	print("minimum value: {}".format(min_fit))
+
 	# Top
 	axs[0].title.set_text(title)
-	axs[0].set_yscale("log", subs=[2,4,6,8])
+	if min_fit < 0:
+		shift = 1e-9
+		shifted_min_fit = min_fit - shift # to avoid log(0)
+		exp = lambda x: (2)**(x)+shifted_min_fit
+		log = lambda x: np.log(x-shifted_min_fit)/np.log(2)
+		axs[0].set_yscale('function', functions=(log, exp))
+		axs[0].set_yticks(np.geomspace(shift, max_fit-min_fit+shift, num=10)+min_fit-shift)
+		axs[0].yaxis.set_major_formatter(StrMethodFormatter('{x:,.3f}'))
+	else:
+		axs[0].set_yscale("log", subs=[2,4,6,8])
 	axs[0].grid(True, which="both")
 	axs[0].tick_params(axis='y', which="minor", grid_alpha=0.3)
 	# Bottom
@@ -120,15 +151,5 @@ def plot_experiment(experiment, title="", title_act="step size"):
 	axs[1].yaxis.set_minor_locator(AutoMinorLocator(2))
 	axs[1].grid(True, which="both")
 	axs[1].tick_params(axis='y', which="minor", grid_alpha=0.3)
-	length = len(experiment[0]["fitness"])
-	avg = np.empty(shape=[0,length])
-	for traj in experiment:
-		actions = []
-		for step in traj["actions"]:
-			actions.append(step.get("step_size", None)) # TODO handle different actions spaces
-		popAvg = np.average(traj["fitness"], axis=1)
-		avg = np.vstack([avg,popAvg])
-		axs[0].plot([*range(length)], popAvg, color="blue", alpha=0.4)
-		axs[1].plot([*range(1,length)], actions, color="black", alpha=0.4)
-	axs[0].plot([*range(length)], np.average(avg, axis=0), color="red", alpha=0.5)
+
 	plt.show()
