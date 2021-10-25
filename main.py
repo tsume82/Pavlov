@@ -122,6 +122,7 @@ if __name__ == "__main__":
     parser.add_argument("--ep_to_cp", dest="episodes_to_checkpoint", type=int, help="episodes_to_checkpoint: the number of episodes before saving a checkpoint", default=3000)
     parser.add_argument("--config","-c", nargs="?", default=False, const=True, help="config: the configuraton file of the experiment, if the flag has no arguments the config.json file in the experiment directory is used")
     parser.add_argument("--multi-config","-mc", dest="multi_config", default=None, help="multi config: test or train from multiple configurations")
+    parser.add_argument("--save", "-s", dest="save_exp", action="store_true", default=False, help="save the experiment")
     args = parser.parse_args()
 
     if isinstance(args.train, str):

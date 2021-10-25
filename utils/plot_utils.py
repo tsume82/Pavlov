@@ -112,13 +112,13 @@ class plot_episodes:
 		# 	self.ax.set_yscale(newscale)
 		# self.button.on_clicked(toggle_fun)
 
-def plot_experiment(experiment, title="Plot Experiment", title_act="step size", logyscale=False, logxscale=True):
-	if isdir(experiment):
+def plot_experiment(experiment, title="Plot Experiment", title_act="step size", logyscale=True, logxscale=True):
+	if isinstance(experiment, str) and isdir(experiment):
 		experiment = load_experiment(experiment)
-		
+
 	fig, axs = plt.subplots(2, sharex=True, figsize=(12,6))
-	fig.tight_layout()
-	fig.canvas.set_window_title(title)
+	fig.tight_layout(rect=(0.06,0,1,0.98), h_pad=0)
+	fig.canvas.manager.set_window_title(title)
 
 	length = len(experiment[0]["fitness"])
 	avg = np.empty(shape=[0,length])
@@ -134,12 +134,13 @@ def plot_experiment(experiment, title="Plot Experiment", title_act="step size", 
 		popmin = np.min(traj["fitness"], axis=1)
 		popmax = np.max(traj["fitness"], axis=1)
 		avg = np.vstack([avg,popAvg])
-		axs[0].fill_between([*range(length)], popmin, popmax, color="darkorange", alpha=0.15)
+		axs[0].fill_between([*range(length)], popmin, popmax, color="lightsteelblue", alpha=0.6) # darkorange alpha=0.15
 		axs[0].plot([*range(length)], popAvg, color="blue", alpha=0.4)
 		axs[1].plot([*range(1,length)], actions, color="black", alpha=0.4)
-	axs[0].plot([*range(length)], np.average(avg, axis=0), color="red", alpha=0.5)
+	axs[0].plot([*range(length)], np.average(avg, axis=0), color="red", alpha=0.8)
 
-	print("minimum value: {}".format(min_fit))
+	print("max value: {}".format(max_fit))
+	print("min value: {}".format(min_fit))
 
 	# Top
 	axs[0].title.set_text(title)
@@ -162,16 +163,17 @@ def plot_experiment(experiment, title="Plot Experiment", title_act="step size", 
 		axs[0].set_xscale("log")
 		axs[0].xaxis.set_major_formatter(ScalarFormatter())
 
-	# axs[0].set_yticks(ticks)
-	# axs[0].set_yticklabels([np.format_float_scientific(t, precision = 3, unique=True) for t in  ticks])
 	axs[0].grid(True, which="both")
 	axs[0].set_ylabel("fitness", labelpad=0)
 	axs[0].tick_params(axis='y', which="minor", grid_alpha=0.3)
+	axs[0].set_yticks(ticks)
+	axs[0].set_yticklabels([np.format_float_scientific(t, precision = 3, unique=True) for t in  ticks])
+	axs[0].set_ylim((min_fit, max_fit))
 
 	# customization to match the paper's plots
-	axs[0].set_xticks([1,10,50,100,200,300,400,500])
-	axs[0].set_ylim((-5e5, 7e6))
-	axs[0].set_yticks([6000000,4000000,2000000,0])
+	# axs[0].set_xticks([1,10,50,100,200,300,400,500])
+	# axs[0].set_yticks([220,218,216,214])
+	# axs[0].set_ylim((212, 222))
 
 	# Bottom
 	axs[1].yaxis.set_minor_locator(AutoMinorLocator(2))
