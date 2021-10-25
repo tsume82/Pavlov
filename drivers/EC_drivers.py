@@ -146,7 +146,7 @@ class CMAdriver(SolverDriver):
         self.options = {
             "popsize": self.pop_size,
             "bounds": [self.lower_bound, self.upper_bound], # in the paper here they have [None, None]
-            "AdaptSigma": False,
+            "AdaptSigma": True,
             "verb_disp": 0,
             "seed": self.seed,
         }

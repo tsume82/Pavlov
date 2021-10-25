@@ -76,7 +76,7 @@ class SolverDriver(Driver):
                 (add_line,) = self.ax2.plot(self.__add_data[0], self.__add_data[i + 1], color=COLORS[i], label=k)
                 self.__add_lines.append(add_line)
 
-            self.ax1.set(xlabel="Evaluations", ylabel="Fitness")
+            self.ax1.set(xlabel="Algorithm Steps", ylabel="Fitness")
         else:
             self.__data[0].append(curr_step)
             self.__data[1].append(average_fitness)

@@ -1,3 +1,4 @@
+from numpy.core.numeric import Inf
 from environments import SchedulerPolicyRayEnvironment, MemePolicyRayEnvironment
 from drivers import KimemeSchedulerFileDriver, RastriginGADriver, CMAdriver
 from benchmarks import functions
@@ -233,11 +234,31 @@ pg_configuration = {
     },
 }
 
+CSA_configuration = {
+    "agent.algorithm": "RayCSA",
+    "agent.algorithm.render_env": False,
+    "env.env_class": "SchedulerPolicyRayEnvironment",
+    "env.env_config": {
+        "solver_driver": "CMAdriver",
+        # discus, ellipsoid, katsuura, rastrigin 2, rosenbrock, bent cigar, sphere
+        "solver_driver_args": [10, 10, "sphere", 1.63],
+        "maximize": False,
+        "steps": 50,
+        "state_metrics_names": ["FitnessHistory", "SolverState"],
+        "state_metrics_config": [(10, 1), ({"es": {"max": Inf, "min": -Inf}},)],
+        "reward_metric": "Best",
+        "reward_metric_config": [False, False],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
+        "memes_no": 1,
+        "action_space_config": {"step_size": {"max": 3, "min": 1e-10}},
+    },
+}
+
+
+# A way to get a list of equal configurations with some difference on some parameter
 all_ppo_configurations = [
     update_and_return(ppo_configuration, {"env.env_config": {"solver_driver_args": [10, 10, fun]}, "agent.algorithm.vf_clip_param": clip})
     for clip, fun in zip([1000000,5000,5000,5000,5000,5000,5000,1000,100,5000],[12, 11, 2, 23, 15, 8, 17, 20, 1, 16])
 ]
-
 
 # dict of all configurations in this file
 ALL_CONFIGURATIONS = {k: v for k, v in locals().items() if not "__" in k and isinstance(v, (dict, list))}

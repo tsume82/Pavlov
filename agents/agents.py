@@ -198,11 +198,32 @@ class RayGuidedPolicySearch(RayAgent):
     agent_class = GuidedPolicySearch
     registerRayAgent(__qualname__, __qualname__)
 
-
 from ray.rllib.agents.ppo import PPOTrainer
 class RayProximalPolicyOptimization(RayAgent):
     name = "Proximal Policy Optimization"
     agent_class = PPOTrainer
+    registerRayAgent(__qualname__, __qualname__)
+
+
+from cma.sigma_adaptation import CMAAdaptSigmaCSA
+class RayCSA(RayAgent):
+    name = "CSA"
+    class CSAagent:
+        def __init__(self, env=None, config=None) -> None:
+            self.adapt_sigma = CMAAdaptSigmaCSA()
+        def compute_single_action(self, obs):
+            f_vals = obs[0][0] # first fitness history
+            es = obs[1]["es"] # ES object of CMA's lib
+            u = es.sigma
+            hsig = es.adapt_sigma.hsig(es)
+            es.hsig = hsig
+            delta = es.adapt_sigma.update2(es, function_values=f_vals)
+            u *= delta
+            # print(obs)
+            return {"step_size": u}
+        def train(self):
+            raise NotImplementedError()
+    agent_class = CSAagent
     registerRayAgent(__qualname__, __qualname__)
     
 # TODO implement PPO and other Ray-based agents

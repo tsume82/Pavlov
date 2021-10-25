@@ -13,7 +13,8 @@ from os.path import isfile, join, basename, isdir
 def getLastCheckpoint(folder):
     checkpoints = [f for f in listdir(folder) if isfile(join(folder, f)) and "checkpoint" in basename(f)]
     if len(checkpoints) == 0:
-        raise Exception("There are no checkpoints in "+folder)
+        print("There are no checkpoints in {}. No checkpoint is loaded".format(folder))
+        return ""
     last = max(checkpoints, key=lambda f: int(basename(f).split("-")[1]))
     print("loaded {}".format(last))
     return last
@@ -51,13 +52,14 @@ def train_agent(agent_config, folder="./.checkpoints", **kwargs):
 def test_agent(agent_config, folder="./.checkpoints", **kwargs):
     checkpoint = kwargs.get("checkpoint", None)
     agent_config["env.env_config"]["args"] = {"block_render_when_done": True}
-    agent_config["agent.algorithm.render_env"] = True
+    agent_config["agent.algorithm.render_env"] = kwargs.get("plot", True)
     agent_config["env.env_config"]["conditions"] = []
     agent = AgentBuilder.build(agent_config)
     checkpoint = (
         folder +"/"+checkpoint if checkpoint else folder+"/"+getLastCheckpoint(folder)
     )
-    agent.load(checkpoint)
+    if isfile(checkpoint):
+        agent.load(checkpoint)
     agent.act()
 
 def test_multiple_times(agent_config, folder="./.checkpoints", **kwargs):
@@ -68,7 +70,8 @@ def test_multiple_times(agent_config, folder="./.checkpoints", **kwargs):
     checkpoint = (
         folder +"/"+checkpoint if checkpoint else folder+"/"+getLastCheckpoint(folder)
     )
-    agent.load(checkpoint)
+    if isfile(checkpoint):
+        agent.load(checkpoint)
     experiment = []
     for i in range(kwargs["num_runs"]):
         print("\rrun: {}/{}\t".format(i+1,kwargs["num_runs"]), end="\n" if i+1 == kwargs["num_runs"] else "")
@@ -78,7 +81,8 @@ def test_multiple_times(agent_config, folder="./.checkpoints", **kwargs):
     title = agent_config["env.env_config"].get("solver_driver_args", "")[2]
     if kwargs.get("save_exp", False):
         save_experiment(experiment, folder)
-    plot_experiment(experiment, title=title if isinstance(title, str) else "fitness")
+    if kwargs.get("plot", True):
+        plot_experiment(experiment, title=title if isinstance(title, str) else "fitness")
 
 def create_folder_and_train(agent_config, folder, **kwargs):
     if kwargs.get("checkpoint", None):
@@ -123,6 +127,7 @@ if __name__ == "__main__":
     parser.add_argument("--config","-c", nargs="?", default=False, const=True, help="config: the configuraton file of the experiment, if the flag has no arguments the config.json file in the experiment directory is used")
     parser.add_argument("--multi-config","-mc", dest="multi_config", default=None, help="multi config: test or train from multiple configurations")
     parser.add_argument("--save", "-s", dest="save_exp", action="store_true", default=False, help="save the experiment")
+    parser.add_argument("--noplot", "-np", dest="plot", action="store_false", default=True, help="do no plot during testing")
     args = parser.parse_args()
 
     if isinstance(args.train, str):
@@ -131,8 +136,7 @@ if __name__ == "__main__":
     kwargs = vars(args)
 
     train = kwargs.pop("train")
-    folder = kwargs.pop("dir")
-    folder = folder if folder else "./.checkpoints/CMA ppo"
+    folder = kwargs.pop("dir", "")
 
     config = kwargs.pop("config")
     multi_config = kwargs.pop("multi_config")
