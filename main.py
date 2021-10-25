@@ -1,6 +1,6 @@
 import argparse
 from agents import AgentBuilder
-from utils.plot_utils import plot_episodes, plot_experiment
+from utils.plot_utils import plot_episodes, plot_experiment, save_experiment
 from utils.config_utils import loadConfiguration, saveConfiguration
 from examples.configurations import ALL_CONFIGURATIONS
 import warnings
@@ -76,6 +76,8 @@ def test_multiple_times(agent_config, folder="./.checkpoints", **kwargs):
         experiment.append(agent.env.trajectory)
         agent.env.reset()
     title = agent_config["env.env_config"].get("solver_driver_args", "")[2]
+    if kwargs.get("save_exp", False):
+        save_experiment(experiment, folder)
     plot_experiment(experiment, title=title if isinstance(title, str) else "fitness")
 
 def create_folder_and_train(agent_config, folder, **kwargs):

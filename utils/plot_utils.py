@@ -1,9 +1,13 @@
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 from matplotlib.widgets import Button
-from matplotlib.ticker import (AutoMinorLocator, StrMethodFormatter)
+from matplotlib.ticker import AutoMinorLocator, StrMethodFormatter, ScalarFormatter, LinearLocator, LogLocator
 import numpy as np
-from os.path import exists, splitext, dirname
+from os.path import exists, splitext, dirname, isdir
 import json
+import pickle
+
+from numpy.lib.arraysetops import unique
 
 class plot_episodes:
 	def __init__(self) -> None:
@@ -108,8 +112,13 @@ class plot_episodes:
 		# 	self.ax.set_yscale(newscale)
 		# self.button.on_clicked(toggle_fun)
 
-def plot_experiment(experiment, title="", title_act="step size"):
-	fig, axs = plt.subplots(2, sharex=True)
+def plot_experiment(experiment, title="Plot Experiment", title_act="step size", logyscale=False, logxscale=True):
+	if isdir(experiment):
+		experiment = load_experiment(experiment)
+		
+	fig, axs = plt.subplots(2, sharex=True, figsize=(12,6))
+	fig.tight_layout()
+	fig.canvas.set_window_title(title)
 
 	length = len(experiment[0]["fitness"])
 	avg = np.empty(shape=[0,length])
@@ -134,22 +143,49 @@ def plot_experiment(experiment, title="", title_act="step size"):
 
 	# Top
 	axs[0].title.set_text(title)
-	if min_fit < 0:
-		shift = 1e-9
-		shifted_min_fit = min_fit - shift # to avoid log(0)
-		exp = lambda x: (2)**(x)+shifted_min_fit
-		log = lambda x: np.log(x-shifted_min_fit)/np.log(2)
-		axs[0].set_yscale('function', functions=(log, exp))
-		axs[0].set_yticks(np.geomspace(shift, max_fit-min_fit+shift, num=10)+min_fit-shift)
-		axs[0].yaxis.set_major_formatter(StrMethodFormatter('{x:,.3f}'))
+	if logyscale:
+		if min_fit < 0:
+			shift = 1e-9
+			shifted_min_fit = min_fit - shift # to avoid log(0)
+			exp = lambda x: (2)**(x)+shifted_min_fit
+			log = lambda x: np.log(x-shifted_min_fit)/np.log(2)
+			axs[0].set_yscale('function', functions=(log, exp))
+			axs[0].set_yticks(np.geomspace(shift, max_fit-min_fit+shift, num=10)+min_fit-shift)
+			axs[0].yaxis.set_major_formatter(StrMethodFormatter('{x:,.3f}'))
+		else:
+			axs[0].set_yscale("log", subs=[2,4,6,8])
 	else:
-		axs[0].set_yscale("log", subs=[2,4,6,8])
+		axs[0].set_yscale("linear")
+		axs[0].yaxis.set_minor_locator(AutoMinorLocator(2))
+	ticks = list(axs[0].get_yticks()) + [min_fit]
+	if logxscale:
+		axs[0].set_xscale("log")
+		axs[0].xaxis.set_major_formatter(ScalarFormatter())
+
+	# axs[0].set_yticks(ticks)
+	# axs[0].set_yticklabels([np.format_float_scientific(t, precision = 3, unique=True) for t in  ticks])
 	axs[0].grid(True, which="both")
+	axs[0].set_ylabel("fitness", labelpad=0)
 	axs[0].tick_params(axis='y', which="minor", grid_alpha=0.3)
+
+	# customization to match the paper's plots
+	axs[0].set_xticks([1,10,50,100,200,300,400,500])
+	axs[0].set_ylim((-5e5, 7e6))
+	axs[0].set_yticks([6000000,4000000,2000000,0])
+
 	# Bottom
-	axs[1].title.set_text(title_act)
 	axs[1].yaxis.set_minor_locator(AutoMinorLocator(2))
+	axs[1].set_xlabel("function evaluations", labelpad=0)
+	axs[1].set_ylabel(title_act, labelpad=0)
 	axs[1].grid(True, which="both")
 	axs[1].tick_params(axis='y', which="minor", grid_alpha=0.3)
 
 	plt.show()
+
+def save_experiment(experiment, folder):
+	with open(folder + '/experiment.bin', 'wb') as f:
+		pickle.dump(experiment, f)
+
+def load_experiment(folder):
+	with open(folder+"/experiment.bin", 'rb') as f:
+		return pickle.load(f)
