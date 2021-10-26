@@ -112,7 +112,7 @@ class plot_episodes:
 		# 	self.ax.set_yscale(newscale)
 		# self.button.on_clicked(toggle_fun)
 
-def plot_experiment(experiment, title="Plot Experiment", title_act="step size", logyscale=True, logxscale=True):
+def plot_experiment(experiment, title="Plot Experiment", title_act="step size", logyscale=True, logxscale=True, ylim=None):
 	if isinstance(experiment, str) and isdir(experiment):
 		experiment = load_experiment(experiment)
 
@@ -134,11 +134,11 @@ def plot_experiment(experiment, title="Plot Experiment", title_act="step size", 
 		max_fit = max(np.max(traj["fitness"]), max_fit)
 		popmin = np.min(traj["fitness"], axis=1)
 		popmax = np.max(traj["fitness"], axis=1)
-		avg = np.vstack([avg,popAvg])
+		avg = np.vstack([avg, popAvg])
 		x = np.array([*range(0,length)])*popLength
 		axs[0].fill_between(x, popmin, popmax, color="lightsteelblue", alpha=0.6) # darkorange alpha=0.15
 		axs[0].plot(x, popAvg, color="blue", alpha=0.4)
-		axs[1].plot(x[1:], actions, color="black", alpha=0.4)
+		axs[1].plot(x, actions, color="black", alpha=0.4)
 	axs[0].plot(x, np.average(avg, axis=0), color="red", alpha=0.8)
 
 	print("max value: {}".format(max_fit))
@@ -165,18 +165,19 @@ def plot_experiment(experiment, title="Plot Experiment", title_act="step size", 
 		axs[0].set_xscale("log")
 		axs[0].xaxis.set_major_formatter(ScalarFormatter())
 
+	axs[0].set_ylim((min_fit, max_fit))
 	axs[0].grid(True, which="both")
 	# axs[0].set_xticklabels(np.array([*range(0,50)])*10)
 	axs[0].set_ylabel("fitness", labelpad=0)
 	axs[0].tick_params(axis='y', which="minor", grid_alpha=0.3)
-	axs[0].set_ylim((min_fit, max_fit))
 	# axs[0].set_yticks(ticks)
 	# axs[0].set_yticklabels([np.format_float_scientific(t, precision = 3, unique=True) for t in  ticks])
 
 	# customization to match the paper's plots
-	# axs[0].set_xticks([10,100,200,300,400,500])
+	axs[0].set_xticks([10,100,200,300,400,500])
 	# axs[0].set_yticks([-50,-60,-70,-80,-90])
-	# axs[0].set_ylim((-95, -45))
+	if ylim:
+		axs[0].set_ylim(ylim)
 
 	# Bottom
 	axs[1].yaxis.set_minor_locator(AutoMinorLocator(2))

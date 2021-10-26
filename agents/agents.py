@@ -205,12 +205,11 @@ class RayProximalPolicyOptimization(RayAgent):
     registerRayAgent(__qualname__, __qualname__)
 
 
-from cma.sigma_adaptation import CMAAdaptSigmaCSA
 class RayCSA(RayAgent):
     name = "CSA"
     class CSAagent:
         def __init__(self, env=None, config=None) -> None:
-            self.adapt_sigma = CMAAdaptSigmaCSA()
+            pass
         def compute_single_action(self, obs):
             f_vals = obs[0][0] # first fitness history
             es = obs[1]["es"] # ES object of CMA's lib
@@ -219,7 +218,6 @@ class RayCSA(RayAgent):
             es.hsig = hsig
             delta = es.adapt_sigma.update2(es, function_values=f_vals)
             u *= delta
-            # print(obs)
             return {"step_size": u}
         def train(self):
             raise NotImplementedError()

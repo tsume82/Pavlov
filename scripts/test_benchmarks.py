@@ -1,9 +1,10 @@
-from benchmarks.utils import loadFunction
 from mpl_toolkits import mplot3d
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
-
+import sys
+sys.path.insert(1, "./")
+from benchmarks.utils import loadFunction
 """
 	Little tool to visualize 2D benchmark functions
 	example usage:

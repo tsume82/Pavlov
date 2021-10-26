@@ -1,6 +1,8 @@
-from metrics import *
 import numpy as np
 from pprint import pprint
+import sys
+sys.path.insert(1, "./")
+from metrics import *
 
 def testMetric(metric: Metric, iterations, pop=10, dim=5):
 	for i in range(iterations):

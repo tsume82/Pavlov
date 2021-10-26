@@ -1,6 +1,8 @@
-from drivers import RastriginGADriver, CMAdriver
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+sys.path.insert(1, "./")
+from drivers import RastriginGADriver, CMAdriver
 
 class plot_helper:
 	def __init__(self) -> None:

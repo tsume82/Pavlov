@@ -148,7 +148,7 @@ class CMAdriver(SolverDriver):
             "bounds": [self.lower_bound, self.upper_bound], # in the paper here they have [None, None]
             "AdaptSigma": True,
             "verb_disp": 0,
-            "seed": self.seed,
+            # "seed": self.seed,
         }
         self.reset()
 
@@ -190,10 +190,11 @@ class CMAdriver(SolverDriver):
         self.set_condition(condition)
         self.curr_step = 0
         # self.solutions = self.np_rng.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
-        self.solutions = np.random.randn(self.dim) # function used in the paper to initialize the candidates
+        # self.solutions = np.random.randn(self.dim)
+        self.solutions = [0]*self.dim
         self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)
-        self.es.mean_old = self.es.mean
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
+        self.es.mean_old = self.es.mean
         return (
             self.solutions,
             self.fitness,

@@ -11,6 +11,8 @@ from os.path import isfile, join, basename, isdir
 # environ["RAY_PICKLE_VERBOSE_DEBUG"] = "1"
 
 def getLastCheckpoint(folder):
+    if not isdir(folder):
+        return ""
     checkpoints = [f for f in listdir(folder) if isfile(join(folder, f)) and "checkpoint" in basename(f)]
     if len(checkpoints) == 0:
         print("There are no checkpoints in {}. No checkpoint is loaded".format(folder))
@@ -55,9 +57,10 @@ def test_agent(agent_config, folder="./.checkpoints", **kwargs):
     agent_config["agent.algorithm.render_env"] = kwargs.get("plot", True)
     agent_config["env.env_config"]["conditions"] = []
     agent = AgentBuilder.build(agent_config)
-    checkpoint = (
-        folder +"/"+checkpoint if checkpoint else folder+"/"+getLastCheckpoint(folder)
-    )
+    if checkpoint:
+        checkpoint = folder + "/" + checkpoint
+    else:
+        checkpoint = folder + "/" + getLastCheckpoint(folder)
     if isfile(checkpoint):
         agent.load(checkpoint)
     agent.act()
@@ -67,9 +70,10 @@ def test_multiple_times(agent_config, folder="./.checkpoints", **kwargs):
     agent_config["env.env_config"]["args"] = {"save_trajectory": True}
     agent_config["agent.algorithm.render_env"] = False
     agent = AgentBuilder.build(agent_config)
-    checkpoint = (
-        folder +"/"+checkpoint if checkpoint else folder+"/"+getLastCheckpoint(folder)
-    )
+    if checkpoint:
+        checkpoint = folder + "/" + checkpoint
+    else:
+        checkpoint = folder + "/" + getLastCheckpoint(folder)
     if isfile(checkpoint):
         agent.load(checkpoint)
     experiment = []
@@ -119,7 +123,7 @@ def main(agent_config, train=True, folder="./.checkpoints", **kwargs):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="launch the training/testing of an agent")
     parser.add_argument("train", nargs='?', type=str, default=True, help="train: '1', 'true' or 'train' for training mode, otherwise test mode is selected")
-    parser.add_argument("--dir", "-d", type=str, default=None, help="directory: the directory of the experiment")
+    parser.add_argument("--dir", "-d", type=str, default="", help="directory: the directory of the experiment")
     parser.add_argument("--multi", "-m", dest="num_runs", type=int, default=None, help="multiexperiment: run multiple runs of test")
     parser.add_argument("--max_ep", dest="max_episodes", type=int, help="max_episodes: maximum number of episodes in training", default=3000)
     parser.add_argument("--checkpoint", "-cp", dest="checkpoint", type=str, help="checkpoint: the name of the checkpoint file to test or training starting from that checkpoint. If no checkpoint is passed, automatically is choosen the last one during test", default=None)
@@ -136,7 +140,7 @@ if __name__ == "__main__":
     kwargs = vars(args)
 
     train = kwargs.pop("train")
-    folder = kwargs.pop("dir", "")
+    folder = kwargs.pop("dir")
 
     config = kwargs.pop("config")
     multi_config = kwargs.pop("multi_config")

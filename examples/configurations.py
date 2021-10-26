@@ -240,8 +240,9 @@ CSA_configuration = {
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
         "solver_driver": "CMAdriver",
-        # discus, ellipsoid, katsuura, rastrigin 2, rosenbrock, bent cigar, sphere
-        "solver_driver_args": [10, 10, "sphere", 1.63],
+        # functions -> [12, 11, 2, 23, 15, 8, 17, 20, 1, 16]
+        # init sigmas -> [1.28, 0.38, 1.54, 1.18, 0.1, 1.66, 0.33, 0.1, 1.63, 0.1]
+        "solver_driver_args": [10, 10, 23, 1.18],
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["FitnessHistory", "SolverState"],
