@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
+from matplotlib import rcParams, cm
 from matplotlib.widgets import Button
 from matplotlib.ticker import AutoMinorLocator, StrMethodFormatter, ScalarFormatter, LinearLocator, LogLocator
 import numpy as np
+from utils.array_utils import getScalar
 from os.path import exists, splitext, dirname, isdir
 import json
 import pickle
@@ -186,6 +187,115 @@ def plot_experiment(experiment, title="Plot Experiment", title_act="step size", 
 	axs[1].grid(True, which="both")
 	axs[1].tick_params(axis='y', which="minor", grid_alpha=0.3)
 
+	plt.show()
+
+def compare_experiments(experiment_list, experiment_names, logyscale=True, logxscale=True, ylim=None, cleanPlotMode=True):
+	fig, axs = plt.subplots(2, sharex=True, figsize=(12,6))
+	fig.tight_layout(rect=(0.06,0,1,0.98), h_pad=0)
+	fig.canvas.manager.set_window_title("compare experiments")
+	cmap = cm.get_cmap("tab20c")
+
+	for i, experiment in enumerate(experiment_list):
+		if isinstance(experiment, str) and isdir(experiment):
+			experiment_list[i] = load_experiment(experiment)
+
+	length = len(experiment_list[0][0]["fitness"])
+	popLength = len(experiment_list[0][0]["fitness"][0])
+	min_fit = np.inf
+	max_fit = -np.inf
+
+	for i, experiment in enumerate(experiment_list):
+		avg = np.empty(shape=[0,length])
+		all_actions = np.empty(shape=[0,length])
+		allPopAvg = np.empty(shape=[0,length])
+		min_traj = np.ones(shape=[length])*np.inf
+		max_traj = np.ones(shape=[length])*-np.inf
+		first_col = cmap(i*4)
+		second_col = cmap(i*4+1)
+		third_col = cmap(i*4+3)
+		for j, traj in enumerate(experiment):
+			actions = []
+			for step in traj["actions"]:
+				action = getScalar(step.get("step_size", None))
+				actions.append(action) # TODO handle different actions spaces
+
+			popAvg = np.average(traj["fitness"], axis=1)
+			min_fit = min(np.min(traj["fitness"]), min_fit)
+			max_fit = max(np.max(traj["fitness"]), max_fit)
+			min_traj = np.min([np.min(traj["fitness"], axis=1), min_traj], axis=0)
+			max_traj = np.max([np.max(traj["fitness"], axis=1), max_traj], axis=0)
+
+			avg = np.vstack([avg, popAvg])
+			all_actions = np.vstack([all_actions, actions])
+			allPopAvg = np.vstack([allPopAvg, popAvg])
+			
+			x = np.array([*range(0,length)])*popLength
+			label = experiment_names[i] if j==0 else None
+
+			if not cleanPlotMode:
+				popmin = np.min(traj["fitness"], axis=1)
+				popmax = np.max(traj["fitness"], axis=1)
+				axs[0].fill_between(x, popmin, popmax, color=third_col, alpha=0.6)
+				axs[0].plot(x, popAvg, color=first_col, alpha=0.4, label=label)
+				axs[1].plot(x, actions, color=first_col, alpha=0.4, label=label)
+
+		if cleanPlotMode:
+			# if i ==0:
+			axs[0].plot(x, np.average(avg, axis=0), color=first_col, label=experiment_names[i], lw=2, zorder=3*(i+1)+2)
+			axs[0].fill_between(x, np.min(allPopAvg, axis=0), np.max(allPopAvg, axis=0), color=second_col, alpha=1/(1+i), zorder=3*(i+1)+1)
+			axs[0].fill_between(x, min_traj, max_traj, color=third_col, alpha=1/(1+i), zorder=3*(i+1))
+			axs[1].plot(x, np.average(all_actions, axis=0), color=first_col, label=experiment_names[i], lw=2)
+			axs[1].fill_between(x, np.min(all_actions, axis=0), np.max(all_actions, axis=0), color=second_col, alpha=1/(1+i))
+		else:
+			axs[0].plot(x, np.average(avg, axis=0), color="red", alpha=0.8)
+		
+
+
+	print("max value: {}".format(max_fit))
+	print("min value: {}".format(min_fit))
+
+	# Top
+	if logyscale:
+		if min_fit < 0:
+			shift = 1e-9
+			shifted_min_fit = min_fit - shift # to avoid log(0)
+			exp = lambda x: (2)**(x)+shifted_min_fit
+			log = lambda x: np.log(x-shifted_min_fit)/np.log(2)
+			axs[0].set_yscale('function', functions=(log, exp))
+			axs[0].set_yticks(np.geomspace(shift, max_fit-min_fit+shift, num=10)+min_fit-shift)
+			axs[0].yaxis.set_major_formatter(StrMethodFormatter('{x:,.3f}'))
+		else:
+			axs[0].set_yscale("log", subs=[2,4,6,8])
+	else:
+		axs[0].set_yscale("linear")
+		axs[0].yaxis.set_minor_locator(AutoMinorLocator(2))
+	ticks = list(axs[0].get_yticks()) + [min_fit]
+	if logxscale:
+		axs[0].set_xscale("log")
+		axs[0].xaxis.set_major_formatter(ScalarFormatter())
+
+	axs[0].set_ylim((min_fit, max_fit))
+	axs[0].grid(True, which="both")
+	# axs[0].set_xticklabels(np.array([*range(0,50)])*10)
+	axs[0].set_ylabel("fitness", labelpad=0)
+	axs[0].tick_params(axis='y', which="minor", grid_alpha=0.3)
+	# axs[0].set_yticks(ticks)
+	# axs[0].set_yticklabels([np.format_float_scientific(t, precision = 3, unique=True) for t in  ticks])
+
+	# customization to match the paper's plots
+	axs[0].set_xticks([10,100,200,300,400,500])
+	# axs[0].set_yticks([-50,-60,-70,-80,-90])
+	if ylim:
+		axs[0].set_ylim(ylim)
+
+	# Bottom
+	axs[1].yaxis.set_minor_locator(AutoMinorLocator(2))
+	axs[1].set_xlabel("function evaluations", labelpad=0)
+	# axs[1].set_ylabel(title_act, labelpad=0)
+	axs[1].grid(True, which="both")
+	axs[1].tick_params(axis='y', which="minor", grid_alpha=0.3)
+
+	plt.legend()
 	plt.show()
 
 def save_experiment(experiment, folder):

@@ -3,6 +3,7 @@ from numpy.core.numeric import Inf
 from drivers import SolverDriver, registerDriver
 from abc import ABC, abstractmethod, ABCMeta
 from benchmarks.utils import loadFunction
+from utils.array_utils import getScalar
 import numpy as np
 import random
 import copy
@@ -155,10 +156,8 @@ class CMAdriver(SolverDriver):
     def step(self, command):
         self.es.tell(self.solutions, self.fitness)
 
-        # assign the sigma from RL model (the [0] is because for some reason ray convert the scalar to an array of shape (1,))
-        self.es.sigma = (
-            command["step_size"] if np.isscalar(command["step_size"]) else command["step_size"][0]
-        )  # TODO debug the action space
+        # assign the sigma from RL model (the "getScalar" is because for some reason ray convert the scalar to an array of shape (1,))
+        self.es.sigma = getScalar(command["step_size"]) # TODO debug the action space
 
         # xmean = command.get("xmean", None)
         # if xmean:
