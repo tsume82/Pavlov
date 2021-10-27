@@ -130,14 +130,16 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
 
 
 class CMAdriver(SolverDriver):
-    def __init__(
-        self, dim, pop_size, object_function="sphere", init_sigma=0.5, max_steps=None, seed=None
-    ) -> None:
+    def __init__(self, dim, pop_size, object_function="sphere", init_sigma=0.5, max_steps=None, seed=None) -> None:
         super().__init__()
         super().set_seed(seed)
         self.dim = dim
         self.pop_size = pop_size
-        self.obj_fun = object_function if not isinstance(object_function, (str, int)) else loadFunction(object_function, lib="cma")
+        self.obj_fun = (
+            object_function
+            if not isinstance(object_function, (str, int))
+            else loadFunction(object_function, lib="cma")
+        )
         self.max_steps = max_steps
         self.curr_step = 0
         self.lower_bound = None
@@ -146,7 +148,7 @@ class CMAdriver(SolverDriver):
         self.chi_N = dim ** 0.5 * (1 - 1.0 / (4.0 * dim) + 1.0 / (21.0 * dim ** 2))
         self.options = {
             "popsize": self.pop_size,
-            "bounds": [self.lower_bound, self.upper_bound], # in the paper here they have [None, None]
+            "bounds": [self.lower_bound, self.upper_bound],  # in the paper here they have [None, None]
             "AdaptSigma": True,
             "verb_disp": 0,
             # "seed": self.seed,
@@ -157,19 +159,15 @@ class CMAdriver(SolverDriver):
         self.es.tell(self.solutions, self.fitness)
 
         # assign the sigma from RL model (the "getScalar" is because for some reason ray convert the scalar to an array of shape (1,))
-        self.es.sigma = getScalar(command["step_size"]) # TODO debug the action space
-
-        # xmean = command.get("xmean", None)
-        # if xmean:
-        #     xmean = xmean if np.isscalar(xmean) else xmean[0]
+        self.es.sigma = getScalar(command["step_size"])  # TODO debug the action space
 
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
 
-        conjugate_evolution_path = (
-            np.sqrt(np.sum(np.square(self.es.adapt_sigma.ps))) / self.chi_N - 1
-        )  # one state in "Learning Step-Size Adaptation in CMA-ES" paper
+        # one state in "Learning Step-Size Adaptation in CMA-ES" paper
+        conjugate_evolution_path = np.sqrt(np.sum(np.square(self.es.adapt_sigma.ps))) / self.chi_N - 1
 
         self.curr_step += 1
+        
         return (
             self.solutions,
             self.fitness,
@@ -190,7 +188,7 @@ class CMAdriver(SolverDriver):
         self.curr_step = 0
         # self.solutions = self.np_rng.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.dim,))
         # self.solutions = np.random.randn(self.dim)
-        self.solutions = [0]*self.dim
+        self.solutions = [0] * self.dim
         self.es = cma.CMAEvolutionStrategy(self.solutions, self.init_sigma, self.options)
         self.solutions, self.fitness = self.es.ask_and_eval(self.obj_fun)
         self.es.mean_old = self.es.mean

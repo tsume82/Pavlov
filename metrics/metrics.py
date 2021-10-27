@@ -161,12 +161,12 @@ class DifferenceOfBest(Metric):
     name = "DifferenceOfBest"
     MetricProvider.register_metric(name, __qualname__)
 
-    def __init__(self, history_max_length=1, maximize=True, fitness_dim=1, normalize=True, normBetween0and1 = False):
+    def __init__(self, history_max_length=1, maximize=True, fitness_dim=1, normalize=True, normBetween0and1=False):
         self.prec_best = None
         self.maximize = maximize
         self.fitness_dim = fitness_dim
         self.normalize = normalize
-        self.normBetween0and1 = normBetween0and1 # it works only if ∀x ∈ fitness | x>0
+        self.normBetween0and1 = normBetween0and1  # it works only if ∀x ∈ fitness | x>0
         self.history_max_length = history_max_length
         self.history = []
 
@@ -176,15 +176,14 @@ class DifferenceOfBest(Metric):
             return [np.array(0)]
         else:
             curr_best = np.nanmax(fitness, axis=0) if self.maximize else np.nanmin(fitness, axis=0)
-            grad = (
-                curr_best - self.prec_best
-            )  # TODO set gradient sign based on the maximization/minimization problem?
+            # TODO set gradient sign based on the maximization/minimization problem?
+            grad = curr_best - self.prec_best
 
             if self.normalize:
                 if self.normBetween0and1:
-                    grad /= (np.amax([curr_best, self.prec_best])/1.99)
+                    grad /= np.amax([curr_best, self.prec_best]) / 1.99
                 else:
-                    grad /= curr_best
+                    grad /= self.prec_best
 
             self.history.insert(0, grad)
             if len(self.history) > self.history_max_length:
@@ -378,7 +377,7 @@ class AvgPosition(Metric):
     name = "AvgPosition"
     MetricProvider.register_metric(name, __qualname__)
 
-    def __init__(self, dim, bounds = {"max":np.inf, "min":-np.inf}, withVariance=False) -> None:
+    def __init__(self, dim, bounds={"max": np.inf, "min": -np.inf}, withVariance=False) -> None:
         self.dim = dim
         self.bounds = bounds
         self.withVariance = withVariance
@@ -386,10 +385,12 @@ class AvgPosition(Metric):
     def get_space(self):
         if not self.withVariance:
             return spaces.Box(low=self.bounds["min"], high=self.bounds["max"], shape=([self.dim]))
-        return spaces.Tuple([
-            spaces.Box(low=self.bounds["min"], high=self.bounds["max"], shape=([self.dim])),
-            spaces.Box(low=-50, high=50, shape=([self.dim]))
-            ])
+        return spaces.Tuple(
+            [
+                spaces.Box(low=self.bounds["min"], high=self.bounds["max"], shape=([self.dim])),
+                spaces.Box(low=-50, high=50, shape=([self.dim])),
+            ]
+        )
 
     def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
         if not self.withVariance:
@@ -398,7 +399,6 @@ class AvgPosition(Metric):
 
     def reset(self) -> None:
         pass
-
 
 
 # build up MetricProvider registered metrics class types
