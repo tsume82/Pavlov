@@ -151,10 +151,10 @@ ppo_configuration = {
     "agent.algorithm.render_env": False,
     "agent.algorithm.num_workers": 0,
     "agent.algorithm.batch_mode": "complete_episodes",
-    # "agent.algorithm.lr": 1e-7,
+    "agent.algorithm.lr": 1e-5,
     "agent.algorithm.train_batch_size": 200,
     "agent.algorithm.optimizer": "Adam",
-    "agent.algorithm.vf_clip_param": 5000,
+    "agent.algorithm.vf_clip_param": 2e5,
     "agent.algorithm.model": {
         "fcnet_activation": "tanh",
         "fcnet_hiddens": [30, 30],
@@ -162,12 +162,11 @@ ppo_configuration = {
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
         "solver_driver": "CMAdriver",
-        # discus, ellipsoid, katsuura, rastrigin 2, rosenbrock, bent cigar, sphere
-        "solver_driver_args": [10, 10, "discus"],
+        "solver_driver_args": [10, 10, 2, 1.54],
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "SolverState"],
-        "state_metrics_config": [(40, False, 1, True, False), ({"step_size": {"max": 3, "min": 0}},)],
+        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
+        "state_metrics_config": [(40, False, 1, True, False), ({"step_size": {"max": 3, "min": 0}}, 40)],
         "reward_metric": "Best",
         "reward_metric_config": [False, False],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
         "memes_no": 1,
@@ -254,13 +253,14 @@ CSA_configuration = {
 
 
 # A way to get a list of equal configurations with some difference on some parameter
+# ["BentCigar", "Discus", "Ellipsoid", "Katsuura", "Rastrigin", "Rosenbrock", "Schaffers", "Schwefel", "Sphere", "Weierstrass"]
 all_ppo_configurations = [
     update_and_return(
         ppo_configuration_2,
         {"env.env_config": {"solver_driver_args": [10, 10, fun, sigma_init]}, "agent.algorithm.vf_clip_param": clip},
     )
     for clip, fun, sigma_init in zip(
-        [1e7, 10000, 1e5, 100, 100, 1e4, 10, 5000, 50, 100],
+        [1e7, 10000, 2e5, 100, 100, 1e4, 10, 5000, 50, 100],
         [12, 11, 2, 23, 15, 8, 17, 20, 1, 16],
         [1.28, 0.38, 1.54, 1.18, 0.1, 1.66, 0.33, 0.1, 1.63, 0.1],
     )

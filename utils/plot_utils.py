@@ -122,7 +122,7 @@ class plot_episodes:
 def plot_experiment(
     experiment, title="Plot Experiment", title_act="step size", logyscale=True, logxscale=True, ylim=None
 ):
-    if isinstance(experiment, str) and isdir(experiment):
+    if isinstance(experiment, str):
         experiment = load_experiment(experiment)
 
     fig, axs = plt.subplots(2, sharex=True, figsize=(12, 6))
@@ -215,7 +215,7 @@ def compare_experiments(
 	cmap = cm.get_cmap("tab20c")
 
 	for i, experiment in enumerate(experiment_list):
-		if isinstance(experiment, str) and isdir(experiment):
+		if isinstance(experiment, str):
 			experiment_list[i] = load_experiment(experiment)
 
 	length = len(experiment_list[0][0]["fitness"])
@@ -399,11 +399,14 @@ def compute_metrics_comparison(experiment_list, metric="AUC"):
 	return prob
 
 
-def save_experiment(experiment, folder):
-    with open(folder + "/experiment.bin", "wb") as f:
+def save_experiment(experiment, folder, name="experiment"):
+    name = name if isinstance(name, str) else "experiment"
+    with open(folder + "/{}.bin".format(name), "wb") as f:
         pickle.dump(experiment, f)
 
 
-def load_experiment(folder):
-    with open(folder + "/experiment.bin", "rb") as f:
+def load_experiment(dir_or_file):
+    if isdir(dir_or_file):
+        dir_or_file = dir_or_file + "/experiment.bin"
+    with open(dir_or_file, "rb") as f:
         return pickle.load(f)

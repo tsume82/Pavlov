@@ -87,7 +87,7 @@ def test_multiple_times(agent_config, folder="./.checkpoints", **kwargs):
         agent.env.reset()
     title = agent_config["env.env_config"].get("solver_driver_args", "")[2]
     if kwargs.get("save_exp", False):
-        save_experiment(experiment, folder)
+        save_experiment(experiment, folder, name=kwargs["save_exp"])
     if kwargs.get("plot", True):
         plot_experiment(experiment, title=title if isinstance(title, str) else "fitness")
 
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     parser.add_argument("--ep_to_cp", dest="episodes_to_checkpoint", type=int, help="episodes_to_checkpoint: the number of episodes before saving a checkpoint", default=3000)
     parser.add_argument("--config","-c", nargs="?", default=False, const=True, help="config: the configuraton file of the experiment, if the flag has no arguments the config.json file in the experiment directory is used")
     parser.add_argument("--multi-config","-mc", dest="multi_config", default=None, help="multi config: test or train from multiple configurations")
-    parser.add_argument("--save", "-s", dest="save_exp", action="store_true", default=False, help="save the experiment")
+    parser.add_argument("--save", "-s", dest="save_exp", nargs="?", default=False, const=True, help="save the experiment")
     parser.add_argument("--noplot", "-np", dest="plot", action="store_false", default=True, help="do no plot during testing")
     args = parser.parse_args()
 
