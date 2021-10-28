@@ -32,12 +32,12 @@ class plot_episodes:
         plt.close()
 
     def save(self, path, infos, info_file_name=None):
-        i = 1
         splitted_path = splitext(path)
-        path = splitted_path[0] + "_" + str(i) + splitted_path[1]
-        while exists(path):
-            i += 1
-            path = splitted_path[0] + "_" + str(i) + splitted_path[1]
+        # i = 1
+        # path = splitted_path[0] + "_" + str(i) + splitted_path[1]
+        # while exists(path):
+        #     i += 1
+        #     path = splitted_path[0] + "_" + str(i) + splitted_path[1]
 
         formatted_infos = json.dumps(infos, skipkeys=True)
         if info_file_name and isinstance(info_file_name, str):
@@ -211,6 +211,7 @@ def compare_experiments(
 	fig, axs = plt.subplots(2, sharex=True, figsize=(12, 6))
 	fig.tight_layout(rect=(0.06, 0, 1, 0.98), h_pad=0)
 	fig.canvas.manager.set_window_title(title)
+	action_axis_label = "step size"
 	cmap = cm.get_cmap("tab20c")
 
 	for i, experiment in enumerate(experiment_list):
@@ -318,7 +319,7 @@ def compare_experiments(
 	# Bottom
 	axs[1].yaxis.set_minor_locator(AutoMinorLocator(2))
 	axs[1].set_xlabel("function evaluations", labelpad=0)
-	# axs[1].set_ylabel(title_act, labelpad=0)
+	axs[1].set_ylabel(action_axis_label, labelpad=0)
 	axs[1].grid(True, which="both")
 	axs[1].tick_params(axis="y", which="minor", grid_alpha=0.3)
 
