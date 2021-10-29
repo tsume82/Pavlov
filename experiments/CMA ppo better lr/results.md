@@ -4,16 +4,16 @@ Probability of PPO trained policy outperforming CSA using 2 different metrics: A
 
 | Function    | $p(PPO < CSA)$ with AUC metric | $p(PPO < CSA)$ with best metric |
 | :---------- | ------------------------------ | ------------------------------- |
-| bentcigar   | 0.15                           | 0.41                            |
-| discus      | 0.0012                         | 0.0884                          |
-| ellipsoid   | 0.10                           | 0.23                            |
-| katsuura    | 0.01                           | 0.42                            |
-| rastrigin   | 0.98                           | 0.96                            |
-| rosenbrock  | 0.49                           | 0.12                            |
-| schaffers   | 0.03                           | 0.59                            |
-| schwefel    | 0.87                           | 0.73                            |
+| bentcigar   | 0.65                           | 0.02                            |
+| discus      | 0.003                          | 0.15                            |
+| ellipsoid   | 0.83                           | 0.61                            |
+| katsuura    | 0.01                           | 0.44                            |
+| rastrigin   | 1                              | 0.985                           |
+| rosenbrock  | 0.62                           | 0.16                            |
+| schaffers   | 0.51                           | 0.61                            |
+| schwefel    | 0.99                           | 0.74                            |
 | sphere      | 0.0                            | 0.0                             |
-| weierstrass | 0.0                            | 0.02                            |
+| weierstrass | 0.0                            | 0.01                            |
 
 ## Plots
 

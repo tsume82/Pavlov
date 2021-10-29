@@ -256,7 +256,7 @@ CSA_configuration = {
 # ["BentCigar", "Discus", "Ellipsoid", "Katsuura", "Rastrigin", "Rosenbrock", "Schaffers", "Schwefel", "Sphere", "Weierstrass"]
 all_ppo_configurations = [
     update_and_return(
-        ppo_configuration_2,
+        ppo_configuration,
         {"env.env_config": {"solver_driver_args": [10, 10, fun, sigma_init]}, "agent.algorithm.vf_clip_param": clip},
     )
     for clip, fun, sigma_init in zip(
