@@ -154,7 +154,7 @@ ppo_configuration = {
     "agent.algorithm.lr": 1e-5,
     "agent.algorithm.train_batch_size": 200,
     "agent.algorithm.optimizer": "Adam",
-    "agent.algorithm.vf_clip_param": 2e5,
+    "agent.algorithm.vf_clip_param": 50,
     "agent.algorithm.model": {
         "fcnet_activation": "tanh",
         "fcnet_hiddens": [30, 30],
@@ -162,7 +162,7 @@ ppo_configuration = {
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
         "solver_driver": "CMAdriver",
-        "solver_driver_args": [10, 10, 2, 1.54],
+        "solver_driver_args": [10, 10, 1, 1.63],
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
@@ -206,24 +206,51 @@ ppo_configuration_2 = {
 pg_configuration = {
     "agent.algorithm": "RayPolicyGradient",
     "agent.algorithm.render_env": False,
+    "agent.algorithm.num_workers": 0,
     "agent.algorithm.batch_mode": "complete_episodes",
-    "agent.algorithm.lr": 0.001,
-    "agent.algorithm.train_batch_size": 1000,
+    "agent.algorithm.lr": 1e-4,
+    "agent.algorithm.train_batch_size": 200,
     "agent.algorithm.optimizer": "Adam",
-    "agent.algorithm.vf_clip_param": 1000,
     "agent.algorithm.model": {
-        "fcnet_activation": "relu",
-        "fcnet_hiddens": [50, 50],
+        "fcnet_activation": "tanh",
+        "fcnet_hiddens": [30, 30],
     },
-    "env.env_class": SchedulerPolicyRayEnvironment,
+    "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
-        "solver_driver": CMAdriver(10, 6, object_function=functions.rastrigin),
+        "solver_driver": "CMAdriver",
+        "solver_driver_args": [10, 10, 1, 1.63, None, 42],
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
-        "state_metrics_config": [
-            (40, False),
-        ],
+        "state_metrics_config": [(40, False, 1, True, False), ({"step_size": {"max": 3, "min": 0}}, 40)],
+        "reward_metric": "Best",
+        "reward_metric_config": [False, False],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
+        "memes_no": 1,
+        "action_space_config": {"step_size": {"max": 3, "min": 1e-10}},
+    },
+}
+
+appo_configuration = {
+    "agent.algorithm": "RayAsyncProximalPolicyOptimization",
+    "agent.algorithm.render_env": False,
+    # "agent.algorithm.num_workers": 0,
+    # "agent.algorithm.batch_mode": "complete_episodes",
+    "agent.algorithm.lr": 1e-5,
+    "agent.algorithm.train_batch_size": 200,
+    "agent.algorithm.optimizer": "Adam",
+    # "agent.algorithm.vf_clip_param": 2e5,
+    "agent.algorithm.model": {
+        "fcnet_activation": "tanh",
+        "fcnet_hiddens": [30, 30],
+    },
+    "env.env_class": "SchedulerPolicyRayEnvironment",
+    "env.env_config": {
+        "solver_driver": "CMAdriver",
+        "solver_driver_args": [10, 10, 1, 1.54],
+        "maximize": False,
+        "steps": 50,
+        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
+        "state_metrics_config": [(40, False, 1, True, False), ({"step_size": {"max": 3, "min": 0}}, 40)],
         "reward_metric": "Best",
         "reward_metric_config": [False, False],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
         "memes_no": 1,

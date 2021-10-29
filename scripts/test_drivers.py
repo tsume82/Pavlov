@@ -46,17 +46,17 @@ class plot_helper:
 		return max_fitness, min_fitness, average_fitness
 
 if __name__ == "__main__":
-	driver = CMAdriver(10, 10, init_sigma=0.5, object_function="rastrigin")
+	driver = CMAdriver(10, 10, init_sigma=1.63, object_function=1, max_steps=None, seed=42)
 	driver.initialize()
 	driver.reset()
 	p=plot_helper()
 	for i in range(100):
-		pop, fit, _ = driver.step([0,0.1])
-		# maximum, minimum, avg = p.plot(i, fit)
-		driver.render(i==99)
+		pop, fit, _ = driver.step({"step_size": 0.5})
+		maximum, minimum, avg = p.plot(i, fit)
+		# driver.render(i==99)
 
-	# print("Max:\t",maximum)
-	# print("Min:\t",minimum)
-	# print("Avg:\t",avg)
+	print("Max:\t",maximum)
+	print("Min:\t",minimum)
+	print("Avg:\t",avg)
 	plt.ioff()
 	plt.show()

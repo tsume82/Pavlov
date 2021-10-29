@@ -198,10 +198,15 @@ class RayGuidedPolicySearch(RayAgent):
     agent_class = GuidedPolicySearch
     registerRayAgent(__qualname__, __qualname__)
 
-from ray.rllib.agents.ppo import PPOTrainer
+from ray.rllib.agents.ppo import PPOTrainer, APPOTrainer
 class RayProximalPolicyOptimization(RayAgent):
     name = "Proximal Policy Optimization"
     agent_class = PPOTrainer
+    registerRayAgent(__qualname__, __qualname__)
+
+class RayAsyncProximalPolicyOptimization(RayAgent):
+    name = "Async Proximal Policy Optimization"
+    agent_class = APPOTrainer
     registerRayAgent(__qualname__, __qualname__)
 
 
