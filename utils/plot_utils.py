@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 from matplotlib import rcParams, cm
-from matplotlib.widgets import Button
 from matplotlib.ticker import AutoMinorLocator, StrMethodFormatter, ScalarFormatter, LinearLocator, LogLocator
 import numpy as np
 from numpy.matrixlib.defmatrix import matrix
@@ -9,7 +8,7 @@ from os.path import exists, splitext, dirname, isdir
 import json
 import pickle
 
-from numpy.lib.arraysetops import unique
+rcParams["font.size"] = 16
 
 
 class plot_episodes:
