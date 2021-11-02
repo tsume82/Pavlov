@@ -156,8 +156,8 @@ ppo_configuration = {
     "agent.algorithm.optimizer": "Adam",
     "agent.algorithm.vf_clip_param": 50,
     "agent.algorithm.model": {
-        "fcnet_activation": "tanh",
-        "fcnet_hiddens": [30, 30],
+        "fcnet_activation": "relu",
+        "fcnet_hiddens": [50, 50],
     },
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
@@ -165,12 +165,16 @@ ppo_configuration = {
         "solver_driver_args": [10, 10, 1, 1.63],
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
-        "state_metrics_config": [(40, False, 1, True, False), ({"step_size": {"max": 3, "min": 0}}, 40)],
+        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverState"],
+        "state_metrics_config": [
+            (40, False, 1, True, False),
+            ({"step_size": {"max": 3, "min": 0}}, 40),
+            ({"ps": {"max": 10, "min": -10}},),
+        ],
         "reward_metric": "Best",
-        "reward_metric_config": [False, False],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
+        "reward_metric_config": [False, True],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
         "memes_no": 1,
-        "action_space_config": {"step_size": {"max": 3, "min": 1e-10}},
+        "action_space_config": {"step_size": {"max": 3, "min": 0.05}},
     },
 }
 ppo_configuration_2 = {
@@ -178,25 +182,22 @@ ppo_configuration_2 = {
     "agent.algorithm.render_env": False,
     "agent.algorithm.num_workers": 0,
     "agent.algorithm.batch_mode": "complete_episodes",
+    "agent.algorithm.lr": 1e-5,
     "agent.algorithm.train_batch_size": 200,
     "agent.algorithm.optimizer": "Adam",
-    "agent.algorithm.vf_clip_param": 100,
+    "agent.algorithm.vf_clip_param": 2e5,
     "agent.algorithm.model": {
         "fcnet_activation": "tanh",
-        "fcnet_hiddens": [50, 50],
+        "fcnet_hiddens": [30, 30],
     },
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
         "solver_driver": "CMAdriver",
-        "solver_driver_args": [10, 10, 16, 0.1],
+        "solver_driver_args": [10, 10, 2, 1.54],
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverState"],
-        "state_metrics_config": [
-            (40, False, 1, True),
-            ({"step_size": {"max": 3, "min": 0}}, 40),
-            ({"ps": {"max": 10, "min": -10}},),
-        ],
+        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
+        "state_metrics_config": [(40, False, 1, True, False), ({"step_size": {"max": 3, "min": 0}}, 40)],
         "reward_metric": "Best",
         "reward_metric_config": [False, False],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
         "memes_no": 1,
@@ -287,9 +288,9 @@ all_ppo_configurations = [
         {"env.env_config": {"solver_driver_args": [10, 10, fun, sigma_init]}, "agent.algorithm.vf_clip_param": clip},
     )
     for clip, fun, sigma_init in zip(
-        [1e7, 10000, 2e5, 100, 100, 1e4, 10, 5000, 50, 100],
-        [12, 11, 2, 23, 15, 8, 17, 20, 1, 16],
-        [1.28, 0.38, 1.54, 1.18, 0.1, 1.66, 0.33, 0.1, 1.63, 0.1],
+		[1e7, 10000, 2e5, 100, 100, 1e4, 10, 5000, 50, 100],
+		[12, 11, 2, 23, 15, 8, 17, 20, 1, 16],
+		[1.28, 0.38, 1.54, 1.18, 0.1, 1.66, 0.33, 0.1, 1.63, 0.1],
     )
 ]
 
