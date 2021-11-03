@@ -2,7 +2,6 @@ import argparse
 from agents import AgentBuilder
 from utils.plot_utils import plot_episodes, plot_experiment, save_experiment
 from utils.config_utils import loadConfiguration, saveConfiguration
-from examples.configurations import ALL_CONFIGURATIONS
 import warnings
 warnings.filterwarnings("ignore")
 
