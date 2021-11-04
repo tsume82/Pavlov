@@ -9,7 +9,7 @@ import random
 import copy
 import math
 import cma
-
+import pygmo
 
 class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
 	def __init__(self, dim, pop_dim, max_gen=50):
@@ -220,5 +220,62 @@ class CMAdriver(SolverDriver):
 		)
 
 
+class DEdriver(SolverDriver):
+	"""
+		Differential Evolution driver
+
+		mutation_variant: 	1 - best/1/exp,
+							2 - rand/1/exp,
+							3 - rand-to-best/1/exp,
+							4 - best/2/exp,
+							5 - rand/2/exp,
+							6 - best/1/bin,
+							7 - rand/1/bin,
+							8 - rand-to-best/1/bin,
+							9 - best/2/bin,
+							10 - rand/2/bin
+	"""
+	def __init__(self, dim, pop_size, object_function="sphere", mutation_variant = 2, F_init = 0.8, CR_init = 0.9) -> None:
+		super().__init__()
+		self.dim = dim
+		self.pop_size = pop_size
+		self.variant = mutation_variant
+		self.F_init = F_init
+		self.CR_init = CR_init
+		self.obj_fun = (
+			object_function
+			if not isinstance(object_function, (str, int))
+			else loadFunction(object_function, lib="cma")
+		)
+
+	
+	def step(self, command):
+		F = getScalar(command["F"])
+		CR = getScalar(command["CR"])
+
+		DEalg = pygmo.de(gen = 1, F=F, CR=CR, variant=self.variant)
+		self.algorithm = pygmo.algorithm(DEalg)
+		self.solutions = self.algorithm.evolve(self.solutions)
+
+		return
+
+	def is_done(self):
+		pass
+
+	def reset(self):
+		super().reset()
+		# DEalg = pygmo.de(gen = 1, F=self.F_init, CR=self.CR_init, variant=self.variant)
+		# self.algorithm = pygmo.algorithm(DEalg)
+		self.solutions = pygmo.population(self.obj_fun, self.dim)
+		return
+
+	def initialized(self):
+		return True
+
+	def  initialize(self):
+		pass
+
+
 registerDriver("RastriginGADriver", RastriginGADriver)
 registerDriver("CMAdriver", CMAdriver)
+registerDriver("DEdriver", DEdriver)

@@ -14,9 +14,11 @@ def loadConfiguration(config: str):
 	if isfile(config):
 		with open(config, "r") as f:
 			agent_config = json.load(f)
+			print("loaded '{}' configuration".format(config))
 	elif isfile(config + "/config.json"):
 		with open(config + "/config.json", "r") as f:
 			agent_config = json.load(f)
+			print("loaded '{}' configuration".format(config + "/config.json"))
 	else:
 		agent_config = ALL_CONFIGURATIONS[config]
 	return agent_config

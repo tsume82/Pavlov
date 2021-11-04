@@ -382,6 +382,7 @@ def compare_experiments(
 		fig.savefig(save + "/{}.png".format(title))
 	else:
 		plt.show()
+	return auc, final_best
 
 
 def getBestDuringRun(fitness):

@@ -98,7 +98,7 @@ def create_folder_and_train(agent_config, folder, **kwargs):
         if len(dirs) == 0:
             next = "/1"
         else:
-            next = "/"+str(int(max(dirs))+1)
+            next = "/"+str(max([int(d) for d in dirs])+1)
         makedirs(folder+next)
         train_agent(agent_config, folder+next, **kwargs)
 

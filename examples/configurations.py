@@ -30,7 +30,6 @@ rl_configuration_1 = {
         "maximize": False,
     },
 }
-
 rl_configuration_2 = {
     "agent.algorithm": "RayPolicyGradient",
     "agent.algorithm.framework": "tf",
@@ -50,8 +49,7 @@ rl_configuration_2 = {
         "action_space_config": None,
     },
 }
-# Bad for rastrigin like functions
-paper_cma_es_configuration = {
+pg_cma_es_configuration = {
     "agent.algorithm": "RayPolicyGradient",
     "agent.algorithm.render_env": False,
     "agent.algorithm.batch_mode": "complete_episodes",
@@ -79,74 +77,7 @@ paper_cma_es_configuration = {
         "action_space_config": {"step_size": {"max": 1, "min": 1e-10}},
     },
 }
-paper_cma_es_configuration_2 = {
-    "agent.algorithm": "RayPolicyGradient",
-    "agent.algorithm.render_env": False,
-    "agent.algorithm.batch_mode": "complete_episodes",
-    "agent.algorithm.lr": 0.001,
-    "agent.algorithm.train_batch_size": 200,
-    "agent.algorithm.optimizer": "Adam",
-    "agent.algorithm.model": {
-        "fcnet_activation": "relu",
-        "fcnet_hiddens": [50, 50],
-    },
-    "env.env_class": SchedulerPolicyRayEnvironment,
-    "env.env_config": {
-        "solver_driver": CMAdriver(10, 6, object_function=functions.rastrigin),
-        "maximize": False,
-        "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest"],
-        "state_metrics_config": [(40, True)],
-        "reward_metric": "Best",
-        "reward_metric_config": [False],
-        "memes_no": 1,
-        "action_space_config": {"step_size": {"max": 1, "min": 1e-10}},
-    },
-}
-paper_cma_es_configuration_with_conditions = {
-    "agent.algorithm": "RayPolicyGradient",
-    "agent.algorithm.render_env": False,
-    "agent.algorithm.batch_mode": "complete_episodes",
-    "agent.algorithm.lr": 0.001,
-    "agent.algorithm.train_batch_size": 1000,
-    "agent.algorithm.optimizer": "Adam",
-    "agent.algorithm.model": {
-        "fcnet_activation": "relu",
-        "fcnet_hiddens": [50, 50],
-    },
-    "env.env_class": SchedulerPolicyRayEnvironment,
-    "env.env_config": {
-        "solver_driver": CMAdriver(10, 6, object_function=functions.rastrigin),
-        "maximize": False,
-        "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverState"],
-        "state_metrics_config": [
-            (40, True),
-            ({"step_size": {"max": 1, "min": 1e-10}}, 40),
-            ({"ps": {"max": 10, "min": -10}},),
-        ],
-        "reward_metric": "Best",
-        "reward_metric_config": [False],
-        "memes_no": 1,
-        "action_space_config": {"step_size": {"max": 1, "min": 1e-10}},
-        "conditions": [
-            {"dim": 5, "init_sigma": 0.5},
-            {"dim": 10, "init_sigma": 0.5},
-            {"dim": 15, "init_sigma": 0.5},
-            {"dim": 20, "init_sigma": 0.5},
-            {"dim": 25, "init_sigma": 0.5},
-            {"dim": 30, "init_sigma": 0.5},
-            {"dim": 5, "init_sigma": 1.0},
-            {"dim": 10, "init_sigma": 1.0},
-            {"dim": 15, "init_sigma": 1.0},
-            {"dim": 20, "init_sigma": 1.0},
-            {"dim": 25, "init_sigma": 1.0},
-            {"dim": 30, "init_sigma": 1.0},
-        ],
-    },
-}
-# No paper based
-ppo_configuration = {
+ppo_cma_es_configuration = {
     "agent.algorithm": "RayProximalPolicyOptimization",
     "agent.algorithm.render_env": False,
     "agent.algorithm.num_workers": 0,
@@ -182,7 +113,7 @@ ppo_configuration = {
         "action_space_config": {"step_size": {"max": 3, "min": 1e-10}},
     },
 }
-ppo_configuration_2 = {
+ppo_de_configuration = {
     "agent.algorithm": "RayProximalPolicyOptimization",
     "agent.algorithm.render_env": False,
     "agent.algorithm.num_workers": 0,
@@ -194,8 +125,8 @@ ppo_configuration_2 = {
     "agent.algorithm.model": {"fcnet_activation": "tanh", "fcnet_hiddens": [30, 30]},
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
-        "solver_driver": "CMAdriver",
-        "solver_driver_args": [20, 10, 6, 0.5],
+        "solver_driver": "DEdriver",
+        "solver_driver_args": [10, 10, 6, 2],
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
@@ -203,7 +134,7 @@ ppo_configuration_2 = {
         "reward_metric": "Best",
         "reward_metric_config": [False, False],
         "memes_no": 1,
-        "action_space_config": {"step_size": {"max": 3, "min": 1e-10}},
+        "action_space_config": {"F": {"max": 2, "min": 1e-10}, "CR": {"max": 1, "min": 0}},
     },
 }
 pg_configuration = {
@@ -232,7 +163,6 @@ pg_configuration = {
         "action_space_config": {"step_size": {"max": 3, "min": 1e-10}},
     },
 }
-
 appo_configuration = {
     "agent.algorithm": "RayAsyncProximalPolicyOptimization",
     "agent.algorithm.render_env": False,
@@ -260,7 +190,6 @@ appo_configuration = {
         "action_space_config": {"step_size": {"max": 3, "min": 1e-10}},
     },
 }
-
 CSA_configuration = {
     "agent.algorithm": "RayCSA",
     "agent.algorithm.render_env": False,
@@ -286,7 +215,7 @@ CSA_configuration = {
 # ["BentCigar", "Discus", "Ellipsoid", "Katsuura", "Rastrigin", "Rosenbrock", "Schaffers", "Schwefel", "Sphere", "Weierstrass"]
 all_ppo_configurations = [
     update_and_return(
-        ppo_configuration,
+        ppo_cma_es_configuration,
         {
             "env.env_config": {"solver_driver_args": [10, 10, fun, sigma_init]},
             "agent.algorithm.vf_clip_param": clip,
@@ -300,18 +229,21 @@ all_ppo_configurations = [
 ]
 
 # ["AttractiveSector", "BuecheRastrigin", "CompositeGR", "DifferentPowers", "LinearSlope", "SharpRidge", "StepEllipsoidal", "RosenbrockRotated", "SchaffersIllConditioned","LunacekBiR", "GG101me", "GG21hi"]
+# [1e3, 1e4, 1e5, 10, 100, 1000, 10, 10, 100, 10, 100, 1000, 10, 50, 100, 100, 200, 500, 1e3, 5e3, 1e4, 10, 20, 50, 100, 1000, 5000, 100, 200, 1000, 100, 500, 1000, 100, 500, 1000],
+# [6, 6, 6, 4, 4, 4, 19, 19, 19, 14, 14, 14, 5, 5, 5, 13, 13, 13, 7, 7, 7, 9, 9, 9, 18, 18, 18, 24, 24, 24, 21, 21, 21, 22, 22, 22],
+# [5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20],
 extended_ppo_configurations = [
     update_and_return(
-        ppo_configuration_2,
+        ppo_cma_es_configuration,
         {
             "env.env_config": {"solver_driver_args": [dim, 10, fun, 0.5]},
             "agent.algorithm.vf_clip_param": clip,
         },
     )
     for clip, fun, dim in zip(
-        [1e3, 1e4, 1e5, 10, 100, 1000, 10, 10, 100, 10, 100, 1000, 10, 50, 100, 100, 200, 500, 1e3, 5e3, 1e4, 10, 20, 50, 100, 1000, 5000, 100, 200, 1000, 100, 500, 1000, 100, 500, 1000],
-        [6, 6, 6, 4, 4, 4, 19, 19, 19, 14, 14, 14, 5, 5, 5, 13, 13, 13, 7, 7, 7, 9, 9, 9, 18, 18, 18, 24, 24, 24, 21, 21, 21, 22, 22, 22],
-        [5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20],
+        [1000, 100, 500, 1000],
+        [21, 22, 22, 22],
+        [20, 5, 10, 20],
     )
 ]
 
