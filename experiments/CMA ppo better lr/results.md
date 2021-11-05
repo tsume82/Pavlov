@@ -19,40 +19,40 @@ Probability of PPO trained policy outperforming CSA using 2 different metrics: A
 
 ##### Bent Cigar
 
-![](bentcigar/bent cigar function comparison.png)
+![](bentcigar/bent_cigar_function_comparison.png)
 
 ##### Discus
 
-![](discus/discus function comparison.png)
+![](discus/discus_function_comparison.png)
 
 ##### Ellipsoid
 
-![](ellipsoid/ellipsoid function comparison.png)
+![](ellipsoid/ellipsoid_function_comparison.png)
 
 ##### Katsuura
 
-![](katsuura/katsuura function comparison.png)
+![](katsuura/katsuura_function_comparison.png)
 
 ##### Rastrigin
 
-![](rastrigin/rastrigin function comparison.png)
+![](rastrigin/rastrigin_function_comparison.png)
 
 ##### Rosenbrock
 
-![](rosenbrock/rosenbrock function comparison.png)
+![](rosenbrock/rosenbrock_function_comparison.png)
 
 ##### Schaffers
 
-![](schaffers/schaffers function comparison.png)
+![](schaffers/schaffers_function_comparison.png)
 
 ##### Schwefel
 
-![](schwefel/schwefel function comparison.png)
+![](schwefel/schwefel_function_comparison.png)
 
 ##### Sphere
 
-![](sphere/sphere function comparison.png)
+![](sphere/sphere_function_comparison.png)
 
 ##### Weierstrass
 
-![](weierstrass/weierstrass function comparison.png)
+![](weierstrass/weierstrass_function_comparison.png)

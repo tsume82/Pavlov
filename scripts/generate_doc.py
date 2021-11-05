@@ -54,8 +54,8 @@ with open(dir1+"results.md", "w+") as f:
 
 	titles = []
 	for fun in funcs:
-		title = "{} {} dims comparison".format(fun.split("_")[0], fun.split("_")[1][:-1])
-		titles.append(title)
+		title = "{}_{}_dims_comparison".format(fun.split("_")[0], fun.split("_")[1][:-1])
+		titles.append(title.replace(" ", "_"))
 		auc, final_best = compare_experiments(
 			[dir1+fun,dir2+fun],
 			[name1, name2],
@@ -64,7 +64,7 @@ with open(dir1+"results.md", "w+") as f:
 			logxscale=False,
 			ylim=None,
 			plotMode="std",
-			save=dir1+fun,
+			save=dir1+fun+"/{}.png".format(title.replace(" ", "_")),
 		)
 		f.write("| {} | {} | {} |\n".format(
 			fun, 

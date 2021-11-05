@@ -379,7 +379,7 @@ def compare_experiments(
 
 	plt.legend()
 	if save:
-		fig.savefig(save + "/{}.png".format(title))
+		fig.savefig(save)
 	else:
 		plt.show()
 	return auc, final_best
