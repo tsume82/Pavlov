@@ -126,15 +126,15 @@ ppo_de_configuration = {
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
         "solver_driver": "DEdriver",
-        "solver_driver_args": [10, 10, 6, 2],
+        "solver_driver_args": [10, 10, 1, "best1bin"],
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
-        "state_metrics_config": [[40, False, 1, True, False], [{"step_size": {"max": 3, "min": 0}}, 40]],
+        "state_metrics_names": ["DifferenceOfBest"],
+        "state_metrics_config": [[40, False, 1, True, False]],
         "reward_metric": "Best",
         "reward_metric_config": [False, False],
         "memes_no": 1,
-        "action_space_config": {"F": {"max": 2, "min": 1e-10}, "CR": {"max": 1, "min": 0}},
+        "action_space_config": {"F": {"max": 2, "min": 0}, "CR": {"max": 1, "min": 0}},
     },
 }
 pg_configuration = {

@@ -185,7 +185,7 @@ class DifferenceOfBest(Metric):
                 else:
                     grad /= self.prec_best
 
-            self.history.insert(0, grad)
+            self.history.insert(0, np.array(grad.item())) # Repeated needs a list, Box needs a np.array as a scalar
             if len(self.history) > self.history_max_length:
                 self.history.pop()
 
