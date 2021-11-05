@@ -76,6 +76,6 @@ with open(dir1+"results.md", "w+") as f:
 
 	for fun, title in zip(funcs, titles):
 		f.write("##### {}\n\n".format(fun))
-		f.write("![](./{}/{}.png)\n\n".format(fun, title))
+		f.write("![]({}/{}.png)\n\n".format(fun, title))
 
 

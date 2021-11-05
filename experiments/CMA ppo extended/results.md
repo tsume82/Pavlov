@@ -44,147 +44,147 @@ Probability of PPO trained policy outperforming CSA using 2 different metrics: A
 
 ##### AttractiveSector_5D
 
-![](./AttractiveSector_5D/AttractiveSector 5 dims comparison.png)
+![](AttractiveSector_5D/AttractiveSector 5 dims comparison.png)
 
 ##### AttractiveSector_10D
 
-![](./AttractiveSector_10D/AttractiveSector 10 dims comparison.png)
+![](AttractiveSector_10D/AttractiveSector 10 dims comparison.png)
 
 ##### AttractiveSector_20D
 
-![](./AttractiveSector_20D/AttractiveSector 20 dims comparison.png)
+![](AttractiveSector_20D/AttractiveSector 20 dims comparison.png)
 
 ##### BuecheRastrigin_5D
 
-![](./BuecheRastrigin_5D/BuecheRastrigin 5 dims comparison.png)
+![](BuecheRastrigin_5D/BuecheRastrigin 5 dims comparison.png)
 
 ##### BuecheRastrigin_10D
 
-![](./BuecheRastrigin_10D/BuecheRastrigin 10 dims comparison.png)
+![](BuecheRastrigin_10D/BuecheRastrigin 10 dims comparison.png)
 
 ##### BuecheRastrigin_20D
 
-![](./BuecheRastrigin_20D/BuecheRastrigin 20 dims comparison.png)
+![](BuecheRastrigin_20D/BuecheRastrigin 20 dims comparison.png)
 
 ##### CompositeGR_5D
 
-![](./CompositeGR_5D/CompositeGR 5 dims comparison.png)
+![](CompositeGR_5D/CompositeGR 5 dims comparison.png)
 
 ##### CompositeGR_10D
 
-![](./CompositeGR_10D/CompositeGR 10 dims comparison.png)
+![](CompositeGR_10D/CompositeGR 10 dims comparison.png)
 
 ##### CompositeGR_20D
 
-![](./CompositeGR_20D/CompositeGR 20 dims comparison.png)
+![](CompositeGR_20D/CompositeGR 20 dims comparison.png)
 
 ##### DifferentPowers_5D
 
-![](./DifferentPowers_5D/DifferentPowers 5 dims comparison.png)
+![](DifferentPowers_5D/DifferentPowers 5 dims comparison.png)
 
 ##### DifferentPowers_10D
 
-![](./DifferentPowers_10D/DifferentPowers 10 dims comparison.png)
+![](DifferentPowers_10D/DifferentPowers 10 dims comparison.png)
 
 ##### DifferentPowers_20D
 
-![](./DifferentPowers_20D/DifferentPowers 20 dims comparison.png)
+![](DifferentPowers_20D/DifferentPowers 20 dims comparison.png)
 
 ##### LinearSlope_5D
 
-![](./LinearSlope_5D/LinearSlope 5 dims comparison.png)
+![](LinearSlope_5D/LinearSlope 5 dims comparison.png)
 
 ##### LinearSlope_10D
 
-![](./LinearSlope_10D/LinearSlope 10 dims comparison.png)
+![](LinearSlope_10D/LinearSlope 10 dims comparison.png)
 
 ##### LinearSlope_20D
 
-![](./LinearSlope_20D/LinearSlope 20 dims comparison.png)
+![](LinearSlope_20D/LinearSlope 20 dims comparison.png)
 
 ##### SharpRidge_5D
 
-![](./SharpRidge_5D/SharpRidge 5 dims comparison.png)
+![](SharpRidge_5D/SharpRidge 5 dims comparison.png)
 
 ##### SharpRidge_10D
 
-![](./SharpRidge_10D/SharpRidge 10 dims comparison.png)
+![](SharpRidge_10D/SharpRidge 10 dims comparison.png)
 
 ##### SharpRidge_20D
 
-![](./SharpRidge_20D/SharpRidge 20 dims comparison.png)
+![](SharpRidge_20D/SharpRidge 20 dims comparison.png)
 
 ##### StepEllipsoidal_5D
 
-![](./StepEllipsoidal_5D/StepEllipsoidal 5 dims comparison.png)
+![](StepEllipsoidal_5D/StepEllipsoidal 5 dims comparison.png)
 
 ##### StepEllipsoidal_10D
 
-![](./StepEllipsoidal_10D/StepEllipsoidal 10 dims comparison.png)
+![](StepEllipsoidal_10D/StepEllipsoidal 10 dims comparison.png)
 
 ##### StepEllipsoidal_20D
 
-![](./StepEllipsoidal_20D/StepEllipsoidal 20 dims comparison.png)
+![](StepEllipsoidal_20D/StepEllipsoidal 20 dims comparison.png)
 
 ##### RosenbrockRotated_5D
 
-![](./RosenbrockRotated_5D/RosenbrockRotated 5 dims comparison.png)
+![](RosenbrockRotated_5D/RosenbrockRotated 5 dims comparison.png)
 
 ##### RosenbrockRotated_10D
 
-![](./RosenbrockRotated_10D/RosenbrockRotated 10 dims comparison.png)
+![](RosenbrockRotated_10D/RosenbrockRotated 10 dims comparison.png)
 
 ##### RosenbrockRotated_20D
 
-![](./RosenbrockRotated_20D/RosenbrockRotated 20 dims comparison.png)
+![](RosenbrockRotated_20D/RosenbrockRotated 20 dims comparison.png)
 
 ##### SchaffersIllConditioned_5D
 
-![](./SchaffersIllConditioned_5D/SchaffersIllConditioned 5 dims comparison.png)
+![](SchaffersIllConditioned_5D/SchaffersIllConditioned 5 dims comparison.png)
 
 ##### SchaffersIllConditioned_10D
 
-![](./SchaffersIllConditioned_10D/SchaffersIllConditioned 10 dims comparison.png)
+![](SchaffersIllConditioned_10D/SchaffersIllConditioned 10 dims comparison.png)
 
 ##### SchaffersIllConditioned_20D
 
-![](./SchaffersIllConditioned_20D/SchaffersIllConditioned 20 dims comparison.png)
+![](SchaffersIllConditioned_20D/SchaffersIllConditioned 20 dims comparison.png)
 
 ##### LunacekBiR_5D
 
-![](./LunacekBiR_5D/LunacekBiR 5 dims comparison.png)
+![](LunacekBiR_5D/LunacekBiR 5 dims comparison.png)
 
 ##### LunacekBiR_10D
 
-![](./LunacekBiR_10D/LunacekBiR 10 dims comparison.png)
+![](LunacekBiR_10D/LunacekBiR 10 dims comparison.png)
 
 ##### LunacekBiR_20D
 
-![](./LunacekBiR_20D/LunacekBiR 20 dims comparison.png)
+![](LunacekBiR_20D/LunacekBiR 20 dims comparison.png)
 
 ##### GG101me_5D
 
-![](./GG101me_5D/GG101me 5 dims comparison.png)
+![](GG101me_5D/GG101me 5 dims comparison.png)
 
 ##### GG101me_10D
 
-![](./GG101me_10D/GG101me 10 dims comparison.png)
+![](GG101me_10D/GG101me 10 dims comparison.png)
 
 ##### GG101me_20D
 
-![](./GG101me_20D/GG101me 20 dims comparison.png)
+![](GG101me_20D/GG101me 20 dims comparison.png)
 
 ##### GG21hi_5D
 
-![](./GG21hi_5D/GG21hi 5 dims comparison.png)
+![](GG21hi_5D/GG21hi 5 dims comparison.png)
 
 ##### GG21hi_10D
 
-![](./GG21hi_10D/GG21hi 10 dims comparison.png)
+![](GG21hi_10D/GG21hi 10 dims comparison.png)
 
 ##### GG21hi_20D
 
-![](./GG21hi_20D/GG21hi 20 dims comparison.png)
+![](GG21hi_20D/GG21hi 20 dims comparison.png)
 
 ## Configuration
 

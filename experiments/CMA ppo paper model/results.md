@@ -9,14 +9,14 @@ Probability of PPO trained policy outperforming CSA using 2 different metrics: A
 
 | Function    | $p(PPO < CSA)$ with AUC metric | $p(PPO < CSA)$ with best metric |
 | :---------- | ------------------------------ | ------------------------------- |
-| bentcigar   | 0.58                           | 0.17                            |
+| bentcigar   | **0.58**                       | 0.17                            |
 | discus      | ---                            | ---                             |
 | ellipsoid   | 0.35                           | 0.22                            |
-| katsuura    | 0.50                           | 0.54                            |
-| rastrigin   | 1                              | 0.95                            |
+| katsuura    | 0.50                           | **0.54**                        |
+| rastrigin   | **1**                          | **0.95**                        |
 | rosenbrock  | ---                            | ---                             |
 | schaffers   | ---                            | ---                             |
-| schwefel    | 0.94                           | 0.27                            |
+| schwefel    | **0.94**                       | 0.27                            |
 | sphere      | 0.0                            | 0.0                             |
 | weierstrass | 0.08                           | 0.01                            |
 
@@ -24,43 +24,31 @@ Probability of PPO trained policy outperforming CSA using 2 different metrics: A
 
 ##### Bent Cigar
 
-![](./bentcigar/bent cigar function comparison.png)
-
-##### Discus
-
-![](./discus/discus function comparison.png)
+![](bentcigar/bent cigar function comparison.png)
 
 ##### Ellipsoid
 
-![](./ellipsoid/ellipsoid function comparison.png)
+![](ellipsoid/ellipsoid function comparison.png)
 
 ##### Katsuura
 
-![](./katsuura/katsuura function comparison.png)
+![](katsuura/katsuura function comparison.png)
 
 ##### Rastrigin
 
-![](./rastrigin/rastrigin function comparison.png)
-
-##### Rosenbrock
-
-![](./rosenbrock/rosenbrock function comparison.png)
-
-##### Schaffers
-
-![](./schaffers/schaffers function comparison.png)
+![](rastrigin/rastrigin function comparison.png)
 
 ##### Schwefel
 
-![](./schwefel/schwefel function comparison.png)
+![](schwefel/schwefel function comparison.png)
 
 ##### Sphere
 
-![](./sphere/sphere function comparison.png)
+![](sphere/sphere function comparison.png)
 
 ##### Weierstrass
 
-![](./weierstrass/weierstrass function comparison.png)
+![](weierstrass/weierstrass function comparison.png)
 
 ## Configuration
 
