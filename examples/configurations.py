@@ -212,6 +212,7 @@ de_adapt_configuration = {
     # "agent.algorithm.strategy": None,
     "agent.algorithm.adapt_strategy": "jDE",
     "agent.algorithm.pop_size": 10,
+    "agent.algorithm.maximize": False,
     "agent.algorithm.render_env": False,
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {

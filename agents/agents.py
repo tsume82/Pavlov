@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod, ABCMeta
-from ray.rllib.utils.annotations import override
 import ray.tune
 import numpy as np
 
@@ -271,7 +270,10 @@ class DEadapt(RayAgent):
 		def __init__(self, env=None, config=None) -> None:
 			self.strategy = config.get("strategy", None)
 			self.pop_size = config["pop_size"]
+			self.maximize = config["maximize"]
 			self.adapt_strategy = config["adapt_strategy"].lower()
+			self.n_dist = lambda: np.random.normal(0, 1, size=self.pop_size)
+			self.u_dist = lambda: np.random.uniform(0, 1, size=self.pop_size)
 
 			assert self.adapt_strategy in self.adapt_strategies.keys()
 
@@ -279,39 +281,96 @@ class DEadapt(RayAgent):
 
 			if self.adapt_strategy == "ide":
 				assert self.strategy in self.de_strategies
-				self.CRs = np.random.normal(0, 1, size=self.pop_size) * 0.15 + 0.5
-				self.Fs = np.random.normal(0, 1, size=self.pop_size) * 0.15 + 0.5
+				self.mem_CR = self.n_dist() * 0.15 + 0.5
+				self.mem_F = self.n_dist() * 0.15 + 0.5
 			if self.adapt_strategy == "jde":
-				self.CRs = np.random.uniform(0, 1, size=self.pop_size)
-				self.Fs = np.random.uniform(0, 1, size=self.pop_size) * 0.9 + 0.1
+				self.mem_CR = self.u_dist()
+				self.mem_F = self.u_dist() * 0.9 + 0.1
 
-			self.bestF = self.Fs[0]
-			self.bestCR = self.CRs[0]
+			self.F = self.mem_F
+			self.CR = self.mem_CR
+
+			self.bestF = self.mem_F[0]
+			self.bestCR = self.mem_CR[0]
+			self.bestFit = -np.inf if self.maximize else np.inf
 
 		# this function will became iDE or jDE
 		def compute_single_action(self, obs):
 			return {"F": 0.8, "CR": 0.9}
 
 		def iDE(self, obs):
-			pass
+			fitness = obs[0][0]
+			oldFitness = obs[0][1] if len(obs[0])>1 else [-np.inf]*self.pop_size
+			# maintain only improved F and CR in memory
+			self.mem_F = np.where(fitness < oldFitness, self.F, self.mem_F)
+			self.mem_CR = np.where(fitness < oldFitness, self.CR, self.mem_CR)
 
+			bestFit, bestF, bestCR = self.__best(fitness)
+
+			randF = np.random.choice(self.mem_F, size=7, replace=False)
+			randCR = np.random.choice(self.mem_CR, size=7, replace=False)
+
+			if self.strategy in ["best1bin", "best1exp"]:
+				self.F = bestF + self.n_dist() * 0.5 * (randF[1] - randF[2])
+				self.CR = bestCR + self.n_dist() * 0.5 * (randCR[1] - randCR[2])
+			if self.strategy in ["rand1bin", "rand1exp"]:
+				self.F = randF[0] + self.n_dist() * 0.5 * (randF[1] - randF[2])
+				self.CR = randCR[0] + self.n_dist() * 0.5 * (randCR[1] - randCR[2])
+			if self.strategy in ["randtobest1bin", "randtobest1exp"]:
+				self.F = self.mem_F + self.n_dist() * 0.5 * (bestF - self.mem_F) + self.n_dist() * 0.5 * (randF[0] - randF[1])
+				self.CR = self.mem_CR + self.n_dist() * 0.5 * (bestCR - self.mem_CR) + self.n_dist() * 0.5 * (randCR[0] - randCR[1])
+			if self.strategy in ["best2bin", "best2exp"]:
+				self.F = bestF + self.n_dist() * 0.5 * (randF[0] - randF[1]) + self.n_dist() * 0.5 * (randF[2] - randF[3])
+				self.CR = bestCR + self.n_dist() * 0.5 * (randCR[0] - randCR[1]) + self.n_dist() * 0.5 * (randCR[2] - randCR[3])
+			if self.strategy in ["rand2bin", "rand2exp"]:
+				self.F = randF[4] + self.n_dist() * 0.5 * (randF[0] - randF[1]) + self.n_dist() * 0.5 * (randF[2] - randF[3])
+				self.CR = randCR[4] + self.n_dist() * 0.5 * (randCR[0] - randCR[1]) + self.n_dist() * 0.5 * (randCR[2] - randCR[3])
+			# if self.strategy in ["currenttobest1bin", "currenttobest1exp"]:
+
+			return {"F": self.F, "CR": self.CR}
+			
 		def jDE(self, obs):
 			fitness = obs[0][0]
 			oldFitness = obs[0][1] if len(obs[0])>1 else [-np.inf]*self.pop_size
 
-			prob = np.random.uniform(0, 1, size=self.pop_size) < 0.9
-			newF = np.random.uniform(0, 1, size=self.pop_size) * 0.9 + 0.1
+			self.mem_F = np.where(fitness < oldFitness, self.F, self.mem_F)
+			self.mem_CR = np.where(fitness < oldFitness, self.CR, self.mem_CR)
 
-			Fs = np.where(prob, self.Fs, newF)
-			CRs = np.where(prob, self.CRs, np.random.uniform(0, 1, size=self.pop_size))
+			prob = self.u_dist() < 0.9
+			newF = self.u_dist() * 0.9 + 0.1
 
-			self.Fs = np.where(fitness < oldFitness, Fs, self.Fs)
-			self.CRs = np.where(fitness < oldFitness, CRs, self.CRs)
+			self.F = np.where(prob, self.mem_F, newF)
+			self.CR = np.where(prob, self.mem_CR, self.u_dist())
 
-			return {"F": Fs, "CR": CRs}
+			return {"F": self.F, "CR": self.CR}
+
+		def __best(self, fitness):
+			# TODO check if indexes do not change
+			if self.maximize:
+				_max = np.max(fitness)
+				if _max > self.bestFit:
+					self.bestFit = _max
+					max_ind = np.argmax(fitness)
+					self.bestF = self.F[max_ind]
+					self.bestCR = self.CR[max_ind]
+				return self.bestFit, self.bestF, self.bestCR
+			else:
+				_min = np.min(fitness)
+				if _min < self.bestFit:
+					self.bestFit = _min
+					min_ind = np.argmin(fitness)
+					self.bestF = self.F[min_ind]
+					self.bestCR = self.CR[min_ind]
+				return self.bestFit, self.bestF, self.bestCR
+
 
 		def train(self):
 			raise NotImplementedError()
+
+	def reset(self):
+		self.env = self.env_class(self.env_config.get("env_config", {}))
+		register_env(self.env_class.__name__, lambda config: self.env)
+		self.agent = self.agent_class(env=self.env_class.__name__, config=self.config)
 
 	agent_class = DEadaptAgent
 	registerRayAgent(__qualname__, __qualname__)
