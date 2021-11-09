@@ -119,7 +119,7 @@ class plot_episodes:
 
 
 def plot_experiment(
-	experiment, title="Plot Experiment", title_act="step size", logyscale=True, logxscale=True, ylim=None
+	experiment, title="Plot Experiment", logyscale=True, logxscale=True, ylim=None
 ):
 	if isinstance(experiment, str):
 		experiment = load_experiment(experiment)
@@ -127,16 +127,24 @@ def plot_experiment(
 	fig, axs = plt.subplots(2, sharex=True, figsize=(12, 6))
 	fig.tight_layout(rect=(0.06, 0, 1, 0.98), h_pad=0)
 	fig.canvas.manager.set_window_title(title)
+	cmap = cm.get_cmap("tab20c")
 
 	length = len(experiment[0]["fitness"])
 	popLength = len(experiment[0]["fitness"][0])
+	actions_per_step = len(experiment[0]["actions"][1])
+	action_labels = []
 	avg = np.empty(shape=[0, length])
 	min_fit = np.inf
 	max_fit = -np.inf
-	for traj in experiment:
+	for i, traj in enumerate(experiment):
 		actions = []
 		for step in traj["actions"]:
-			actions.append(step.get("step_size", None))  # TODO handle different actions spaces
+			if step:
+				actions.append([np.average(v) if isinstance(v, (list, np.ndarray)) else v for v in step.values()])
+				if not action_labels:
+					action_labels = list(step.keys())
+			else:
+				actions.append([np.nan]*actions_per_step)
 		popAvg = np.average(traj["fitness"], axis=1)
 		min_fit = min(np.min(traj["fitness"]), min_fit)
 		max_fit = max(np.max(traj["fitness"]), max_fit)
@@ -146,7 +154,9 @@ def plot_experiment(
 		x = np.array([*range(0, length)]) * popLength
 		axs[0].fill_between(x, popmin, popmax, color="lightsteelblue", alpha=0.6)  # darkorange alpha=0.15
 		axs[0].plot(x, popAvg, color="blue", alpha=0.4)
-		axs[1].plot(x, actions, color="black", alpha=0.4)
+		actions = np.array(actions)
+		for j, label in enumerate(action_labels):
+			axs[1].plot(x, actions[:,j], color=cmap(j * 4), alpha=0.4, label=label if i == 0 else None)
 	axs[0].plot(x, np.average(avg, axis=0), color="red", alpha=0.8)
 
 	print("max value: {}".format(max_fit))
@@ -190,9 +200,10 @@ def plot_experiment(
 	# Bottom
 	axs[1].yaxis.set_minor_locator(AutoMinorLocator(2))
 	axs[1].set_xlabel("function evaluations", labelpad=0)
-	axs[1].set_ylabel(title_act, labelpad=0)
+	axs[1].set_ylabel("actions", labelpad=0)
 	axs[1].grid(True, which="both")
 	axs[1].tick_params(axis="y", which="minor", grid_alpha=0.3)
+	plt.legend()
 
 	plt.show()
 
@@ -226,6 +237,8 @@ def compare_experiments(
 
 	length = len(exp_list[0][0]["fitness"])
 	popLength = len(exp_list[0][0]["fitness"][0])
+	actions_per_step = len(experiment[0]["actions"][1])
+	action_labels = []
 	min_fit = min_plot = np.inf
 	max_fit = max_plot = -np.inf
 
@@ -243,8 +256,15 @@ def compare_experiments(
 		for j, traj in enumerate(experiment):
 			actions = []
 			for step in traj["actions"]:
-				action = getScalar(step.get("step_size", None))
+				action = getScalar(step.get("CR", None))
 				actions.append(action)  # TODO handle different actions spaces
+				# if step:
+				# 	actions.append([np.average(v) if isinstance(v, (list, np.ndarray)) else v for v in step.values()])
+				# 	if not action_labels:
+				# 		action_labels = list(step.keys())
+				# else:
+				# 	actions.append([np.nan]*actions_per_step)
+			# actions = np.array(actions)
 
 			min_fit = min(np.min(traj["fitness"]), min_fit)
 			max_fit = max(np.max(traj["fitness"]), max_fit)

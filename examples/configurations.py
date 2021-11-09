@@ -82,35 +82,29 @@ ppo_cma_es_configuration = {
     "agent.algorithm.render_env": False,
     "agent.algorithm.num_workers": 0,
     "agent.algorithm.batch_mode": "complete_episodes",
-    "agent.algorithm.lr": 1e-5,
-    "agent.algorithm.lr_schedule": [
-        (0, 5e-5),
-        (2000 * 50, 1e-5),
-    ],  # timestep when entropy_coeff will be 0: timestep = curr_episode * steps_per_episode
+    "agent.algorithm.lr": 1e-05,
     "agent.algorithm.train_batch_size": 200,
-    "agent.algorithm.optimizer": "Adam",
-    "agent.algorithm.vf_clip_param": 50,
-    "entropy_coeff": 0.01,
-    "entropy_coeff_schedule": 3000 * 50,
-    "agent.algorithm.model": {
-        "fcnet_activation": "tanh",
-        "fcnet_hiddens": [50, 50],
-    },
+    # "agent.algorithm.optimizer": "Adam",
+    "agent.algorithm.vf_clip_param": 1000,
+	# "entropy_coeff": 0.01,
+	# "grad_clip": 1e5,
+    "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50, 50]},
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
         "solver_driver": "CMAdriver",
-        "solver_driver_args": [10, 10, 1, 1.63],
+        "solver_driver_args": [10, 10, 11, 0.38],
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "SolverState"],
+        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverState"],
         "state_metrics_config": [
-            (40, False, 1, True, False),
-            ({"step_size": {"max": 3, "min": 0}},),
+            [40, False, 1, True, False],
+            [{"step_size": {"max": 3, "min": 0}}, 40],
+            [{"ps": {"max": 10, "min": -10}}],
         ],
         "reward_metric": "Best",
-        "reward_metric_config": [False, True],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
+        "reward_metric_config": [False, True],
         "memes_no": 1,
-        "action_space_config": {"step_size": {"max": 3, "min": 1e-10}},
+        "action_space_config": {"step_size": {"max": 3, "min": 0.05}},
     },
 }
 ppo_de_configuration = {
@@ -121,18 +115,22 @@ ppo_de_configuration = {
     "agent.algorithm.lr": 1e-05,
     "agent.algorithm.train_batch_size": 200,
     "agent.algorithm.optimizer": "Adam",
-    "agent.algorithm.vf_clip_param": 1e5,
-    "agent.algorithm.model": {"fcnet_activation": "tanh", "fcnet_hiddens": [30, 30]},
+    "agent.algorithm.vf_clip_param": 1e7,
+    "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50, 50]},
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
         "solver_driver": "DEdriver",
-        "solver_driver_args": [10, 10, 1, "best1bin"],
+        "solver_driver_args": [10, 10, 12, "best1bin"],
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest"],
-        "state_metrics_config": [[40, False, 1, True, False]],
+        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverStateHistory"],
+        "state_metrics_config": [
+            [40, False, 1, True, False],
+            [{"F": {"max": 2, "min": 0}}, 40],
+            [{"CR": {"max": 1, "min": 0}}, 40]
+        ],
         "reward_metric": "Best",
-        "reward_metric_config": [False, False],
+        "reward_metric_config": [False, True],
         "memes_no": 1,
         "action_space_config": {"F": {"max": 2, "min": 0}, "CR": {"max": 1, "min": 0}},
     },
@@ -207,6 +205,26 @@ CSA_configuration = {
         "reward_metric_config": [False, False],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
         "memes_no": 1,
         "action_space_config": {"step_size": {"max": 3, "min": 1e-10}},
+    },
+}
+de_adapt_configuration = {
+    "agent.algorithm": "DEadapt",
+    # "agent.algorithm.strategy": None,
+    "agent.algorithm.adapt_strategy": "jDE",
+    "agent.algorithm.pop_size": 10,
+    "agent.algorithm.render_env": False,
+    "env.env_class": "SchedulerPolicyRayEnvironment",
+    "env.env_config": {
+        "solver_driver": "DEdriver",
+        "solver_driver_args": [10, 10, 12, "best1bin"],
+        "maximize": False,
+        "steps": 50,
+        "state_metrics_names": ["FitnessHistory"],
+        "state_metrics_config": [(10, 2)],
+        "reward_metric": "Best",
+        "reward_metric_config": [False, True],  # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
+        "memes_no": 1,
+        "action_space_config": {"F": {"max": [2]*10, "min": [0]*10}, "CR": {"max": [1]*10, "min": [0]*10}},
     },
 }
 

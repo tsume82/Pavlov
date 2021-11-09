@@ -270,7 +270,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
             self.trajectory = {
                 "solutions":np.array(start_solutions),
                 "fitness":np.array(start_fitness),
-                "actions":[{"step_size": solver_params["step_size"]}] # TODO to remove
+                "actions":[{}]
             }
 
         return self.state

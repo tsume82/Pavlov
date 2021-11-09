@@ -216,6 +216,7 @@ class DifferenceOfBest(Metric):
 class FitnessHistory(Metric):
     """
     RecentFitness metric, keep track of the fitness within the last history_size steps
+	most recent is in [0]
     """
 
     name = "FitnessHistory"
@@ -227,10 +228,10 @@ class FitnessHistory(Metric):
         self.archive = None
 
     def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
-        self.archive.append(fitness)
+        self.archive.insert(0, fitness)
 
         if len(self.archive) > self.history_size:
-            self.archive.pop(0)
+            self.archive.pop()
 
         return self.archive
 
@@ -267,7 +268,7 @@ class BestsHistory(Metric):
         self.history.insert(0, best)
 
         if len(self.history) > self.history_size:
-            self.history.pop(0)
+            self.history.pop()
 
         return self.history
 
