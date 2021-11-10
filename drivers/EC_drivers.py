@@ -9,8 +9,9 @@ import random
 import copy
 import math
 import cma
+import copy
 import pygmo
-from scipy.optimize._differentialevolution import DifferentialEvolutionSolver
+from drivers.DE import DifferentialEvolutionSolver
 
 
 class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
@@ -262,8 +263,8 @@ class DEdriver(SolverDriver):
 		self.solver.cross_over_probability = command["CR"]
 
 		next(self.solver)
-		self.solutions = self.solver.population
-		self.fitness = self.solver.population_energies
+		self.solutions = copy.copy(self.solver.population)
+		self.fitness = copy.copy(self.solver.population_energies)
 
 		return (
 			self.solutions,

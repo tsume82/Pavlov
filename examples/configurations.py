@@ -209,8 +209,8 @@ CSA_configuration = {
 }
 de_adapt_configuration = {
     "agent.algorithm": "DEadapt",
-    # "agent.algorithm.strategy": None,
-    "agent.algorithm.adapt_strategy": "jDE",
+    "agent.algorithm.strategy": "best1bin",
+    "agent.algorithm.adapt_strategy": "iDE",
     "agent.algorithm.pop_size": 10,
     "agent.algorithm.maximize": False,
     "agent.algorithm.render_env": False,
