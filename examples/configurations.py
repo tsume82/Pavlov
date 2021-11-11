@@ -217,7 +217,7 @@ de_adapt_configuration = {
     "env.env_class": "SchedulerPolicyRayEnvironment",
     "env.env_config": {
         "solver_driver": "DEdriver",
-        "solver_driver_args": [10, 10, 12, "best1bin"],
+        "solver_driver_args": [10, 10, 12, "best1bin"], # (dim, pop_size, object_function, strategy)
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["FitnessHistory"],
@@ -247,6 +247,20 @@ all_ppo_configurations = [
     )
 ]
 
+all_de_ppo_configurations = [
+    update_and_return(
+        ppo_cma_es_configuration,
+        {
+            "env.env_config": {"solver_driver_args": [10, 10, fun, "best1bin"]},
+            "agent.algorithm.vf_clip_param": clip,
+        },
+    )
+    for clip, fun in zip(
+        [1e7, 10000, 2e5, 100, 100, 1e4, 10, 5000, 50, 100],
+        [12, 11, 2, 23, 15, 8, 17, 20, 1, 16],
+    )
+]
+
 # ["AttractiveSector", "BuecheRastrigin", "CompositeGR", "DifferentPowers", "LinearSlope", "SharpRidge", "StepEllipsoidal", "RosenbrockRotated", "SchaffersIllConditioned","LunacekBiR", "GG101me", "GG21hi"]
 # [1e3, 1e4, 1e5, 10, 100, 1000, 10, 10, 100, 10, 100, 1000, 10, 50, 100, 100, 200, 500, 1e3, 5e3, 1e4, 10, 20, 50, 100, 1000, 5000, 100, 200, 1000, 100, 500, 1000, 100, 500, 1000],
 # [6, 6, 6, 4, 4, 4, 19, 19, 19, 14, 14, 14, 5, 5, 5, 13, 13, 13, 7, 7, 7, 9, 9, 9, 18, 18, 18, 24, 24, 24, 21, 21, 21, 22, 22, 22],
@@ -265,7 +279,6 @@ extended_ppo_configurations = [
         [20, 5, 10, 20],
     )
 ]
-
 
 # dict of all configurations in this file
 ALL_CONFIGURATIONS = {k: v for k, v in locals().items() if not "__" in k and isinstance(v, (dict, list))}
