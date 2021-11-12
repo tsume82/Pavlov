@@ -42,19 +42,32 @@ funcs = [
     "GG21hi_20D",
 ]
 
-dir1 = "./experiments/CMA ppo extended/"
-dir2 = "./experiments/CSA/"
-name1 = "PPO"
-name2 = "CSA"
+funcs = [
+    "BentCigar",
+    "Discus",
+    "Ellipsoid",
+    "Katsuura",
+    "Rastrigin",
+    "Rosenbrock",
+    "Schaffers",
+    "Schwefel",
+    "Sphere",
+    "Weierstrass",
+]
 
-with open(dir1+"results.md", "w+") as f:
+dir1 = "./experiments/DE ppo/"
+dir2 = "./experiments/iDE/"
+name1 = "PPO"
+name2 = "iDE"
+
+with open(dir1+"results_iDE.md", "w+") as f:
 	f.write("## Comparison Table\n\nProbability of PPO trained policy outperforming CSA using 2 different metrics: Area under the curve and the absolute best of the run.\n")
 	f.write("| Function    | p({0} < {1}) with AUC metric | p({0} < {1}) with best of the run metric |\n".format(name1,name2))
 	f.write("| :---------- | ------------------------------ | ------------------------------- |\n")
 
 	titles = []
 	for fun in funcs:
-		title = "{}_{}_dims_comparison".format(fun.split("_")[0], fun.split("_")[1][:-1])
+		title = "iDE {} comparison".format(fun)
 		titles.append(title.replace(" ", "_"))
 		auc, final_best = compare_experiments(
 			[dir1+fun,dir2+fun],
