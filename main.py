@@ -84,7 +84,7 @@ def test_multiple_times(agent_config, folder="./.checkpoints", **kwargs):
 		agent.act()
 		experiment.append(agent.env.trajectory)
 		agent.env.reset()
-		agent.reset()
+		agent.reset() # Really slow and sometimes not needed
 	title = agent_config["env.env_config"].get("solver_driver_args", "")[2]
 	if kwargs.get("save_exp", False):
 		save_experiment(experiment, folder, name=kwargs["save_exp"])

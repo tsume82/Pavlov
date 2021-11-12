@@ -126,8 +126,8 @@ ppo_de_configuration = {
         "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverStateHistory"],
         "state_metrics_config": [
             [40, False, 1, True, False],
-            [{"F": {"max": 2, "min": 0}}, 40],
-            [{"CR": {"max": 1, "min": 0}}, 40]
+            [{"F": {"max": [2], "min": [0]}}, 40],
+            [{"CR": {"max": [1], "min": [0]}}, 40]
         ],
         "reward_metric": "Best",
         "reward_metric_config": [False, True],
@@ -249,15 +249,15 @@ all_ppo_configurations = [
 
 all_de_ppo_configurations = [
     update_and_return(
-        ppo_cma_es_configuration,
+        ppo_de_configuration,
         {
             "env.env_config": {"solver_driver_args": [10, 10, fun, "best1bin"]},
             "agent.algorithm.vf_clip_param": clip,
         },
     )
     for clip, fun in zip(
-        [1e7, 10000, 2e5, 100, 100, 1e4, 10, 5000, 50, 100],
-        [12, 11, 2, 23, 15, 8, 17, 20, 1, 16],
+        [100],
+        [16],
     )
 ]
 

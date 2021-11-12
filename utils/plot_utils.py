@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib import rcParams, cm
+from matplotlib.lines import Line2D
 from matplotlib.ticker import AutoMinorLocator, StrMethodFormatter, ScalarFormatter, LinearLocator, LogLocator
 import numpy as np
 from numpy.matrixlib.defmatrix import matrix
@@ -129,11 +130,11 @@ def plot_experiment(
 	fig.canvas.manager.set_window_title(title)
 	cmap = cm.get_cmap("tab20c")
 
-	length = len(experiment[0]["fitness"])
+	evolution_length = len(experiment[0]["fitness"])
 	popLength = len(experiment[0]["fitness"][0])
 	actions_per_step = len(experiment[0]["actions"][1])
 	action_labels = []
-	avg = np.empty(shape=[0, length])
+	avg = np.empty(shape=[0, evolution_length])
 	min_fit = np.inf
 	max_fit = -np.inf
 	for i, traj in enumerate(experiment):
@@ -151,7 +152,7 @@ def plot_experiment(
 		popmin = np.min(traj["fitness"], axis=1)
 		popmax = np.max(traj["fitness"], axis=1)
 		avg = np.vstack([avg, popAvg])
-		x = np.array([*range(0, length)]) * popLength
+		x = np.array([*range(0, evolution_length)]) * popLength
 		axs[0].fill_between(x, popmin, popmax, color="lightsteelblue", alpha=0.6)  # darkorange alpha=0.15
 		axs[0].plot(x, popAvg, color="blue", alpha=0.4)
 		actions = np.array(actions)
@@ -225,51 +226,51 @@ def compare_experiments(
 	plotMode="std",
 ):
 	assert plotMode in ["std", "adv", "raw"]
-	fig, axs = plt.subplots(2, sharex=True, figsize=(12, 6))
-	fig.tight_layout(rect=(0.06, 0, 1, 0.98), h_pad=0)
-	fig.canvas.manager.set_window_title(title)
-	action_axis_label = "step size"
-	cmap = cm.get_cmap("tab20c")
 
 	for i, experiment in enumerate(exp_list):
 		if isinstance(experiment, str):
 			exp_list[i] = load_experiment(experiment)
 
-	length = len(exp_list[0][0]["fitness"])
+	evolution_length = len(exp_list[0][0]["fitness"])
 	popLength = len(exp_list[0][0]["fitness"][0])
-	actions_per_step = len(experiment[0]["actions"][1])
-	action_labels = []
+	actions_per_step = len(exp_list[0][0]["actions"][1])
 	min_fit = min_plot = np.inf
 	max_fit = max_plot = -np.inf
+	label_ax1 = []
+
+	fig, axs = plt.subplots(1+actions_per_step, sharex=True, figsize=(12, 3+actions_per_step*3))
+	fig.tight_layout(rect=(0.06, 0, 1, 0.98), h_pad=0)
+	fig.canvas.manager.set_window_title(title)
+	cmap = cm.get_cmap("tab20c")
+	cmap2 = cm.get_cmap("tab20b")
 
 	# compute data to plot
 	for i, experiment in enumerate(exp_list):
-		avg = np.empty(shape=[0, length])
-		all_actions = np.empty(shape=[0, length])
-		all_best_during_run = np.empty(shape=[0, length])
-		allPopAvg = np.empty(shape=[0, length])
-		min_traj = np.ones(shape=[length]) * np.inf
-		max_traj = np.ones(shape=[length]) * -np.inf
+		action_labels = list(exp_list[0][0]["actions"][1].keys())
+		avg = np.empty(shape=[0, evolution_length])
+		all_actions = {k:np.empty(shape=(0, evolution_length)) for k in action_labels}
+		all_best_during_run = np.empty(shape=[0, evolution_length])
+		allPopAvg = np.empty(shape=[0, evolution_length])
+		min_traj = np.ones(shape=[evolution_length]) * np.inf
+		max_traj = np.ones(shape=[evolution_length]) * -np.inf
 		first_col = cmap(i * 4)
 		second_col = cmap(i * 4 + 1)
 		third_col = cmap(i * 4 + 3)
 		for j, traj in enumerate(experiment):
-			actions = []
+			actions = {k:[] for k in action_labels}
 			for step in traj["actions"]:
-				action = getScalar(step.get("CR", None))
-				actions.append(action)  # TODO handle different actions spaces
-				# if step:
-				# 	actions.append([np.average(v) if isinstance(v, (list, np.ndarray)) else v for v in step.values()])
-				# 	if not action_labels:
-				# 		action_labels = list(step.keys())
-				# else:
-				# 	actions.append([np.nan]*actions_per_step)
-			# actions = np.array(actions)
+				if step:
+					for k, v in step.items():
+						actions[k].append(np.average(v))
+				else:
+					for k in action_labels:
+						actions[k].append(np.nan)
 
 			min_fit = min(np.min(traj["fitness"]), min_fit)
 			max_fit = max(np.max(traj["fitness"]), max_fit)
-			all_actions = np.vstack([all_actions, actions])
-			x = np.array([*range(1, length+1)]) * popLength
+			for k in action_labels:
+				all_actions[k] = np.vstack([all_actions[k], np.array(actions[k])])
+			x = np.array([*range(1, evolution_length+1)]) * popLength
 
 			if plotMode == "std":
 				best_during_run = getBestDuringRun(traj["fitness"])
@@ -285,16 +286,16 @@ def compare_experiments(
 				max_traj = np.max([np.max(traj["fitness"], axis=1), max_traj], axis=0)
 				continue
 			if plotMode == "raw":
-				label = exp_names[i] if j == 0 else None
 				popmin = np.min(traj["fitness"], axis=1)
 				popmax = np.max(traj["fitness"], axis=1)
 				axs[0].fill_between(x, popmin, popmax, color=third_col, alpha=0.6)
-				axs[0].plot(x, popAvg, color=first_col, alpha=0.4, label=label)
-				axs[1].plot(x, actions, color=first_col, alpha=0.4, label=label)
+				axs[0].plot(x, popAvg, color=first_col, alpha=0.4)
+				for a, act_label in enumerate(action_labels):
+					axs[1+a].plot(x, actions[act_label], color=first_col, alpha=0.4)
 				continue
 
 		# plot data
-
+		label_ax1 += [exp_names[i]+"-"+a for a in action_labels]
 		if plotMode == "adv":
 			axs[0].plot(x, np.average(avg, axis=0), color=first_col, label=exp_names[i], lw=2, zorder=3 * (i + 1) + 2)
 			axs[0].fill_between(
@@ -306,10 +307,11 @@ def compare_experiments(
 				zorder=3 * (i + 1) + 1,
 			)
 			axs[0].fill_between(x, min_traj, max_traj, color=third_col, alpha=1 / (1 + i), zorder=3 * (i + 1))
-			axs[1].plot(x, np.average(all_actions, axis=0), color=first_col, label=exp_names[i], lw=2)
-			axs[1].fill_between(
-				x, np.min(all_actions, axis=0), np.max(all_actions, axis=0), color=second_col, alpha=1 / (1 + i)
-			)
+			for a, act_label in enumerate(action_labels):
+				axs[1+a].plot(x, np.average(all_actions[act_label], axis=0), color=first_col, label=exp_names[i], lw=2)
+				axs[1+a].fill_between(
+					x, np.min(all_actions[act_label], axis=0), np.max(all_actions[act_label], axis=0), color=second_col, alpha=1 / (1 + i)
+				)
 			min_plot = min(min_plot, min_fit)
 			max_plot = max(max_plot, max_fit)
 		elif plotMode == "raw":
@@ -319,8 +321,6 @@ def compare_experiments(
 		elif plotMode == "std":
 			all_best_avg = np.average(all_best_during_run, axis=0)
 			all_best_std = np.std(all_best_during_run, axis=0)
-			actions_avg =  np.average(all_actions, axis=0)
-			actions_std = np.std(all_actions, axis=0)
 			axs[0].plot(x, all_best_avg, color=first_col, lw=2, zorder=3 * (i + 1) + 2, label=exp_names[i])
 			axs[0].fill_between(
 				x,
@@ -330,15 +330,18 @@ def compare_experiments(
 				alpha=1 / (1 + i),
 				zorder=3 * (i + 1),
 			)
-			axs[1].plot(x, actions_avg, color=first_col, lw=2, zorder=3 * (i + 1) + 2, label=exp_names[i])
-			axs[1].fill_between(
-				x,
-				actions_avg - actions_std,
-				actions_avg + actions_std,
-				color=second_col,
-				alpha=1 / (1 + i),
-				zorder=3 * (i + 1),
-			)
+			for a, act_label in enumerate(action_labels):
+				actions_avg =  np.average(all_actions[act_label], axis=0)
+				actions_std = np.std(all_actions[act_label], axis=0)
+				axs[1+a].plot(x, actions_avg, color=first_col, lw=2, zorder=3 * (i + 1) + 2)
+				axs[1+a].fill_between(
+					x,
+					(actions_avg - actions_std),
+					(actions_avg + actions_std),
+					color=second_col,
+					alpha=1 / (1 + i),
+					zorder=3 * (i + 1),
+				)
 			min_plot = min(min_plot, np.min(all_best_avg - all_best_std))
 			max_plot = max(max_plot, np.max(all_best_avg + all_best_std))
 			
@@ -372,23 +375,29 @@ def compare_experiments(
 	axs[0].grid(True, which="both")
 	# axs[0].set_xticklabels(np.array([*range(0,50)])*10)
 	axs[0].set_ylabel("fitness", labelpad=0)
+	axs[0].yaxis.label.set_color("forestgreen")
 	axs[0].tick_params(axis="y", which="minor", grid_alpha=0.3)
 	# axs[0].set_yticks(ticks)
 	# axs[0].set_yticklabels([np.format_float_scientific(t, precision = 3, unique=True) for t in  ticks])
 
-	# customization to match the paper's plots
-	axs[0].set_xticks([10, 100, 200, 300, 400, 500])
-	# axs[0].set_yticks([-50,-60,-70,-80,-90])
+	ticks = [10]+[*range(0, evolution_length*popLength, int(np.floor(evolution_length*popLength/100/5))*100)][1:]
+	axs[0].set_xticks(ticks)
 	if ylim:
 		axs[0].set_ylim(ylim)
 
 	# Bottom
-	axs[1].yaxis.set_minor_locator(AutoMinorLocator(2))
-	axs[1].set_xlabel("function evaluations", labelpad=0)
-	axs[1].set_ylabel(action_axis_label, labelpad=0)
-	axs[1].grid(True, which="both")
-	axs[1].tick_params(axis="y", which="minor", grid_alpha=0.3)
+	axs[-1].set_xlabel("function evaluations", labelpad=0)
 
+	axs[0].legend([Line2D([0],[0],color=cmap(i * 4)) for i, _ in enumerate(exp_names)], exp_names, prop = {"size": 12})
+
+	for a, action in enumerate(action_labels):
+		axs[1+a].legend([Line2D([0],[0],color=cmap(i * 4)) for i, l in enumerate(exp_names)], exp_names, prop = {"size": 12})
+		axs[1+a].yaxis.set_minor_locator(AutoMinorLocator(2))
+		axs[1+a].set_ylabel(action, labelpad=0)
+		axs[1+a].yaxis.label.set_color("forestgreen")
+		axs[1+a].grid(True, which="both")
+		axs[1+a].tick_params(axis="y", which="minor", grid_alpha=0.3)
+		
 
 	# compute statistical metrics
 	if len(exp_list) == 2:
@@ -397,7 +406,6 @@ def compare_experiments(
 		print("with AUC metric: p({} < {}) = {}".format(exp_names[0], exp_names[1], auc))
 		print("with final best metric: p({} < {}) = {}".format(exp_names[0], exp_names[1], final_best))
 
-	plt.legend()
 	if save:
 		fig.savefig(save)
 	else:
@@ -474,7 +482,7 @@ def compute_metrics_comparison(exp_list, metric="AUC"):
 	combinations = mesh.T.reshape(-1, 2)
 
 	# create an array with 1 if the metric in experiment 0 is less than experiment 2, 0 otherwise
-	# sum the array and divide it for its length to get a probablity
+	# sum the array and divide it for its evolution_length to get a probablity
 	# see Equation 1 in "Learning Step-Size Adaptation in CMA-ES"
 	prob = np.sum([1 if c[0] < c[1] else 0 for c in combinations]) / combinations.shape[0]
 	return prob

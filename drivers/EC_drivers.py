@@ -292,7 +292,7 @@ class DEdriver(SolverDriver):
 		return (
 			self.solutions,
 			self.fitness,
-			{"F": np.array(self.solver.scale), "CR": np.array(self.solver.cross_over_probability)},
+			{"F": np.array([self.solver.scale]), "CR": np.array([self.solver.cross_over_probability])},
 		)
 
 	def initialized(self):
