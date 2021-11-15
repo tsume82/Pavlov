@@ -3,18 +3,20 @@
 Probability of PPO trained policy outperforming CSA using 2 different metrics: Area under the curve and the absolute best of the run.
 | Function    | p(PPO_fix_CR < jDE) with AUC metric | p(PPO_fix_CR < jDE) with best of the run metric |
 | :---------- | ------------------------------ | ------------------------------- |
-| BentCigar | 0.4508 | 0.4512 |
-| Discus | 0.436 | 0.4816 |
-| Ellipsoid | 0.248 | 0.1876 |
-| Katsuura | 0.4828 | 0.4588 |
-| Rastrigin | 0.34 | 0.4592 |
-| Rosenbrock | 0.2768 | 0.2396 |
-| Schaffers | 0.2228 | 0.1096 |
-| Schwefel | 0.4064 | **0.5028** |
-| Sphere | 0.1644 | 0.1584 |
-| Weierstrass | 0.3496 | 0.2572 |
+| BentCigar | 0.4136 | 0.4128 |
+| Discus | 0.4712 | 0.1844 |
+| Ellipsoid | 0.2084 | 0.0228 |
+| Katsuura | **0.6164** | **0.5404** |
+| Rastrigin | 0.328 | 0.384 |
+| Rosenbrock | 0.3388 | 0.1208 |
+| Schaffers | 0.1764 | 0.0572 |
+| Schwefel | 0.396 | 0.226 |
+| Sphere | 0.088 | 0.0352 |
+| Weierstrass | 0.314 | 0.1992 |
 
 ## Plots
+
+**for PPO, CR is fixed to 0.7**
 
 ##### BentCigar
 

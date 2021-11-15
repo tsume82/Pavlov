@@ -16,6 +16,8 @@ Probability of PPO trained policy outperforming CSA using 2 different metrics: A
 
 ## Plots
 
+**for PPO, CR is fixed to 0.7**
+
 ##### BentCigar
 
 ![](BentCigar/iDE_BentCigar_comparison.png)

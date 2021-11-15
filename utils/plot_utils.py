@@ -233,12 +233,14 @@ def compare_experiments(
 
 	evolution_length = len(exp_list[0][0]["fitness"])
 	popLength = len(exp_list[0][0]["fitness"][0])
-	actions_per_step = max([len(traj[0]["actions"][1]) for traj in exp_list])
+	actions_set = list(set([a for traj in exp_list for a in list(traj[0]["actions"][1].keys())]))
+	actions_per_step = len(actions_set)
 	min_fit = min_plot = np.inf
 	max_fit = max_plot = -np.inf
-	label_ax1 = []
 
 	fig, axs = plt.subplots(1+actions_per_step, sharex=True, figsize=(12, 3+actions_per_step*3))
+	actions_map = {k: i for i, k in enumerate(actions_set)}
+	getActionAxis = lambda key: axs[1+actions_map[key]]
 	fig.tight_layout(rect=(0.06, 0, 1, 0.98), h_pad=0)
 	fig.canvas.manager.set_window_title(title)
 	cmap = cm.get_cmap("tab20c")
@@ -290,12 +292,11 @@ def compare_experiments(
 				popmax = np.max(traj["fitness"], axis=1)
 				axs[0].fill_between(x, popmin, popmax, color=third_col, alpha=0.6)
 				axs[0].plot(x, popAvg, color=first_col, alpha=0.4)
-				for a, act_label in enumerate(action_labels):
-					axs[1+a].plot(x, actions[act_label], color=first_col, alpha=0.4)
+				for act_label in action_labels:
+					getActionAxis(act_label).plot(x, actions[act_label], color=first_col, alpha=0.4)
 				continue
 
 		# plot data
-		label_ax1 += [exp_names[i]+"-"+a for a in action_labels]
 		if plotMode == "adv":
 			axs[0].plot(x, np.average(avg, axis=0), color=first_col, label=exp_names[i], lw=2, zorder=3 * (i + 1) + 2)
 			axs[0].fill_between(
@@ -307,9 +308,9 @@ def compare_experiments(
 				zorder=3 * (i + 1) + 1,
 			)
 			axs[0].fill_between(x, min_traj, max_traj, color=third_col, alpha=1 / (1 + i), zorder=3 * (i + 1))
-			for a, act_label in enumerate(action_labels):
-				axs[1+a].plot(x, np.average(all_actions[act_label], axis=0), color=first_col, label=exp_names[i], lw=2)
-				axs[1+a].fill_between(
+			for act_label in action_labels:
+				getActionAxis(act_label).plot(x, np.average(all_actions[act_label], axis=0), color=first_col, label=exp_names[i], lw=2)
+				getActionAxis(act_label).fill_between(
 					x, np.min(all_actions[act_label], axis=0), np.max(all_actions[act_label], axis=0), color=second_col, alpha=1 / (1 + i)
 				)
 			min_plot = min(min_plot, min_fit)
@@ -330,11 +331,11 @@ def compare_experiments(
 				alpha=1 / (1 + i),
 				zorder=3 * (i + 1),
 			)
-			for a, act_label in enumerate(action_labels):
+			for act_label in action_labels:
 				actions_avg =  np.average(all_actions[act_label], axis=0)
 				actions_std = np.std(all_actions[act_label], axis=0)
-				axs[1+a].plot(x, actions_avg, color=first_col, lw=2, zorder=3 * (i + 1) + 2)
-				axs[1+a].fill_between(
+				getActionAxis(act_label).plot(x, actions_avg, color=first_col, lw=2, zorder=3 * (i + 1) + 2)
+				getActionAxis(act_label).fill_between(
 					x,
 					(actions_avg - actions_std),
 					(actions_avg + actions_std),
@@ -390,13 +391,13 @@ def compare_experiments(
 
 	axs[0].legend([Line2D([0],[0],color=cmap(i * 4)) for i, _ in enumerate(exp_names)], exp_names, prop = {"size": 12})
 
-	for a, action in enumerate(action_labels):
-		axs[1+a].legend([Line2D([0],[0],color=cmap(i * 4)) for i, l in enumerate(exp_names)], exp_names, prop = {"size": 12})
-		axs[1+a].yaxis.set_minor_locator(AutoMinorLocator(2))
-		axs[1+a].set_ylabel(action, labelpad=0)
-		axs[1+a].yaxis.label.set_color("forestgreen")
-		axs[1+a].grid(True, which="both")
-		axs[1+a].tick_params(axis="y", which="minor", grid_alpha=0.3)
+	for action in actions_set:
+		getActionAxis(action).legend([Line2D([0],[0],color=cmap(i * 4)) for i, l in enumerate(exp_names)], exp_names, prop = {"size": 12})
+		getActionAxis(action).yaxis.set_minor_locator(AutoMinorLocator(2))
+		getActionAxis(action).set_ylabel(action, labelpad=0)
+		getActionAxis(action).yaxis.label.set_color("forestgreen")
+		getActionAxis(action).grid(True, which="both")
+		getActionAxis(action).tick_params(axis="y", which="minor", grid_alpha=0.3)
 		
 
 	# compute statistical metrics
