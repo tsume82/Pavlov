@@ -55,9 +55,9 @@ funcs = [
     "Weierstrass",
 ]
 
-dir1 = "./experiments/DE ppo/"
+dir1 = "./experiments/DE ppo fixed CR/"
 dir2 = "./experiments/iDE/"
-name1 = "PPO"
+name1 = "PPO_fix_CR"
 name2 = "iDE"
 
 with open(dir1+"results_iDE.md", "w+") as f:

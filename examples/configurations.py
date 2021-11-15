@@ -123,16 +123,15 @@ ppo_de_configuration = {
         "solver_driver_args": [10, 10, 12, "best1bin"],
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverStateHistory"],
+        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
         "state_metrics_config": [
             [40, False, 1, True, False],
-            [{"F": {"max": [2], "min": [0]}}, 40],
-            [{"CR": {"max": [1], "min": [0]}}, 40]
+            [{"F": {"max": [2], "min": [0]}}, 40]
         ],
         "reward_metric": "Best",
         "reward_metric_config": [False, True],
         "memes_no": 1,
-        "action_space_config": {"F": {"max": 2, "min": 0}, "CR": {"max": 1, "min": 0}},
+        "action_space_config": {"F": {"max": 2, "min": 0}},
     },
 }
 pg_configuration = {
@@ -256,8 +255,8 @@ all_de_ppo_configurations = [
         },
     )
     for clip, fun in zip(
-        [100],
-        [16],
+        [10000, 2e5, 100, 100, 1e4, 10, 5000, 50, 100],
+        [11, 2, 23, 15, 8, 17, 20, 1, 16],
     )
 ]
 

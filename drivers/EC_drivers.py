@@ -260,7 +260,10 @@ class DEdriver(SolverDriver):
 		self.curr_step += 1
 		# F and CR can be both scalar or array of shape (dim,)
 		self.solver.scale = command["F"]
-		self.solver.cross_over_probability = command["CR"]
+		# self.solver.cross_over_probability = command["CR"]
+
+		if np.any(np.isnan(self.solver.scale)) or np.any(np.isnan(self.solver.cross_over_probability)):
+			print("NaN step size detected!!!")
 
 		next(self.solver)
 		self.solutions = copy.copy(self.solver.population)
@@ -283,6 +286,7 @@ class DEdriver(SolverDriver):
 			[[-5.12, 5.12]] * self.dim,
 			mutation=0.8,
 			strategy=self.strategy,
+			recombination=0.7,
 			popsize=max(self.pop_size // self.dim, 1),  # population = popsize * len(x) from the doc
 		)
 		self.solver.dither = None

@@ -233,7 +233,7 @@ def compare_experiments(
 
 	evolution_length = len(exp_list[0][0]["fitness"])
 	popLength = len(exp_list[0][0]["fitness"][0])
-	actions_per_step = len(exp_list[0][0]["actions"][1])
+	actions_per_step = max([len(traj[0]["actions"][1]) for traj in exp_list])
 	min_fit = min_plot = np.inf
 	max_fit = max_plot = -np.inf
 	label_ax1 = []
@@ -246,7 +246,7 @@ def compare_experiments(
 
 	# compute data to plot
 	for i, experiment in enumerate(exp_list):
-		action_labels = list(exp_list[0][0]["actions"][1].keys())
+		action_labels = list(exp_list[i][0]["actions"][1].keys())
 		avg = np.empty(shape=[0, evolution_length])
 		all_actions = {k:np.empty(shape=(0, evolution_length)) for k in action_labels}
 		all_best_during_run = np.empty(shape=[0, evolution_length])
