@@ -259,7 +259,7 @@ class DEdriver(SolverDriver):
 	def step(self, command):
 		self.curr_step += 1
 		# F and CR can be both scalar or array of shape (dim,)
-		# self.solver.scale = command["F"]
+		self.solver.scale = command["F"]
 		self.solver.cross_over_probability = command["CR"]
 
 		if np.any(np.isnan(self.solver.scale)) or np.any(np.isnan(self.solver.cross_over_probability)):

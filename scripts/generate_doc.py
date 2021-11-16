@@ -55,19 +55,19 @@ funcs = [
     "Weierstrass",
 ]
 
-dir1 = "./experiments/DE ppo fixed CR/"
-dir2 = "./experiments/jDE/"
-name1 = "PPO_fix_CR"
-name2 = "jDE"
+dir1 = "./experiments/DE ppo deltabest/"
+dir2 = "./experiments/iDE/"
+name1 = "PPO deltabest"
+name2 = "iDE"
 
-with open(dir1+"results_jDE.md", "w+") as f:
+with open(dir1+"results_iDE.md", "w+") as f:
 	f.write("## Comparison Table\n\nProbability of PPO trained policy outperforming CSA using 2 different metrics: Area under the curve and the absolute best of the run.\n")
 	f.write("| Function    | p({0} < {1}) with AUC metric | p({0} < {1}) with best of the run metric |\n".format(name1,name2))
 	f.write("| :---------- | ------------------------------ | ------------------------------- |\n")
 
 	titles = []
 	for fun in funcs:
-		title = "jDE {} comparison".format(fun)
+		title = "iDE {} comparison".format(fun)
 		titles.append(title.replace(" ", "_"))
 		auc, final_best = compare_experiments(
 			[dir1+fun,dir2+fun],

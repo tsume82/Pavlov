@@ -112,7 +112,7 @@ ppo_de_configuration = {
     "agent.algorithm.render_env": False,
     "agent.algorithm.num_workers": 0,
     "agent.algorithm.batch_mode": "complete_episodes",
-    "agent.algorithm.lr": 1e-05,
+    "agent.algorithm.lr": 5e-05,
     "agent.algorithm.train_batch_size": 200,
     "agent.algorithm.optimizer": "Adam",
     "agent.algorithm.vf_clip_param": 1e7,
@@ -123,15 +123,16 @@ ppo_de_configuration = {
         "solver_driver_args": [10, 10, 12, "best1bin"],
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
+        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory", "SolverStateHistory"],
         "state_metrics_config": [
             [40, False, 1, True, False],
-            [{"CR": {"max": [1], "min": [0]}}, 40]
+            [{"CR": {"max": [1], "min": [0]}}, 40],
+            [{"F": {"max": [2], "min": [0]}}, 40]
         ],
-        "reward_metric": "Best",
-        "reward_metric_config": [False, True],
+        "reward_metric": "DeltaBest",
+        "reward_metric_config": [False, True, True], # (maximize, use_best_of_run, normalize)
         "memes_no": 1,
-        "action_space_config": {"CR": {"max": 1, "min": 0}},
+        "action_space_config": {"CR": {"max": 1, "min": 0},"F": {"max": 2, "min": 0}},
     },
 }
 pg_configuration = {
@@ -251,12 +252,12 @@ all_de_ppo_configurations = [
         ppo_de_configuration,
         {
             "env.env_config": {"solver_driver_args": [10, 10, fun, "best1bin"]},
-            "agent.algorithm.vf_clip_param": clip,
+            "agent.algorithm.vf_clip_param": 10,
         },
     )
     for clip, fun in zip(
-        [100],
-        [16],
+        [50, 100],
+        [1, 16],
     )
 ]
 
