@@ -29,6 +29,7 @@ def train_agent(agent_config, folder="./.checkpoints", **kwargs):
 	agent = AgentBuilder.build(agent_config)
 	if checkpoint:
 		agent.load(folder +"/"+ checkpoint)
+		print("loaded {}".format(folder +"/"+ checkpoint))
 	p = plot_episodes()
 	while episodes < max_episodes:
 		res = agent.train()
@@ -84,7 +85,7 @@ def test_multiple_times(agent_config, folder="./.checkpoints", **kwargs):
 		agent.act()
 		experiment.append(agent.env.trajectory)
 		agent.env.reset()
-		agent.reset() # Really slow and sometimes not needed
+		# agent.reset() # Really slow and sometimes not needed
 	title = agent_config["env.env_config"].get("solver_driver_args", "")[2]
 	if kwargs.get("save_exp", False):
 		save_experiment(experiment, folder, name=kwargs["save_exp"])

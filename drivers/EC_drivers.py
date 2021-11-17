@@ -133,7 +133,7 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
 
 
 class CMAdriver(SolverDriver):
-	def __init__(self, dim, pop_size, object_function="sphere", init_sigma=0.5, max_steps=None, seed=None) -> None:
+	def __init__(self, dim, pop_size, object_function="sphere", init_sigma=0.5, seed=None) -> None:
 		super().__init__()
 		super().set_seed(seed)
 		self.dim = dim
@@ -143,7 +143,6 @@ class CMAdriver(SolverDriver):
 			if not isinstance(object_function, (str, int))
 			else loadFunction(object_function, lib="cma")
 		)
-		self.max_steps = max_steps
 		self.curr_step = 0
 		self.lower_bound = None
 		self.upper_bound = None
@@ -242,7 +241,7 @@ class DEdriver(SolverDriver):
 	"""
 
 	def __init__(
-		self, dim, pop_size, object_function="sphere", strategy="best1bin", F_init=0.8, CR_init=0.9
+		self, dim, pop_size, object_function="sphere", strategy="best1bin", sample=None, F_init=0.8, CR_init=0.7
 	) -> None:
 		super().__init__()
 		self.dim = dim
@@ -250,6 +249,8 @@ class DEdriver(SolverDriver):
 		self.strategy = strategy
 		self.F_init = F_init
 		self.CR_init = CR_init
+		assert sample in [None, "normal", "uniform"]
+		self.sample = sample
 		self.obj_fun = (
 			object_function
 			if not isinstance(object_function, (str, int))
@@ -257,10 +258,18 @@ class DEdriver(SolverDriver):
 		)
 
 	def step(self, command):
-		self.curr_step += 1
 		# F and CR can be both scalar or array of shape (dim,)
-		self.solver.scale = command["F"]
-		self.solver.cross_over_probability = command["CR"]
+
+		self.curr_step += 1
+		if self.sample:
+			F, CR = self.sample_distr(
+				command["F_mean"], command["F_stdev"], command["CR_mean"], command["CR_stdev"]
+			)
+			self.solver.scale = F
+			self.solver.cross_over_probability = CR
+		else:
+			self.solver.scale = command["F"]
+			self.solver.cross_over_probability = command["CR"]
 
 		if np.any(np.isnan(self.solver.scale)) or np.any(np.isnan(self.solver.cross_over_probability)):
 			print("NaN step size detected!!!")
@@ -272,32 +281,59 @@ class DEdriver(SolverDriver):
 		return (
 			self.solutions,
 			self.fitness,
-			{"F": np.array(self.solver.scale), "CR": np.array(self.solver.cross_over_probability)},
+			{
+				"F": np.array(self.solver.scale),
+				"CR": np.array(self.solver.cross_over_probability),
+				"F_mean": command["F_mean"],
+				"F_stdev": command["F_stdev"],
+				"CR_mean": command["CR_mean"],
+				"CR_stdev": command["CR_stdev"],
+			},
 		)
 
 	def is_done(self):
 		pass
 
-	def reset(self, cond):
+	def reset(self, cond={}):
 		super().reset()
 		self.curr_step = 0
 		self.solver = DifferentialEvolutionSolver(
 			self.obj_fun,
 			[[-5.12, 5.12]] * self.dim,
-			mutation=0.8,
+			mutation=self.F_init,
 			strategy=self.strategy,
-			recombination=0.7,
+			recombination=self.CR_init,
 			popsize=max(self.pop_size // self.dim, 1),  # population = popsize * len(x) from the doc
 		)
 		self.solver.dither = None
+		if self.sample:
+			F, CR = self.sample_distr(1, 1, 0.5, 1)
+			self.solver.scale = F
+			self.solver.cross_over_probability = CR
 		next(self.solver)
 		self.solutions = self.solver.population
 		self.fitness = self.solver.population_energies
 		return (
 			self.solutions,
 			self.fitness,
-			{"F": np.array([self.solver.scale]), "CR": np.array([self.solver.cross_over_probability])},
+			{
+				"F": np.array([self.solver.scale]),
+				"CR": np.array([self.solver.cross_over_probability]),
+				"F_mean": np.array([1]),
+				"F_stdev": np.array([1]),
+				"CR_mean": np.array([0.5]),
+				"CR_stdev": np.array([1]),
+			},
 		)
+
+	def sample_distr(self, F_mean, F_stdev, CR_mean, CR_stdev):
+		if self.sample == "normal":
+			F = np.random.normal(loc=F_mean, scale=F_stdev, size=self.pop_size)
+			CR = np.random.normal(loc=CR_mean, scale=CR_stdev, size=self.pop_size)
+		elif self.sample == "uniform":
+			F = np.random.uniform(loc=F_mean, scale=F_stdev, size=self.pop_size)
+			CR = np.random.uniform(loc=CR_mean, scale=CR_stdev, size=self.pop_size)
+		return F, CR
 
 	def initialized(self):
 		return True

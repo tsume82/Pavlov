@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+
 sys.path.insert(1, "./")
-from drivers import RastriginGADriver, CMAdriver
+from drivers import RastriginGADriver, CMAdriver, DEdriver
 
 class plot_helper:
 	def __init__(self) -> None:
@@ -45,18 +46,21 @@ class plot_helper:
 		plt.show()
 		return max_fitness, min_fitness, average_fitness
 
+
 if __name__ == "__main__":
-	driver = CMAdriver(10, 10, init_sigma=1.63, object_function=1, max_steps=None, seed=42)
+	# driver = CMAdriver(10, 10, init_sigma=1.63, object_function=1, max_steps=None, seed=42)
+	driver = DEdriver(10, 10, object_function=12, sample="normal")
 	driver.initialize()
 	driver.reset()
-	p=plot_helper()
+	# p=plot_helper()
 	for i in range(100):
-		pop, fit, _ = driver.step({"step_size": 0.5})
-		maximum, minimum, avg = p.plot(i, fit)
+		command = {}
+		pop, fit, _ = driver.step(command)
+		# maximum, minimum, avg = p.plot(i, fit)
 		# driver.render(i==99)
 
-	print("Max:\t",maximum)
-	print("Min:\t",minimum)
-	print("Avg:\t",avg)
-	plt.ioff()
-	plt.show()
+	# print("Max:\t",maximum)
+	# print("Min:\t",minimum)
+	# print("Avg:\t",avg)
+	# plt.ioff()
+	# plt.show()

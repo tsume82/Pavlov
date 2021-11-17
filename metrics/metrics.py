@@ -161,31 +161,30 @@ class DifferenceOfBest(Metric):
 	name = "DifferenceOfBest"
 	MetricProvider.register_metric(name, __qualname__)
 
-	def __init__(self, history_max_length=1, maximize=True, fitness_dim=1, normalize=True, normBetween0and1=False):
+	def __init__(self, history_max_length=1, maximize=True, fitness_dim=1, relative=True, normalize=False):
 		self.prec_best = None
 		self.maximize = maximize
 		self.fitness_dim = fitness_dim
+		self.relative = relative
 		self.normalize = normalize
-		self.normBetween0and1 = normBetween0and1  # it works only if ∀x ∈ fitness | x>0
 		self.history_max_length = history_max_length
 		self.history = []
 
 	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
 		if self.prec_best is None:
 			self.prec_best = np.nanmax(fitness, axis=0) if self.maximize else np.nanmin(fitness, axis=0)
-			return [np.array(0)]
+			self.history.insert(0, np.array(0))
 		else:
 			curr_best = np.nanmax(fitness, axis=0) if self.maximize else np.nanmin(fitness, axis=0)
-			# TODO set gradient sign based on the maximization/minimization problem?
-			grad = curr_best - self.prec_best
+			delta = curr_best - self.prec_best
 
-			if self.normalize:
-				if self.normBetween0and1:
-					grad /= np.amax([curr_best, self.prec_best]) / 1.99
+			if self.relative:
+				if self.normalize:
+					delta /= abs(curr_best - self.prec_best) + abs(self.prec_best) + 1e-5
 				else:
-					grad /= self.prec_best
+					delta /= abs(self.prec_best) + 1e-3
 
-			self.history.insert(0, np.array(grad.item()))  # Repeated needs a list, Box needs a np.array as a scalar
+			self.history.insert(0, np.array(delta.item()))  # Repeated needs a list, Box needs a np.array as a scalar
 			if len(self.history) > self.history_max_length:
 				self.history.pop()
 
@@ -201,13 +200,13 @@ class DifferenceOfBest(Metric):
 		low = -np.inf
 		high = np.inf
 
-		if self.normalize:
-			if self.normBetween0and1:
+		if self.relative:
+			if self.normalize:
 				low = -1
 				high = 1
 			else:
-				low = -1e7
-				high = 1e7
+				low = -1e6
+				high = 1e6
 
 		box = spaces.Box(low=low, high=high, shape=([]))
 		return Repeated(box, self.history_max_length)

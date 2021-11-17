@@ -3,8 +3,6 @@ from matplotlib import rcParams, cm
 from matplotlib.lines import Line2D
 from matplotlib.ticker import AutoMinorLocator, StrMethodFormatter, ScalarFormatter, LinearLocator, LogLocator
 import numpy as np
-from numpy.matrixlib.defmatrix import matrix
-from utils.array_utils import getScalar
 from os.path import exists, splitext, dirname, isdir
 import json
 import pickle
@@ -234,6 +232,7 @@ def compare_experiments(
 	evolution_length = len(exp_list[0][0]["fitness"])
 	popLength = len(exp_list[0][0]["fitness"][0])
 	actions_set = list(set([a for traj in exp_list for a in list(traj[0]["actions"][1].keys())]))
+	actions_set.sort()
 	actions_per_step = len(actions_set)
 	min_fit = min_plot = np.inf
 	max_fit = max_plot = -np.inf
