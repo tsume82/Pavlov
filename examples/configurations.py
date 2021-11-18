@@ -120,18 +120,18 @@ ppo_de_configuration = {
 	"env.env_class": "SchedulerPolicyRayEnvironment",
 	"env.env_config": {
 		"solver_driver": "DEdriver",
-		"solver_driver_args": [10, 10, 8, "best1bin", "normal"],
+		"solver_driver_args": [10, 10, 8, "best1bin", "uniform"],
 		"maximize": False,
 		"steps": 50,
-		"state_metrics_names": ["DifferenceOfBest","SolverStateHistory",],
+		"state_metrics_names": ["DifferenceOfBest","SolverStateHistory"],
 		"state_metrics_config": [
 			[40, False, 1, True, False],
 			[
 				{
-					"F_mean": {"max": [2], "min": [0]},
-					"F_stdev": {"max": [1], "min": [0]},
-					"CR_mean": {"max": [1], "min": [0]},
-					"CR_stdev": {"max": [1], "min": [0]},
+					"F_min": {"max": [2], "min": [0]},
+					"F_max": {"max": [2], "min": [0]},
+					"CR_min": {"max": [1], "min": [0]},
+					"CR_max": {"max": [1], "min": [0]},
 				},
 				40,
 			],
@@ -140,10 +140,10 @@ ppo_de_configuration = {
 		"reward_metric_config": [False, True, True],  # (maximize, use_best_of_run, normalize)
 		"memes_no": 1,
 		"action_space_config": {
-			"F_mean": {"max": 2, "min": 0},
-			"F_stdev": {"max": 1, "min": 0},
-			"CR_mean": {"max": 1, "min": 0},
-			"CR_stdev": {"max": 1, "min": 0},
+					"F_min": {"max": 2, "min": 0},
+					"F_max": {"max": 2, "min": 0},
+					"CR_min": {"max": 1, "min": 0},
+					"CR_max": {"max": 1, "min": 0},
 		},
 	},
 }
@@ -263,7 +263,7 @@ all_de_ppo_configurations = [
 	update_and_return(
 		ppo_de_configuration,
 		{
-			"env.env_config": {"solver_driver_args": [10, 10, fun, "best1bin", "normal"]},
+			"env.env_config": {"solver_driver_args": [10, 10, fun, "best1bin", "uniform"]},
 			"agent.algorithm.vf_clip_param": 10,
 		},
 	)

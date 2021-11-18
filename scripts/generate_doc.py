@@ -2,6 +2,7 @@ import sys
 
 sys.path.insert(1, "./")
 from utils.plot_utils import plot_experiment, compare_experiments
+from utils.config_utils import loadConfiguration
 
 funcs = [
     "AttractiveSector_5D",
@@ -42,6 +43,8 @@ funcs = [
     "GG21hi_20D",
 ]
 
+#▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚
+#region Document parameters:
 funcs = [
     "BentCigar",
     "Discus",
@@ -55,19 +58,44 @@ funcs = [
     "Weierstrass",
 ]
 
-dir1 = "./experiments/DE ppo normal_sampled/"
+dir1 = "./experiments/DE ppo uniform_sampled/" # the document will be saved in this folder and the configuration will be taken from here
 dir2 = "./experiments/jDE/"
-name1 = "PPO normal sampled"
+name1 = "PPO with F and CR uniformly sampled"
 name2 = "jDE"
+# endregion
+#▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚
 
-with open(dir1+"results_jDE.md", "w+") as f:
-	f.write("## Comparison Table\n\nProbability of PPO trained policy outperforming CSA using 2 different metrics: Area under the curve and the absolute best of the run.\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚
+# region writing the markdown
+filename = "results_{0}_vs_{1}.md".format(name1, name2).replace(" ","_")
+with open(dir1+filename, "w+") as f:
+
+	# write comparison tables
+	f.write("## Comparison Table\n")
 	f.write("| Function    | p({0} < {1}) with AUC metric | p({0} < {1}) with best of the run metric |\n".format(name1,name2))
 	f.write("| :---------- | ------------------------------ | ------------------------------- |\n")
 
 	titles = []
 	for fun in funcs:
-		title = "jDE {} comparison".format(fun)
+		title = "{0} vs {1}: {2} comparison".format(name1, name2, fun)
 		titles.append(title.replace(" ", "_"))
 		auc, final_best = compare_experiments(
 			[dir1+fun,dir2+fun],
@@ -84,7 +112,9 @@ with open(dir1+"results_jDE.md", "w+") as f:
 			auc if auc < 0.5 else "**{}**".format(auc), 
 			final_best if final_best < 0.5 else "**{}**".format(final_best), 
 			))
-	
+
+
+	# write plots
 	f.write("\n## Plots\n\n")
 
 	for fun, title in zip(funcs, titles):
@@ -92,3 +122,19 @@ with open(dir1+"results_jDE.md", "w+") as f:
 		f.write("![]({}/{}.png)\n\n".format(fun, title))
 
 
+	# write configuration (if it exists)
+	config = None
+	try:
+		config = loadConfiguration(dir1+funcs[0])
+	except:
+		print("no configuration loaded")
+
+	if config is not None:
+		import json
+		f.write("\n## Configuration\n\n")
+		f.write("```json\n")
+		config_string = json.dumps(config, indent=4)
+		f.write(config_string)
+		f.write("\n```")
+# endregion
+#▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚

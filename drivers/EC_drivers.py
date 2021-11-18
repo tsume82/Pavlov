@@ -262,17 +262,15 @@ class DEdriver(SolverDriver):
 
 		self.curr_step += 1
 		if self.sample:
-			F, CR = self.sample_distr(
-				command["F_mean"], command["F_stdev"], command["CR_mean"], command["CR_stdev"]
-			)
+			F, CR = self.sample_distr(command)
 			self.solver.scale = F
 			self.solver.cross_over_probability = CR
 		else:
 			self.solver.scale = command["F"]
 			self.solver.cross_over_probability = command["CR"]
 
-		if np.any(np.isnan(self.solver.scale)) or np.any(np.isnan(self.solver.cross_over_probability)):
-			print("NaN step size detected!!!")
+		if np.any(np.isnan(list(command.values()))):
+			print("NaN action detected!!!")
 
 		next(self.solver)
 		self.solutions = copy.copy(self.solver.population)
@@ -284,10 +282,7 @@ class DEdriver(SolverDriver):
 			{
 				"F": np.array(self.solver.scale),
 				"CR": np.array(self.solver.cross_over_probability),
-				"F_mean": command["F_mean"],
-				"F_stdev": command["F_stdev"],
-				"CR_mean": command["CR_mean"],
-				"CR_stdev": command["CR_stdev"],
+				**command
 			},
 		)
 
@@ -307,7 +302,18 @@ class DEdriver(SolverDriver):
 		)
 		self.solver.dither = None
 		if self.sample:
-			F, CR = self.sample_distr(1, 1, 0.5, 1)
+			command = {
+				"F_mean": np.array([1]),
+				"F_stdev": np.array([1]),
+				"CR_mean": np.array([0.5]),
+				"CR_stdev": np.array([1]),
+			} if self.sample == "normal" else {
+				"F_min": np.array([0]),
+				"F_max": np.array([2]),
+				"CR_min": np.array([0]),
+				"CR_max": np.array([1]),
+			}
+			F, CR = self.sample_distr(command)
 			self.solver.scale = F
 			self.solver.cross_over_probability = CR
 		next(self.solver)
@@ -319,20 +325,17 @@ class DEdriver(SolverDriver):
 			{
 				"F": np.array([self.solver.scale]),
 				"CR": np.array([self.solver.cross_over_probability]),
-				"F_mean": np.array([1]),
-				"F_stdev": np.array([1]),
-				"CR_mean": np.array([0.5]),
-				"CR_stdev": np.array([1]),
+				**command
 			},
 		)
 
-	def sample_distr(self, F_mean, F_stdev, CR_mean, CR_stdev):
+	def sample_distr(self, command):
 		if self.sample == "normal":
-			F = np.random.normal(loc=F_mean, scale=F_stdev, size=self.pop_size)
-			CR = np.random.normal(loc=CR_mean, scale=CR_stdev, size=self.pop_size)
+			F = np.random.normal(loc=command["F_mean"], scale=command["F_stdev"], size=self.pop_size)
+			CR = np.random.normal(loc=command["CR_mean"], scale=command["CR_stdev"], size=self.pop_size)
 		elif self.sample == "uniform":
-			F = np.random.uniform(loc=F_mean, scale=F_stdev, size=self.pop_size)
-			CR = np.random.uniform(loc=CR_mean, scale=CR_stdev, size=self.pop_size)
+			F = np.random.uniform(low=command["F_min"], high=command["F_max"], size=self.pop_size)
+			CR = np.random.uniform(low=command["CR_min"], high=command["CR_max"], size=self.pop_size)
 		return F, CR
 
 	def initialized(self):

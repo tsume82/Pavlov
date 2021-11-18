@@ -108,3 +108,9 @@ venv.bak/
 .logs
 .plots
 .checkpoints
+
+# personal files
+commands.bat
+compare_tests.bat
+test.bat
+__rename.py
