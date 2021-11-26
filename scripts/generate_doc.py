@@ -3,6 +3,7 @@ import sys
 sys.path.insert(1, "./")
 from utils.plot_utils import plot_experiment, compare_experiments
 from utils.config_utils import loadConfiguration
+from os.path import isdir
 
 funcs = [
     "AttractiveSector_5D",
@@ -58,10 +59,10 @@ funcs = [
     "Weierstrass",
 ]
 
-dir1 = "./experiments/DE ppo uniform_sampled/" # the document will be saved in this folder and the configuration will be taken from here
-dir2 = "./experiments/jDE/"
-name1 = "PPO with F and CR uniformly sampled"
-name2 = "jDE"
+dir1 = "./experiments/CMA ppo deltabest/" # the document will be saved in this folder and the configuration will be taken from here
+dir2 = "./experiments/CMA ppo paper model/"
+name1 = "PPO with deltabest"
+name2 = "PPO without deltabest"
 # endregion
 #▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚
 
@@ -97,21 +98,22 @@ with open(dir1+filename, "w+") as f:
 	for fun in funcs:
 		title = "{0} vs {1}: {2} comparison".format(name1, name2, fun)
 		titles.append(title.replace(" ", "_"))
-		auc, final_best = compare_experiments(
-			[dir1+fun,dir2+fun],
-			[name1, name2],
-			title=title,
-			logyscale=True,
-			logxscale=False,
-			ylim=None,
-			plotMode="std",
-			save=dir1+fun+"/{}.png".format(title.replace(" ", "_")),
-		)
-		f.write("| {} | {} | {} |\n".format(
-			fun, 
-			auc if auc < 0.5 else "**{}**".format(auc), 
-			final_best if final_best < 0.5 else "**{}**".format(final_best), 
-			))
+		if isdir(dir2+fun) and isdir(dir1+fun):
+			auc, final_best = compare_experiments(
+				[dir1+fun,dir2+fun],
+				[name1, name2],
+				title=title,
+				logyscale=True,
+				logxscale=False,
+				ylim=None,
+				plotMode="std",
+				save=dir1+fun+"/{}.png".format(title.replace(" ", "_")),
+			)
+			auc = auc if auc < 0.5 else "**{}**".format(auc)
+			final_best = final_best if final_best < 0.5 else "**{}**".format(final_best)
+			f.write("| {} | {} | {} |\n".format(fun, auc, final_best))
+		else:
+			f.write("| {} | {} | {} |\n".format(fun, "---", "---"))
 
 
 	# write plots

@@ -184,7 +184,7 @@ class CMAdriver(SolverDriver):
 		)
 
 	def is_done(self):
-		return False if self.max_steps == None else self.curr_step >= self.max_steps
+		return False
 
 	def reset(self, condition={}):
 		super().reset()

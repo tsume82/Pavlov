@@ -3,6 +3,7 @@ from agents import AgentBuilder
 from utils.plot_utils import plot_episodes, plot_experiment, save_experiment
 from utils.config_utils import loadConfiguration, saveConfiguration
 import warnings
+import traceback
 warnings.filterwarnings("ignore")
 
 from os import listdir, makedirs, environ
@@ -21,9 +22,9 @@ def getLastCheckpoint(folder):
 	return last
 
 def train_agent(agent_config, folder="./.checkpoints", **kwargs):
-	max_episodes = kwargs.get("max_episodes", 12000)
+	max_episodes = kwargs.get("max_episodes", 5000)
 	checkpoint = kwargs.get("checkpoint", None)
-	episodes_to_checkpoint = kwargs.get("episodes_to_checkpoint", 3000)
+	episodes_to_checkpoint = kwargs.get("episodes_to_checkpoint", 1000)
 
 	episodes = 0
 	agent = AgentBuilder.build(agent_config)
@@ -119,7 +120,10 @@ def main(agent_config, train=True, folder="./.checkpoints", **kwargs):
 
 	if isinstance(agent_config, list):
 		for _config in agent_config:
-			parse_config_and_run(_config)
+			try:
+				parse_config_and_run(_config)
+			except Exception as e:
+				traceback.print_exc()
 	else:
 		parse_config_and_run(agent_config)
 
@@ -129,9 +133,9 @@ if __name__ == "__main__":
 	parser.add_argument("train", nargs='?', type=str, default=True, help="train: '1', 'true' or 'train' for training mode, otherwise test mode is selected")
 	parser.add_argument("--dir", "-d", type=str, default="", help="directory: the directory of the experiment")
 	parser.add_argument("--multi", "-m", dest="num_runs", type=int, default=None, help="multiexperiment: run multiple runs of test")
-	parser.add_argument("--max_ep", dest="max_episodes", type=int, help="max_episodes: maximum number of episodes in training", default=3000)
+	parser.add_argument("--max_ep", dest="max_episodes", type=int, help="max_episodes: maximum number of episodes in training", default=5000)
 	parser.add_argument("--checkpoint", "-cp", dest="checkpoint", type=str, help="checkpoint: the name of the checkpoint file to test or training starting from that checkpoint. If no checkpoint is passed, automatically is choosen the last one during test", default=None)
-	parser.add_argument("--ep_to_cp", dest="episodes_to_checkpoint", type=int, help="episodes_to_checkpoint: the number of episodes before saving a checkpoint", default=3000)
+	parser.add_argument("--ep_to_cp", dest="episodes_to_checkpoint", type=int, help="episodes_to_checkpoint: the number of episodes before saving a checkpoint", default=1000)
 	parser.add_argument("--config","-c", nargs="?", default=False, const=True, help="config: the configuraton file of the experiment, if the flag has no arguments the config.json file in the experiment directory is used")
 	parser.add_argument("--multi-config","-mc", dest="multi_config", default=None, help="multi config: test or train from multiple configurations")
 	parser.add_argument("--save", "-s", dest="save_exp", nargs="?", default=False, const=True, help="save the experiment")

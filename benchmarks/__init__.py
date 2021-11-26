@@ -1,5 +1,11 @@
 import benchmarks.benchmarks as functions
-import benchmarks.CEC2017.cec2017.functions as CEC2017
+
+try:
+	import benchmarks.CEC2017.cec2017.functions as CEC2017
+except ModuleNotFoundError as err:
+	CEC2017 = None
+	print(err)
+	print("Have you intalled CEC2017 library? Try to run:\n> git submodule update --remote")
 
 try:
 	import cocoex as COCO
