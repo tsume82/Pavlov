@@ -199,7 +199,7 @@ class CMAdriver(SolverDriver):
 		return (
 			self.solutions,
 			self.fitness,
-			{"step_size": np.array(self.init_sigma), "ps": np.array(0), "es": self.es, "curr_step": self.curr_step},
+			{"step_size": np.array(self.init_sigma, dtype=np.float32), "ps": np.array(0, dtype=np.float32), "es": self.es, "curr_step": self.curr_step},
 		)
 
 	def set_condition(self, condition):

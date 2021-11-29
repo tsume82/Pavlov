@@ -11,6 +11,7 @@ try:
 	import cocoex as COCO
 	# info about the functions: https://hal.inria.fr/inria-00362633v2/document
 except ModuleNotFoundError as err:
+	COCO = None
 	print(err)
 	print("Have you built COCO library? Try to run:\n> git submodule update --remote\n> cd benchmarks/COCO\n> python do.py run-python")
 

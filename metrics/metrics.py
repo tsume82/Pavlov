@@ -173,7 +173,7 @@ class DifferenceOfBest(Metric):
 	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
 		if self.prec_best is None:
 			self.prec_best = np.nanmax(fitness, axis=0) if self.maximize else np.nanmin(fitness, axis=0)
-			self.history.insert(0, np.array(0))
+			self.history.insert(0, np.array(0, dtype=np.float32))
 		else:
 			curr_best = np.nanmax(fitness, axis=0) if self.maximize else np.nanmin(fitness, axis=0)
 			delta = curr_best - self.prec_best
