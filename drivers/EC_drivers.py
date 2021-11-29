@@ -280,8 +280,8 @@ class DEdriver(SolverDriver):
 			self.solutions,
 			self.fitness,
 			{
-				"F": np.array(self.solver.scale),
-				"CR": np.array(self.solver.cross_over_probability),
+				"F": np.array(self.solver.scale, dtype=np.float32),
+				"CR": np.array(self.solver.cross_over_probability, dtype=np.float32),
 				**command
 			},
 		)
@@ -303,15 +303,15 @@ class DEdriver(SolverDriver):
 		self.solver.dither = None
 		if self.sample:
 			command = {
-				"F_mean": np.array([1]),
-				"F_stdev": np.array([1]),
-				"CR_mean": np.array([0.5]),
-				"CR_stdev": np.array([1]),
+				"F_mean": np.array([1], dtype=np.float32),
+				"F_stdev": np.array([1], dtype=np.float32),
+				"CR_mean": np.array([0.5], dtype=np.float32),
+				"CR_stdev": np.array([1], dtype=np.float32),
 			} if self.sample == "normal" else {
-				"F_min": np.array([0]),
-				"F_max": np.array([2]),
-				"CR_min": np.array([0]),
-				"CR_max": np.array([1]),
+				"F_min": np.array([0], dtype=np.float32),
+				"F_max": np.array([2], dtype=np.float32),
+				"CR_min": np.array([0], dtype=np.float32),
+				"CR_max": np.array([1], dtype=np.float32),
 			}
 			F, CR = self.sample_distr(command)
 			self.solver.scale = F
