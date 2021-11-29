@@ -278,15 +278,51 @@ extended_ppo_configurations = [
 		ppo_cma_es_configuration,
 		{
 			"env.env_config": {"solver_driver_args": [dim, 10, fun, 0.5]},
-			"agent.algorithm.vf_clip_param": clip,
 		},
 	)
-	for clip, fun, dim in zip(
-		[1000, 100, 500, 1000],
-		[21, 22, 22, 22],
-		[20, 5, 10, 20],
+	for fun, dim in zip(
+		[6, 6, 6, 4, 4, 4, 19, 19, 19, 14, 14, 14, 5, 5, 5, 13, 13, 13, 7, 7, 7, 9, 9, 9, 18, 18, 18, 24, 24, 24, 21, 21, 21, 22, 22, 22],
+		[5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20],
 	)
 ]
+
+extended_ppo_configurations1 = extended_ppo_configurations[0]
+extended_ppo_configurations2 = extended_ppo_configurations[1]
+extended_ppo_configurations3 = extended_ppo_configurations[2]
+extended_ppo_configurations4 = extended_ppo_configurations[3]
+extended_ppo_configurations5 = extended_ppo_configurations[4]
+extended_ppo_configurations6 = extended_ppo_configurations[5]
+extended_ppo_configurations7 = extended_ppo_configurations[6]
+extended_ppo_configurations8 = extended_ppo_configurations[7]
+extended_ppo_configurations9 = extended_ppo_configurations[8]
+extended_ppo_configurations10 = extended_ppo_configurations[9]
+extended_ppo_configurations11 = extended_ppo_configurations[10]
+extended_ppo_configurations12 = extended_ppo_configurations[11]
+extended_ppo_configurations13 = extended_ppo_configurations[12]
+extended_ppo_configurations14 = extended_ppo_configurations[13]
+extended_ppo_configurations15 = extended_ppo_configurations[14]
+extended_ppo_configurations16 = extended_ppo_configurations[15]
+extended_ppo_configurations17 = extended_ppo_configurations[16]
+extended_ppo_configurations18 = extended_ppo_configurations[17]
+extended_ppo_configurations19 = extended_ppo_configurations[18]
+extended_ppo_configurations20 = extended_ppo_configurations[19]
+extended_ppo_configurations21 = extended_ppo_configurations[20]
+extended_ppo_configurations22 = extended_ppo_configurations[21]
+extended_ppo_configurations23 = extended_ppo_configurations[22]
+extended_ppo_configurations24 = extended_ppo_configurations[23]
+extended_ppo_configurations25 = extended_ppo_configurations[24]
+extended_ppo_configurations26 = extended_ppo_configurations[25]
+extended_ppo_configurations27 = extended_ppo_configurations[26]
+extended_ppo_configurations28 = extended_ppo_configurations[27]
+extended_ppo_configurations29 = extended_ppo_configurations[28]
+extended_ppo_configurations30 = extended_ppo_configurations[29]
+extended_ppo_configurations31 = extended_ppo_configurations[30]
+extended_ppo_configurations32 = extended_ppo_configurations[31]
+extended_ppo_configurations33 = extended_ppo_configurations[32]
+extended_ppo_configurations34 = extended_ppo_configurations[33]
+extended_ppo_configurations35 = extended_ppo_configurations[34]
+extended_ppo_configurations36 = extended_ppo_configurations[35]
+
 
 # dict of all configurations in this file
 ALL_CONFIGURATIONS = {k: v for k, v in locals().items() if not "__" in k and isinstance(v, (dict, list))}

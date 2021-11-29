@@ -49,10 +49,7 @@ def train_agent(agent_config, folder="./.checkpoints", **kwargs):
 			p.save(folder + "/train.svg", agent_config)
 			saveConfiguration(agent_config, folder)
 
-	if not kwargs.get("multi_config", False):
-		p.show()
-	else:
-		p.close()
+	p.close()
 
 
 def test_agent(agent_config, folder="./.checkpoints", **kwargs):
