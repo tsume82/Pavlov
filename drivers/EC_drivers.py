@@ -301,6 +301,7 @@ class DEdriver(SolverDriver):
 			popsize=max(self.pop_size // self.dim, 1),  # population = popsize * len(x) from the doc
 		)
 		self.solver.dither = None
+		command = {}
 		if self.sample:
 			command = {
 				"F_mean": np.array([1], dtype=np.float32),

@@ -94,12 +94,17 @@ def create_folder_and_train(agent_config, folder, **kwargs):
 	if kwargs.get("checkpoint", None):
 		train_agent(agent_config, folder, **kwargs)
 	else:
-		dirs = [f for f in listdir(folder) if isdir(join(folder, f))]
-		if len(dirs) == 0:
-			next = "/1"
+		dir = kwargs.get("create_dir", None)
+		if dir:
+			makedirs(folder+dir)
+			next = dir
 		else:
-			next = "/"+str(max([int(d) for d in dirs])+1)
-		makedirs(folder+next)
+			dirs = [f for f in listdir(folder) if isdir(join(folder, f))]
+			if len(dirs) == 0:
+				next = "/1"
+			else:
+				next = "/"+str(max([int(d) for d in dirs])+1)
+			makedirs(folder+next)
 		train_agent(agent_config, folder+next, **kwargs)
 
 def main(agent_config, train=True, folder="./.checkpoints", **kwargs):
@@ -135,6 +140,7 @@ if __name__ == "__main__":
 	parser.add_argument("--ep_to_cp", dest="episodes_to_checkpoint", type=int, help="episodes_to_checkpoint: the number of episodes before saving a checkpoint", default=1000)
 	parser.add_argument("--config","-c", nargs="?", default=False, const=True, help="config: the configuraton file of the experiment, if the flag has no arguments the config.json file in the experiment directory is used")
 	parser.add_argument("--multi-config","-mc", dest="multi_config", default=None, help="multi config: test or train from multiple configurations")
+	parser.add_argument("--create-dir","-cd", dest="create_dir", default=None, help="create dir with this name and save here the training")
 	parser.add_argument("--save", "-s", dest="save_exp", nargs="?", default=False, const=True, help="save the experiment")
 	parser.add_argument("--noplot", "-np", dest="plot", action="store_false", default=True, help="do no plot during testing")
 	args = parser.parse_args()

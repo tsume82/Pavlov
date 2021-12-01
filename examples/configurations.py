@@ -114,37 +114,21 @@ ppo_de_configuration = {
 	"agent.algorithm.lr": 5e-05,
 	"agent.algorithm.train_batch_size": 200,
 	"agent.algorithm.optimizer": "Adam",
-	"agent.algorithm.vf_clip_param": 1e7,
+	"agent.algorithm.vf_clip_param": 10,
 	"agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50, 50]},
 	"env.env_class": "SchedulerPolicyRayEnvironment",
 	"env.env_config": {
 		"solver_driver": "DEdriver",
-		"solver_driver_args": [10, 10, 8, "best1bin", "uniform"],
+		"solver_driver_args": [10, 10, 8, "best1bin"],
 		"maximize": False,
 		"steps": 50,
-		"state_metrics_names": ["DifferenceOfBest","SolverStateHistory"],
-		"state_metrics_config": [
-			[40, False, 1, True, False],
-			[
-				{
-					"F_min": {"max": [2], "min": [0]},
-					"F_max": {"max": [2], "min": [0]},
-					"CR_min": {"max": [1], "min": [0]},
-					"CR_max": {"max": [1], "min": [0]},
-				},
-				40,
-			],
-		],
+		"state_metrics_names": ["DifferenceOfBest","SolverStateHistory","SolverStateHistory"],
+		"state_metrics_config": [[40, False, 1, True, True], [{"CR": {"max": [1], "min": [0]}}, 40], [{"F": {"max": [2], "min": [0]}}, 40]],
 		"reward_metric": "DeltaBest",
 		"reward_metric_config": [False, True, True],  # (maximize, use_best_of_run, normalize)
 		"memes_no": 1,
-		"action_space_config": {
-					"F_min": {"max": 2, "min": 0},
-					"F_max": {"max": 2, "min": 0},
-					"CR_min": {"max": 1, "min": 0},
-					"CR_max": {"max": 1, "min": 0},
-		},
-	},
+		"action_space_config": {"CR": {"max": 1, "min": 0}, "F": {"max": 2, "min": 0}}
+	}
 }
 pg_configuration = {
 	"agent.algorithm": "RayPolicyGradient",
@@ -258,15 +242,17 @@ all_ppo_configurations = [
 	)
 ]
 
-all_de_ppo_configurations = [
+extended_de_ppo_configurations = [
 	update_and_return(
 		ppo_de_configuration,
 		{
-			"env.env_config": {"solver_driver_args": [10, 10, fun, "best1bin", "uniform"]},
-			"agent.algorithm.vf_clip_param": 10,
+			"env.env_config": {"solver_driver_args": [dim, 10, fun, "best1bin"]},
 		},
 	)
-	for fun in [16]
+	for fun, dim in zip(
+		[6, 6, 6, 4, 4, 4, 19, 19, 19, 14, 14, 14, 5, 5, 5, 13, 13, 13, 7, 7, 7, 9, 9, 9, 18, 18, 18, 24, 24, 24, 21, 21, 21, 22, 22, 22],
+		[5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20],
+	)
 ]
 
 # ["AttractiveSector", "BuecheRastrigin", "CompositeGR", "DifferentPowers", "LinearSlope", "SharpRidge", "StepEllipsoidal", "RosenbrockRotated", "SchaffersIllConditioned","LunacekBiR", "GG101me", "GG21hi"]
@@ -285,43 +271,64 @@ extended_ppo_configurations = [
 		[5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20],
 	)
 ]
+all_de_ppo_configurations = [
+	update_and_return(
+		ppo_cma_es_configuration,
+		{
+			"env.env_config": {"solver_driver_args": [10, 10, fun, 0.5]},
+		},
+	)
+	for fun in [12, 11, 2, 23, 15, 8, 17, 20, 1, 16]
+]
 
-extended_ppo_configurations1 = extended_ppo_configurations[0]
-extended_ppo_configurations2 = extended_ppo_configurations[1]
-extended_ppo_configurations3 = extended_ppo_configurations[2]
-extended_ppo_configurations4 = extended_ppo_configurations[3]
-extended_ppo_configurations5 = extended_ppo_configurations[4]
-extended_ppo_configurations6 = extended_ppo_configurations[5]
-extended_ppo_configurations7 = extended_ppo_configurations[6]
-extended_ppo_configurations8 = extended_ppo_configurations[7]
-extended_ppo_configurations9 = extended_ppo_configurations[8]
-extended_ppo_configurations10 = extended_ppo_configurations[9]
-extended_ppo_configurations11 = extended_ppo_configurations[10]
-extended_ppo_configurations12 = extended_ppo_configurations[11]
-extended_ppo_configurations13 = extended_ppo_configurations[12]
-extended_ppo_configurations14 = extended_ppo_configurations[13]
-extended_ppo_configurations15 = extended_ppo_configurations[14]
-extended_ppo_configurations16 = extended_ppo_configurations[15]
-extended_ppo_configurations17 = extended_ppo_configurations[16]
-extended_ppo_configurations18 = extended_ppo_configurations[17]
-extended_ppo_configurations19 = extended_ppo_configurations[18]
-extended_ppo_configurations20 = extended_ppo_configurations[19]
-extended_ppo_configurations21 = extended_ppo_configurations[20]
-extended_ppo_configurations22 = extended_ppo_configurations[21]
-extended_ppo_configurations23 = extended_ppo_configurations[22]
-extended_ppo_configurations24 = extended_ppo_configurations[23]
-extended_ppo_configurations25 = extended_ppo_configurations[24]
-extended_ppo_configurations26 = extended_ppo_configurations[25]
-extended_ppo_configurations27 = extended_ppo_configurations[26]
-extended_ppo_configurations28 = extended_ppo_configurations[27]
-extended_ppo_configurations29 = extended_ppo_configurations[28]
-extended_ppo_configurations30 = extended_ppo_configurations[29]
-extended_ppo_configurations31 = extended_ppo_configurations[30]
-extended_ppo_configurations32 = extended_ppo_configurations[31]
-extended_ppo_configurations33 = extended_ppo_configurations[32]
-extended_ppo_configurations34 = extended_ppo_configurations[33]
-extended_ppo_configurations35 = extended_ppo_configurations[34]
-extended_ppo_configurations36 = extended_ppo_configurations[35]
+
+exp1 = extended_de_ppo_configurations[0]
+exp2 = extended_de_ppo_configurations[1]
+exp3 = extended_de_ppo_configurations[2]
+exp4 = extended_de_ppo_configurations[3]
+exp5 = extended_de_ppo_configurations[4]
+exp6 = extended_de_ppo_configurations[5]
+exp7 = extended_de_ppo_configurations[6]
+exp8 = extended_de_ppo_configurations[7]
+exp9 = extended_de_ppo_configurations[8]
+exp10 = extended_de_ppo_configurations[9]
+exp11 = extended_de_ppo_configurations[10]
+exp12 = extended_de_ppo_configurations[11]
+exp13 = extended_de_ppo_configurations[12]
+exp14 = extended_de_ppo_configurations[13]
+exp15 = extended_de_ppo_configurations[14]
+exp16 = extended_de_ppo_configurations[15]
+exp17 = extended_de_ppo_configurations[16]
+exp18 = extended_de_ppo_configurations[17]
+exp19 = extended_de_ppo_configurations[18]
+exp20 = extended_de_ppo_configurations[19]
+exp21 = extended_de_ppo_configurations[20]
+exp22 = extended_de_ppo_configurations[21]
+exp23 = extended_de_ppo_configurations[22]
+exp24 = extended_de_ppo_configurations[23]
+exp25 = extended_de_ppo_configurations[24]
+exp26 = extended_de_ppo_configurations[25]
+exp27 = extended_de_ppo_configurations[26]
+exp28 = extended_de_ppo_configurations[27]
+exp29 = extended_de_ppo_configurations[28]
+exp30 = extended_de_ppo_configurations[29]
+exp31 = extended_de_ppo_configurations[30]
+exp32 = extended_de_ppo_configurations[31]
+exp33 = extended_de_ppo_configurations[32]
+exp34 = extended_de_ppo_configurations[33]
+exp35 = extended_de_ppo_configurations[34]
+exp36 = extended_de_ppo_configurations[35]
+
+exp37 = all_de_ppo_configurations[0]
+exp38 = all_de_ppo_configurations[1]
+exp39 = all_de_ppo_configurations[2]
+exp40 = all_de_ppo_configurations[3]
+exp41 = all_de_ppo_configurations[4]
+exp42 = all_de_ppo_configurations[5]
+exp43 = all_de_ppo_configurations[6]
+exp44 = all_de_ppo_configurations[7]
+exp45 = all_de_ppo_configurations[8]
+exp46 = all_de_ppo_configurations[9]
 
 
 # dict of all configurations in this file
