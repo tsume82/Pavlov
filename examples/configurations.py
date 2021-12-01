@@ -273,9 +273,9 @@ extended_ppo_configurations = [
 ]
 all_de_ppo_configurations = [
 	update_and_return(
-		ppo_cma_es_configuration,
+		ppo_de_configuration,
 		{
-			"env.env_config": {"solver_driver_args": [10, 10, fun, 0.5]},
+			"env.env_config": {"solver_driver_args": [10, 10, fun, "best1bin"]},
 		},
 	)
 	for fun in [12, 11, 2, 23, 15, 8, 17, 20, 1, 16]
