@@ -298,7 +298,7 @@ class DEdriver(SolverDriver):
 			mutation=self.F_init,
 			strategy=self.strategy,
 			recombination=self.CR_init,
-			popsize=max(self.pop_size // self.dim, 1),  # population = popsize * len(x) from the doc
+			popsize=self.pop_size,
 		)
 		self.solver.dither = None
 		command = {}
