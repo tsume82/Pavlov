@@ -96,10 +96,7 @@ ppo_cma_es_configuration = {
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
-        "state_metrics_config": [
-            [40, False, 1, True, True],
-            [{"step_size": {"max": 3, "min": 0}}, 40]
-        ],
+        "state_metrics_config": [[40, False, 1, True, True], [{"step_size": {"max": 3, "min": 0}}, 40]],
         "reward_metric": "DeltaBest",
         "reward_metric_config": [False, True, True],
         "memes_no": 1,
@@ -107,38 +104,44 @@ ppo_cma_es_configuration = {
     },
 }
 ppo_de_configuration = {
-	"agent.algorithm": "RayProximalPolicyOptimization", 
-	"agent.algorithm.render_env": False, 
-	"agent.algorithm.num_workers": 0, 
-	"agent.algorithm.batch_mode": "complete_episodes", 
-	"agent.algorithm.lr": 5e-05, 
-	"agent.algorithm.train_batch_size": 200, 
-	"agent.algorithm.optimizer": "Adam", 
-	"agent.algorithm.vf_clip_param": 10, 
-	"agent.algorithm.model": 
-	{
-		"fcnet_activation": "relu", 
-		"fcnet_hiddens": [50, 50]
-	}, 
-	"env.env_class": "SchedulerPolicyRayEnvironment", 
-	"env.env_config": 
-	{
-		"solver_driver": "DEdriver", 
-		"solver_driver_args": [10, 10, 12, "best1bin", "normal"], 
-		"maximize": False, 
-		"steps": 50, 
-		"state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"], 
-		"state_metrics_config": [
-			[40, False, 1, True, False], 
-			[{	"F_mean": {"max": [2], "min": [0]}, 
-				"F_stdev": {"max": [1], "min": [0]}, 
-				"CR_mean": {"max": [1], "min": [0]}, 
-				"CR_stdev": {"max": [1], "min": [0]}}, 40]], 
-		"reward_metric": "DeltaBest", 
-		"reward_metric_config": [False, True, True], 
-		"memes_no": 1, 
-		"action_space_config": {"F_mean": {"max": 2, "min": 0}, "F_stdev": {"max": 1, "min": 0}, "CR_mean": {"max": 1, "min": 0}, "CR_stdev": {"max": 1, "min": 0}}
-	}
+    "agent.algorithm": "RayProximalPolicyOptimization",
+    "agent.algorithm.render_env": False,
+    "agent.algorithm.num_workers": 0,
+    "agent.algorithm.batch_mode": "complete_episodes",
+    "agent.algorithm.lr": 5e-05,
+    "agent.algorithm.train_batch_size": 200,
+    "agent.algorithm.optimizer": "Adam",
+    "agent.algorithm.vf_clip_param": 10,
+    "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50, 50]},
+    "env.env_class": "SchedulerPolicyRayEnvironment",
+    "env.env_config": {
+        "solver_driver": "DEdriver",
+        "solver_driver_args": [10, 10, 12, "best1bin", "uniform"],
+        "maximize": False,
+        "steps": 50,
+        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
+        "state_metrics_config": [
+            [40, False, 1, True, False],
+            [
+                {
+                    "F_min": {"max": [2], "min": [0]},
+                    "F_max": {"max": [2], "min": [0]},
+                    "CR_min": {"max": [1], "min": [0]},
+                    "CR_max": {"max": [1], "min": [0]},
+                },
+                40,
+            ],
+        ],
+        "reward_metric": "DeltaBest",
+        "reward_metric_config": [False, True, True],
+        "memes_no": 1,
+        "action_space_config": {
+            "F_min": {"max": 2, "min": 0},
+            "F_max": {"max": 2, "min": 0},
+            "CR_min": {"max": 1, "min": 0},
+            "CR_max": {"max": 1, "min": 0},
+        },
+    },
 }
 pg_configuration = {
     "agent.algorithm": "RayPolicyGradient",
@@ -156,34 +159,6 @@ pg_configuration = {
     "env.env_config": {
         "solver_driver": "CMAdriver",
         "solver_driver_args": [10, 10, 1, 1.63, None, 42],
-        "maximize": False,
-        "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
-        "state_metrics_config": [(40, False, 1, True, False), ({"step_size": {"max": 3, "min": 0}}, 40)],
-        "reward_metric": "Best",
-        # (maximize=True, use_best_of_run=False, fit_dim=1, fit_index=0)
-        "reward_metric_config": [False, False],
-        "memes_no": 1,
-        "action_space_config": {"step_size": {"max": 3, "min": 1e-10}},
-    },
-}
-appo_configuration = {
-    "agent.algorithm": "RayAsyncProximalPolicyOptimization",
-    "agent.algorithm.render_env": False,
-    # "agent.algorithm.num_workers": 0,
-    # "agent.algorithm.batch_mode": "complete_episodes",
-    "agent.algorithm.lr": 1e-5,
-    "agent.algorithm.train_batch_size": 200,
-    "agent.algorithm.optimizer": "Adam",
-    # "agent.algorithm.vf_clip_param": 2e5,
-    "agent.algorithm.model": {
-        "fcnet_activation": "tanh",
-        "fcnet_hiddens": [30, 30],
-    },
-    "env.env_class": "SchedulerPolicyRayEnvironment",
-    "env.env_config": {
-        "solver_driver": "CMAdriver",
-        "solver_driver_args": [10, 10, 1, 1.54],
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
@@ -261,14 +236,86 @@ extended_de_ppo_configurations = [
     update_and_return(
         ppo_de_configuration,
         {
-            "env.env_config": {"solver_driver_args": [dim, 10, fun, "best1bin", "normal"]},
+            "env.env_config": {"solver_driver_args": [dim, 10, fun, "best1bin", "uniform"]},
         },
     )
     for fun, dim in zip(
-        [6, 6, 6, 4, 4, 4, 19, 19, 19, 14, 14, 14, 5, 5, 5, 13, 13, 13, 7,
-            7, 7, 9, 9, 9, 18, 18, 18, 24, 24, 24, 21, 21, 21, 22, 22, 22],
-        [5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20,
-         5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20],
+        [
+            6,
+            6,
+            6,
+            4,
+            4,
+            4,
+            19,
+            19,
+            19,
+            14,
+            14,
+            14,
+            5,
+            5,
+            5,
+            13,
+            13,
+            13,
+            7,
+            7,
+            7,
+            9,
+            9,
+            9,
+            18,
+            18,
+            18,
+            24,
+            24,
+            24,
+            21,
+            21,
+            21,
+            22,
+            22,
+            22,
+        ],
+        [
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+        ],
     )
 ]
 
@@ -276,7 +323,7 @@ extended_de_ppo_configurations = [
 # [1e3, 1e4, 1e5, 10, 100, 1000, 10, 10, 100, 10, 100, 1000, 10, 50, 100, 100, 200, 500, 1e3, 5e3, 1e4, 10, 20, 50, 100, 1000, 5000, 100, 200, 1000, 100, 500, 1000, 100, 500, 1000],
 # [6, 6, 6, 4, 4, 4, 19, 19, 19, 14, 14, 14, 5, 5, 5, 13, 13, 13, 7, 7, 7, 9, 9, 9, 18, 18, 18, 24, 24, 24, 21, 21, 21, 22, 22, 22],
 # [5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20],
-extended_ppo_configurations = [
+extended_cma_ppo_configurations = [
     update_and_return(
         ppo_cma_es_configuration,
         {
@@ -284,20 +331,83 @@ extended_ppo_configurations = [
         },
     )
     for fun, dim in zip(
-        [6, 6, 6, 4, 4, 4, 19, 19, 19, 14, 14, 14, 5, 5, 5, 13, 13, 13, 7,
-            7, 7, 9, 9, 9, 18, 18, 18, 24, 24, 24, 21, 21, 21, 22, 22, 22],
-        [5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20,
-         5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20],
+        [
+            6,
+            6,
+            6,
+            4,
+            4,
+            4,
+            19,
+            19,
+            19,
+            14,
+            14,
+            14,
+            5,
+            5,
+            5,
+            13,
+            13,
+            13,
+            7,
+            7,
+            7,
+            9,
+            9,
+            9,
+            18,
+            18,
+            18,
+            24,
+            24,
+            24,
+            21,
+            21,
+            21,
+            22,
+            22,
+            22,
+        ],
+        [
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+        ],
     )
-]
-all_de_ppo_configurations = [
-    update_and_return(
-        ppo_de_configuration,
-        {
-            "env.env_config": {"solver_driver_args": [10, 10, fun, "best1bin"]},
-        },
-    )
-    for fun in [12, 11, 2, 23, 15, 8, 17, 20, 1, 16]
 ]
 
 
@@ -340,5 +450,4 @@ exp36 = extended_de_ppo_configurations[35]
 
 
 # dict of all configurations in this file
-ALL_CONFIGURATIONS = {k: v for k, v in locals().items(
-) if not "__" in k and isinstance(v, (dict, list))}
+ALL_CONFIGURATIONS = {k: v for k, v in locals().items() if not "__" in k and isinstance(v, (dict, list))}
