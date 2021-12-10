@@ -60,9 +60,10 @@ funcs = [
 ] + funcs
 
 dir1 = "./experiments/DE ppo uniform_sampled/" # the document will be saved in this folder and the configuration will be taken from here
-dir2 = "./experiments/iDE/"
+dir2 = "./experiments/jDE/"
 name1 = "PPO"
-name2 = "iDE"
+name2 = "jDE"
+filename = f"results_DE_normal_sampled_{name1}_vs_{name2}.md".replace(" ","_")
 # endregion
 #▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚
 
@@ -86,7 +87,6 @@ name2 = "iDE"
 
 #▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚
 # region writing the markdown
-filename = "results_{0}_vs_{1}.md".format(name1, name2).replace(" ","_")
 with open(dir1+filename, "w+") as f:
 
 	# write comparison tables
@@ -95,10 +95,12 @@ with open(dir1+filename, "w+") as f:
 	f.write("| :---------- | ------------------------------ | ------------------------------- |\n")
 
 	titles = []
+	best_on_auc = best_on_final = tot = 0
 	for fun in funcs:
 		title = "{0} vs {1}: {2} comparison".format(name1, name2, fun)
 		titles.append(title.replace(" ", "_"))
 		if isdir(dir2+fun) and isdir(dir1+fun):
+			tot += 1
 			auc, final_best = compare_experiments(
 				[dir1+fun,dir2+fun],
 				[name1, name2],
@@ -109,12 +111,17 @@ with open(dir1+filename, "w+") as f:
 				plotMode="std",
 				save=dir1+fun+"/{}.png".format(title.replace(" ", "_")),
 			)
+			if auc > 0.5: best_on_auc += 1
+			if final_best > 0.5: best_on_final += 1
 			auc = auc if auc < 0.5 else "**{}**".format(auc)
 			final_best = final_best if final_best < 0.5 else "**{}**".format(final_best)
 			f.write("| {} | {} | {} |\n".format(fun, auc, final_best))
 		else:
 			f.write("| {} | {} | {} |\n".format(fun, "---", "---"))
 
+	auc_tot = f"{(best_on_auc/tot*100):.1f}" if best_on_auc/tot < 0.5 else f"**{best_on_auc/tot*100:.1f}**"
+	fin_tot = f"{(best_on_final/tot*100):.1f}" if best_on_final/tot < 0.5 else f"**{best_on_final/tot*100:.1f}**"
+	f.write(f"| **Total p({name1} < {name2})** | {auc_tot}% ({best_on_auc}/{tot}) | {fin_tot}% ({best_on_final}/{tot}) |\n")
 
 	# write plots
 	f.write("\n## Plots\n\n")
