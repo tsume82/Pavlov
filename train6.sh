@@ -1,2 +1,0 @@
-python main.py train -d "./experiments/DE ppo uniform_sampled" -cd "/SchaffersIllConditioned_10D" -c exp26
-python main.py train -d "./experiments/DE ppo uniform_sampled" -cd "/SchaffersIllConditioned_20D" -c exp27

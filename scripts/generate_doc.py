@@ -57,12 +57,12 @@ funcs = [
     "Schwefel",
     "Sphere",
     "Weierstrass",
-]
+] + funcs
 
-dir1 = "./experiments/CMA ppo deltabest/" # the document will be saved in this folder and the configuration will be taken from here
-dir2 = "./experiments/CMA ppo paper model/"
-name1 = "PPO with deltabest"
-name2 = "PPO without deltabest"
+dir1 = "./experiments/DE ppo uniform_sampled/" # the document will be saved in this folder and the configuration will be taken from here
+dir2 = "./experiments/iDE/"
+name1 = "PPO"
+name2 = "iDE"
 # endregion
 #▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚
 
