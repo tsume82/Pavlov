@@ -149,9 +149,6 @@ class RayAgent(Agent, metaclass=ABCMeta):
 
 		self.reset()
 
-	# The environment is itself responsible for logging the states, the only returned value is the final state
-	#   (this behavior may change in the future, if needed)
-	# TODO generalize steps_max to arbitrary stop_condition (working on metrics? maybe use TFA ones)
 	def act(self, steps_max=None):
 		# https://docs.ray.io/en/master/rllib-training.html?highlight=computing%20actions#computing-actions
 		episode_reward = 0
@@ -173,13 +170,6 @@ class RayAgent(Agent, metaclass=ABCMeta):
 
 	def train(self, stop_condition={}, autosave=False):
 		return self.agent.train()
-		# return ray.tune.run(
-		#     self.agent_class,
-		#     config=self.config,
-		#     local_dir="./.logs",
-		#     stop=stop_condition,
-		#     checkpoint_at_end=autosave
-		# )
 
 	def reset(self):
 		ray.shutdown()
@@ -376,5 +366,5 @@ class DEadapt(RayAgent):
 	registerRayAgent(__qualname__, __qualname__)
 
 
-# TODO implement PPO and other Ray-based agents
+# TODO implement other Ray-based agents
 buildRegister()
