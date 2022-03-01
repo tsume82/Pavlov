@@ -163,8 +163,7 @@ class RayAgent(Agent, metaclass=ABCMeta):
 			episode_reward += reward
 			steps_done += 1
 
-			if self.config.get("render_env", False):
-				self.env.render()
+			if self.config.get("render_env", False): self.env.render()
 
 		return obs, episode_reward, steps_done
 
