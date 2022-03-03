@@ -228,7 +228,18 @@ ppo_de_configuration_multienv = {
     "env.env_class": "SchedulerPolicyMultiRayEnvironment",
     "env.env_config": {
         "solver_driver": "DEdriver",
-        "solver_driver_args": [[10, 10, 12, "best1bin", "uniform"], [10, 10, 2, "best1bin", "uniform"]],
+        "solver_driver_args": [
+            [10, 10, 12, "best1bin", "uniform"], 
+            [10, 10, 11, "best1bin", "uniform"],
+            [10, 10, 2, "best1bin", "uniform"], 
+            [10, 10, 23, "best1bin", "uniform"],
+            [10, 10, 15, "best1bin", "uniform"], 
+            [10, 10, 8, "best1bin", "uniform"],
+            [10, 10, 17, "best1bin", "uniform"], 
+            [10, 10, 20, "best1bin", "uniform"],
+            [10, 10, 1, "best1bin", "uniform"], 
+            [10, 10, 16, "best1bin", "uniform"]
+        ],
         "maximize": False,
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
