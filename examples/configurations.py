@@ -214,6 +214,47 @@ de_adapt_configuration = {
     },
 }
 
+# multi env test
+ppo_de_configuration_multienv = {
+    "agent.algorithm": "RayProximalPolicyOptimization",
+    "agent.algorithm.render_env": False,
+    "agent.algorithm.num_workers": 0,
+    "agent.algorithm.batch_mode": "complete_episodes",
+    "agent.algorithm.lr": 5e-05,
+    "agent.algorithm.train_batch_size": 200,
+    "agent.algorithm.optimizer": "Adam",
+    "agent.algorithm.vf_clip_param": 10,
+    "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50, 50]},
+    "env.env_class": "SchedulerPolicyMultiRayEnvironment",
+    "env.env_config": {
+        "solver_driver": "DEdriver",
+        "solver_driver_args": [[10, 10, 12, "best1bin", "uniform"], [10, 10, 2, "best1bin", "uniform"]],
+        "maximize": False,
+        "steps": 50,
+        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
+        "state_metrics_config": [
+            [40, False, 1, True, False],
+            [
+                {
+                    "F_min": {"max": [2], "min": [0]},
+                    "F_max": {"max": [2], "min": [0]},
+                    "CR_min": {"max": [1], "min": [0]},
+                    "CR_max": {"max": [1], "min": [0]},
+                },
+                40,
+            ],
+        ],
+        "reward_metric": "DeltaBest",
+        "reward_metric_config": [False, True, True],
+        "memes_no": 1,
+        "action_space_config": {
+            "F_min": {"max": 2, "min": 0},
+            "F_max": {"max": 2, "min": 0},
+            "CR_min": {"max": 1, "min": 0},
+            "CR_max": {"max": 1, "min": 0},
+        },
+    },
+}
 
 # A way to get a list of equal configurations with some difference on some parameter
 # ["BentCigar", "Discus", "Ellipsoid", "Katsuura", "Rastrigin", "Rosenbrock", "Schaffers", "Schwefel", "Sphere", "Weierstrass"]
@@ -411,42 +452,7 @@ extended_cma_ppo_configurations = [
 ]
 
 
-exp1 = extended_de_ppo_configurations[0]
-exp2 = extended_de_ppo_configurations[1]
-exp3 = extended_de_ppo_configurations[2]
-exp4 = extended_de_ppo_configurations[3]
-exp5 = extended_de_ppo_configurations[4]
-exp6 = extended_de_ppo_configurations[5]
-exp7 = extended_de_ppo_configurations[6]
-exp8 = extended_de_ppo_configurations[7]
-exp9 = extended_de_ppo_configurations[8]
-exp10 = extended_de_ppo_configurations[9]
-exp11 = extended_de_ppo_configurations[10]
-exp12 = extended_de_ppo_configurations[11]
-exp13 = extended_de_ppo_configurations[12]
-exp14 = extended_de_ppo_configurations[13]
-exp15 = extended_de_ppo_configurations[14]
-exp16 = extended_de_ppo_configurations[15]
-exp17 = extended_de_ppo_configurations[16]
-exp18 = extended_de_ppo_configurations[17]
-exp19 = extended_de_ppo_configurations[18]
-exp20 = extended_de_ppo_configurations[19]
-exp21 = extended_de_ppo_configurations[20]
-exp22 = extended_de_ppo_configurations[21]
-exp23 = extended_de_ppo_configurations[22]
-exp24 = extended_de_ppo_configurations[23]
-exp25 = extended_de_ppo_configurations[24]
-exp26 = extended_de_ppo_configurations[25]
-exp27 = extended_de_ppo_configurations[26]
-exp28 = extended_de_ppo_configurations[27]
-exp29 = extended_de_ppo_configurations[28]
-exp30 = extended_de_ppo_configurations[29]
-exp31 = extended_de_ppo_configurations[30]
-exp32 = extended_de_ppo_configurations[31]
-exp33 = extended_de_ppo_configurations[32]
-exp34 = extended_de_ppo_configurations[33]
-exp35 = extended_de_ppo_configurations[34]
-exp36 = extended_de_ppo_configurations[35]
+
 
 
 # dict of all configurations in this file

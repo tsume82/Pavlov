@@ -10,8 +10,8 @@ from metrics import *
 from itertools import cycle
 from drivers import DRIVERS
 
+# region: Envrionment registration region
 ENVIRONMENTS = {}
-
 
 def registerEnvironment(env, clazz):
 	ENVIRONMENTS[env] = clazz
@@ -21,7 +21,7 @@ def buildRegister():
 	for k, v in ENVIRONMENTS.items():
 		if type(v) == str:
 			ENVIRONMENTS[k] = eval(v)
-
+# endregion
 
 class InvalidEnvironmentRequest(Exception):
 	def __init__(self, *args: object) -> None:
@@ -336,13 +336,29 @@ class SchedulerPolicyRayEnvironment(SchedulerPolicyEnvironment):
 
 class SchedulerPolicyMultiRayEnvironment(VectorEnv):
 	"""
-	Vectorized Version of the SchedulerPolicyEnvironment: It allows multiple solvers acting as multiple environments for an agent.
+	Vectorized Version of the SchedulerPolicyEnvironment: It allows multiple solvers acting as multiple environments for one agent.
+
+	The number of sub environments is defined by the number of solver_driver_args. It must be a list of arguments for each solver.
+
+	For now the solver must be the same, with the same observation, action and reward spaces. The only difference between the environments
+	are the arguments of the solvers (with the purose of training a policy working with different functions/dimensions)
 	"""
+	registerEnvironment(__qualname__, __qualname__)
 
 	def __init__(self, env_config):
-		# TODO create a list of ray environments handling different parameters for different environments
-		# notes: since the agent (for now) is only one, all the parameters of the environmets must be the same except for the solver arguments 
-		# (a.k.a the objective functions, dimensions, etc...)
+		assert type(env_config["solver_driver_args"][0]) == list # different args for every solver
+		num_envs = len(env_config["solver_driver_args"])
+
+		self.envs = [] # sub-environments list
+		for i in range(num_envs):
+			curr_env_conf = env_config.copy()
+			curr_env_conf["solver_driver_args"] = curr_env_conf["solver_driver_args"][i]
+			self.envs.append(SchedulerPolicyRayEnvironment(curr_env_conf))
+		
+		# observation and action spaces of sub environments must be the same
+		observation_space = self.envs[0].observation_space
+		action_space = self.envs[0].action_space
+
 		super().__init__(observation_space, action_space, num_envs)
 
 	@override(VectorEnv)
