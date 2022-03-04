@@ -267,6 +267,8 @@ ppo_de_configuration_multienv = {
     },
 }
 
+multienv_ppo_de_uniform1 = update_and_return(ppo_cma_es_configuration,{"env.env_config": {"solver_driver_args": [10, 10, 12, "best1bin", "uniform"]}})
+
 # A way to get a list of equal configurations with some difference on some parameter
 # ["BentCigar", "Discus", "Ellipsoid", "Katsuura", "Rastrigin", "Rosenbrock", "Schaffers", "Schwefel", "Sphere", "Weierstrass"]
 all_ppo_configurations = [

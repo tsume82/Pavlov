@@ -1,1 +1,0 @@
-train -d ./experiments/multifuncion -c ppo_de_configuration_multienv -cd /multienv_de_uniform
