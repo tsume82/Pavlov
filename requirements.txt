@@ -107,7 +107,7 @@ requests==2.26.0
 requests-oauthlib==1.3.0
 rsa==4.7.2
 scikit-image==0.18.3
-scipy @ file:///C:/bld/scipy_1628206591178/work
+scipy==1.6.3
 six @ file:///home/conda/feedstock_root/build_artifacts/six_1620240208055/work
 tabulate==0.8.9
 tensorboard==2.6.0

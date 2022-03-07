@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod, ABCMeta
+from os.path import splitext
 import ray.tune
 import numpy as np
 
@@ -177,11 +178,18 @@ class RayAgent(Agent, metaclass=ABCMeta):
 		register_env(self.env_class.__name__, lambda config: self.env)
 		self.agent = self.agent_class(env=self.env_class.__name__, config=self.config)
 
-	def load(self, from_file):
-		self.agent.load_checkpoint(from_file)
+	def load(self, path: str):
+		if splitext(path)[1] != ".h5":
+			self.agent.load_checkpoint(path)
+		else:
+			self.agent.import_model(path)
 
-	def save(self, to_file):
-		self.agent.save_checkpoint(to_file)
+	def save(self, export_dir: str, pickle_agent_class = False):
+		if pickle_agent_class:
+			self.agent.save_checkpoint(export_dir)
+		else:
+			# self.agent.export_policy_model(export_dir)
+			self.agent.export_policy_checkpoint(export_dir)
 
 
 class RayPolicyGradient(RayAgent):

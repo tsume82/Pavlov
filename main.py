@@ -7,7 +7,7 @@ import traceback
 warnings.filterwarnings("ignore")
 
 from os import listdir, makedirs, environ
-from os.path import isfile, join, basename, isdir
+from os.path import isfile, join, basename, isdir, normpath
 # environ["RAY_PICKLE_VERBOSE_DEBUG"] = "1"
 
 def getLastCheckpoint(folder):
@@ -46,11 +46,11 @@ def train_agent(agent_config, folder="./.checkpoints", **kwargs):
 	episodes = 0
 	agent = AgentBuilder.build(agent_config)
 	loadCheckpoint(agent, kwargs["checkpoint"], folder)
-	p = plot_episodes()
+	plotter = plot_episodes()
 	while episodes < max_episodes:
 		res = agent.train()
 		episodes = res["episodes_total"]
-		p.plot(res["hist_stats"]["episode_reward"][: res["episodes_this_iter"]])
+		plotter.plot(res["hist_stats"]["episode_reward"][: res["episodes_this_iter"]])
 		# pprint(res)
 		print()
 		print(f"═════════════════════╣Ep.: {episodes}\t╠═════════════════════")
@@ -61,10 +61,10 @@ def train_agent(agent_config, folder="./.checkpoints", **kwargs):
 
 		if episodes % episodes_to_checkpoint < res["episodes_this_iter"]:
 			agent.save(folder)
-			p.save(join(folder, "train.svg"), agent_config)
+			plotter.save(join(folder, "train.svg"), agent_config)
 			saveConfiguration(agent_config, folder)
 
-	p.close()
+	plotter.close()
 
 
 def test_agent(agent_config, folder="./.checkpoints", **kwargs):
@@ -158,7 +158,7 @@ if __name__ == "__main__":
 	kwargs = vars(args)
 
 	train = kwargs.pop("train")
-	folder = kwargs.pop("dir")
+	folder = normpath(kwargs.pop("dir"))
 
 	config = kwargs.pop("config")
 	multi_config = kwargs.get("multi_config")
