@@ -1,4 +1,6 @@
 import argparse
+
+from numpy import argmax
 from agents import AgentBuilder
 from utils.plot_utils import plot_episodes, plot_experiment, save_experiment
 from utils.config_utils import loadConfiguration, saveConfiguration
@@ -7,18 +9,28 @@ import traceback
 warnings.filterwarnings("ignore")
 
 from os import listdir, makedirs, environ
-from os.path import isfile, join, basename, isdir, normpath
+from os.path import isfile, join, basename, isdir, normpath, exists
 # environ["RAY_PICKLE_VERBOSE_DEBUG"] = "1"
 
 def getLastCheckpoint(folder):
 	if not isdir(folder):
-		return ""
-	checkpoints = [f for f in listdir(folder) if isfile(join(folder, f)) and "checkpoint" in basename(f)]
-	if len(checkpoints) == 0:
-		print(f"There are no checkpoints in {folder}. No checkpoint is loaded")
-		return ""
-	last = max(checkpoints, key=lambda f: int(basename(f).split("-")[1]))
-	return last
+		return None
+	
+	def cp_filter(file):
+		base = basename(file)
+		return "checkpoint" in base or "model_weights" in base
+
+	checkpoints = [f for f in listdir(folder) if isfile(join(folder, f)) and cp_filter(f)]
+
+	toint = lambda file: int(basename(file).split("-")[1])
+	cp_iterations = [toint(file) for file in checkpoints]
+
+	if len(checkpoints) > 0:
+		last = cp_iterations.index(max(cp_iterations))
+		return checkpoints[last]
+
+	return None
+
 
 def loadCheckpoint(agent, checkpoint_arg, folder: str):
 	"""
@@ -30,14 +42,17 @@ def loadCheckpoint(agent, checkpoint_arg, folder: str):
 	if checkpoint_arg is not False: # enter if it's str or True
 		if checkpoint_arg is True:
 			checkpoint_arg = getLastCheckpoint(folder)
+			if not checkpoint_arg:
+				print(f"There are no checkpoints in {folder}. No checkpoint is loaded")
+				return
 
 		checkpoint = checkpoint_arg if isfile(checkpoint_arg) else join(folder, checkpoint_arg)
 		
 		if isfile(checkpoint):
-			print(f"loaded {checkpoint}")
 			agent.load(checkpoint)
-	else:
-		print(f"No checkpoint loaded")
+			print(f"loaded {checkpoint}")
+		else:
+			print(f"{checkpoint} not loaded")
 
 def train_agent(agent_config, folder="./.checkpoints", **kwargs):
 	max_episodes = kwargs.get("max_episodes", 5000)

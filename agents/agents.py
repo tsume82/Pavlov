@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod, ABCMeta
-from os.path import splitext
-import ray.tune
+from os.path import splitext, join
+import pickle
+import ray
 import numpy as np
 
 # from ray.rllib.agents import Trainer as RayTrainer
@@ -179,17 +180,21 @@ class RayAgent(Agent, metaclass=ABCMeta):
 		self.agent = self.agent_class(env=self.env_class.__name__, config=self.config)
 
 	def load(self, path: str):
-		if splitext(path)[1] != ".h5":
+		if "checkpoint-" in splitext(path)[0]:
 			self.agent.load_checkpoint(path)
 		else:
-			self.agent.import_model(path)
+			with open(path, "rb") as file:
+				weights = pickle.load(file)
+				self.agent.set_weights(weights)
 
 	def save(self, export_dir: str, pickle_agent_class = False):
 		if pickle_agent_class:
 			self.agent.save_checkpoint(export_dir)
 		else:
-			# self.agent.export_policy_model(export_dir)
-			self.agent.export_policy_checkpoint(export_dir)
+			weights = self.agent.get_weights()
+			with open(join(export_dir, f"model_weights-{self.agent.iteration}"), "wb") as f:
+				pickle.dump(weights, f)
+			
 
 
 class RayPolicyGradient(RayAgent):

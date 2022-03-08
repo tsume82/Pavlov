@@ -3,7 +3,6 @@ from numpy.core.numeric import Inf
 from drivers import SolverDriver, registerDriver
 from abc import ABC, abstractmethod, ABCMeta
 from benchmarks.utils import loadFunction
-from utils.array_utils import getScalar
 import numpy as np
 import random
 import copy
