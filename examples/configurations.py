@@ -215,9 +215,6 @@ de_adapt_configuration = {
 }
 
 
-
-
-
 # region: multienv ##########################################################################
 
 
@@ -275,20 +272,95 @@ multienv_ppo_de_configuration = {
 
 multienv_ppo_cma_configuration = update_and_return(
     ppo_cma_configuration, {
-		"env.env_class": "SchedulerPolicyMultiRayEnvironment", 
-		"env.env_config": { "solver_driver_args": [[10, 10, fun, 0.5] for fun in [12, 11, 2, 23, 15, 8, 17, 20, 1, 16]] }
-	}
+        "env.env_class": "SchedulerPolicyMultiRayEnvironment",
+        "env.env_config": {"solver_driver_args": [[dim, 10, fun, 0.5] for fun, dim in zip([
+            12, 11, 2, 23, 15, 8, 17, 20, 1, 16,
+            6,
+            6,
+            6,
+            4,
+            4,
+            4,
+            19,
+            19,
+            19,
+            14,
+            14,
+            14,
+            5,
+            5,
+            5,
+            13,
+            13,
+            13,
+            7,
+            7,
+            7,
+            9,
+            9,
+            9,
+            18,
+            18,
+            18,
+            24,
+            24,
+            24,
+            21,
+            21,
+            21,
+            22,
+            22,
+            22,
+        ],
+            [
+                10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+            5,
+            10,
+            20,
+        ])]}
+    }
 )
 
 
 # endregion #################################################################################
 
 
-
-
 # A way to get a list of equal configurations with some difference on some parameter
 # ["BentCigar", "Discus", "Ellipsoid", "Katsuura", "Rastrigin", "Rosenbrock", "Schaffers", "Schwefel", "Sphere", "Weierstrass"]
-all_ppo_cma_configurations = [
+ppo_cma_configuration_10_funcs = [
     update_and_return(
         ppo_cma_configuration,
         {
@@ -393,7 +465,7 @@ extended_de_ppo_configurations = [
 # [1e3, 1e4, 1e5, 10, 100, 1000, 10, 10, 100, 10, 100, 1000, 10, 50, 100, 100, 200, 500, 1e3, 5e3, 1e4, 10, 20, 50, 100, 1000, 5000, 100, 200, 1000, 100, 500, 1000, 100, 500, 1000],
 # [6, 6, 6, 4, 4, 4, 19, 19, 19, 14, 14, 14, 5, 5, 5, 13, 13, 13, 7, 7, 7, 9, 9, 9, 18, 18, 18, 24, 24, 24, 21, 21, 21, 22, 22, 22],
 # [5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20],
-extended_cma_ppo_configurations = [
+cma_ppo_configuration_46_funcs = [
     update_and_return(
         ppo_cma_configuration,
         {
@@ -402,6 +474,7 @@ extended_cma_ppo_configurations = [
     )
     for fun, dim in zip(
         [
+            12, 11, 2, 23, 15, 8, 17, 20, 1, 16,
             6,
             6,
             6,
@@ -440,6 +513,7 @@ extended_cma_ppo_configurations = [
             22,
         ],
         [
+            10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
             5,
             10,
             20,
@@ -480,16 +554,54 @@ extended_cma_ppo_configurations = [
     )
 ]
 
-all_ppo_cma_configurations0 = all_ppo_cma_configurations[0]
-all_ppo_cma_configurations1 = all_ppo_cma_configurations[1]
-all_ppo_cma_configurations2 = all_ppo_cma_configurations[2]
-all_ppo_cma_configurations3 = all_ppo_cma_configurations[3]
-all_ppo_cma_configurations4 = all_ppo_cma_configurations[4]
-all_ppo_cma_configurations5 = all_ppo_cma_configurations[5]
-all_ppo_cma_configurations6 = all_ppo_cma_configurations[6]
-all_ppo_cma_configurations7 = all_ppo_cma_configurations[7]
-all_ppo_cma_configurations8 = all_ppo_cma_configurations[8]
-all_ppo_cma_configurations9 = all_ppo_cma_configurations[9]
+cma_ppo_configuration_46_funcs0 = cma_ppo_configuration_46_funcs[0]
+cma_ppo_configuration_46_funcs1 = cma_ppo_configuration_46_funcs[1]
+cma_ppo_configuration_46_funcs2 = cma_ppo_configuration_46_funcs[2]
+cma_ppo_configuration_46_funcs3 = cma_ppo_configuration_46_funcs[3]
+cma_ppo_configuration_46_funcs4 = cma_ppo_configuration_46_funcs[4]
+cma_ppo_configuration_46_funcs5 = cma_ppo_configuration_46_funcs[5]
+cma_ppo_configuration_46_funcs6 = cma_ppo_configuration_46_funcs[6]
+cma_ppo_configuration_46_funcs7 = cma_ppo_configuration_46_funcs[7]
+cma_ppo_configuration_46_funcs8 = cma_ppo_configuration_46_funcs[8]
+cma_ppo_configuration_46_funcs9 = cma_ppo_configuration_46_funcs[9]
+cma_ppo_configuration_46_funcs10 = cma_ppo_configuration_46_funcs[10]
+cma_ppo_configuration_46_funcs11 = cma_ppo_configuration_46_funcs[11]
+cma_ppo_configuration_46_funcs12 = cma_ppo_configuration_46_funcs[12]
+cma_ppo_configuration_46_funcs13 = cma_ppo_configuration_46_funcs[13]
+cma_ppo_configuration_46_funcs14 = cma_ppo_configuration_46_funcs[14]
+cma_ppo_configuration_46_funcs15 = cma_ppo_configuration_46_funcs[15]
+cma_ppo_configuration_46_funcs16 = cma_ppo_configuration_46_funcs[16]
+cma_ppo_configuration_46_funcs17 = cma_ppo_configuration_46_funcs[17]
+cma_ppo_configuration_46_funcs18 = cma_ppo_configuration_46_funcs[18]
+cma_ppo_configuration_46_funcs19 = cma_ppo_configuration_46_funcs[19]
+cma_ppo_configuration_46_funcs20 = cma_ppo_configuration_46_funcs[20]
+cma_ppo_configuration_46_funcs21 = cma_ppo_configuration_46_funcs[21]
+cma_ppo_configuration_46_funcs22 = cma_ppo_configuration_46_funcs[22]
+cma_ppo_configuration_46_funcs23 = cma_ppo_configuration_46_funcs[23]
+cma_ppo_configuration_46_funcs24 = cma_ppo_configuration_46_funcs[24]
+cma_ppo_configuration_46_funcs25 = cma_ppo_configuration_46_funcs[25]
+cma_ppo_configuration_46_funcs26 = cma_ppo_configuration_46_funcs[26]
+cma_ppo_configuration_46_funcs27 = cma_ppo_configuration_46_funcs[27]
+cma_ppo_configuration_46_funcs28 = cma_ppo_configuration_46_funcs[28]
+cma_ppo_configuration_46_funcs29 = cma_ppo_configuration_46_funcs[29]
+cma_ppo_configuration_46_funcs30 = cma_ppo_configuration_46_funcs[30]
+cma_ppo_configuration_46_funcs31 = cma_ppo_configuration_46_funcs[31]
+cma_ppo_configuration_46_funcs32 = cma_ppo_configuration_46_funcs[32]
+cma_ppo_configuration_46_funcs33 = cma_ppo_configuration_46_funcs[33]
+cma_ppo_configuration_46_funcs34 = cma_ppo_configuration_46_funcs[34]
+cma_ppo_configuration_46_funcs35 = cma_ppo_configuration_46_funcs[35]
+cma_ppo_configuration_46_funcs36 = cma_ppo_configuration_46_funcs[36]
+cma_ppo_configuration_46_funcs37 = cma_ppo_configuration_46_funcs[37]
+cma_ppo_configuration_46_funcs38 = cma_ppo_configuration_46_funcs[38]
+cma_ppo_configuration_46_funcs39 = cma_ppo_configuration_46_funcs[39]
+cma_ppo_configuration_46_funcs40 = cma_ppo_configuration_46_funcs[40]
+cma_ppo_configuration_46_funcs41 = cma_ppo_configuration_46_funcs[41]
+cma_ppo_configuration_46_funcs42 = cma_ppo_configuration_46_funcs[42]
+cma_ppo_configuration_46_funcs43 = cma_ppo_configuration_46_funcs[43]
+cma_ppo_configuration_46_funcs44 = cma_ppo_configuration_46_funcs[44]
+cma_ppo_configuration_46_funcs45 = cma_ppo_configuration_46_funcs[45]
+cma_ppo_configuration_46_funcs46 = cma_ppo_configuration_46_funcs[46]
 
 # dict of all configurations in this file
-ALL_CONFIGURATIONS = {k: v for k, v in locals().items() if not "__" in k and isinstance(v, (dict, list))}
+ALL_CONFIGURATIONS = {k: v for k, v in locals().items(
+) if not "__" in k and isinstance(v, (dict, list))}
