@@ -271,96 +271,12 @@ de_adapt_configuration = {
 # }
 
 multienv_ppo_de_uniform_configuration = update_and_return(
-    ppo_de_configuration, {
-        "env.env_class": "SchedulerPolicyMultiRayEnvironment",
-        "env.env_config": {"solver_driver_args": [[dim, 10, fun, "best1bin", "uniform"] for fun, dim in zip([
-            12, 11, 2, 23, 15, 8, 17, 20, 1, 16,
-            6,
-            6,
-            6,
-            4,
-            4,
-            4,
-            19,
-            19,
-            19,
-            14,
-            14,
-            14,
-            5,
-            5,
-            5,
-            13,
-            13,
-            13,
-            7,
-            7,
-            7,
-            9,
-            9,
-            9,
-            18,
-            18,
-            18,
-            24,
-            24,
-            24,
-            21,
-            21,
-            21,
-            22,
-            22,
-            22,
-        ],
-            [
-                10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-        ])]}
-    }
-)
-
-multienv_ppo_de_gaussian_configuration = update_and_return(
     ppo_de_configuration,
     {
         "env.env_class": "SchedulerPolicyMultiRayEnvironment",
         "env.env_config": {
             "solver_driver_args": [
-                [dim, 10, fun, "best1bin", "normal"]
+                [dim, 10, fun, "best1bin", "uniform"]
                 for fun, dim in zip(
                     [
                         12,
@@ -459,28 +375,151 @@ multienv_ppo_de_gaussian_configuration = update_and_return(
                         20,
                     ],
                 )
-            ],
-            "state_metrics_config": [
-                [40, False, 1, True, False],
-                [
-                    {
-                        "F_mean": {"max": [2], "min": [0]},
-                        "F_stdev": {"max": [1], "min": [0]},
-                        "CR_mean": {"max": [1], "min": [0]},
-                        "CR_stdev": {"max": [1], "min": [0]},
-                    },
-                    40,
-                ],
-            ],
-            "action_space_config": {
-                "F_mean": {"max": 2, "min": 0},
-                "F_stdev": {"max": 1, "min": 0},
-                "CR_mean": {"max": 1, "min": 0},
-                "CR_stdev": {"max": 1, "min": 0},
-            },
+            ]
         },
     },
 )
+
+multienv_ppo_de_gaussian_configuration = {
+    "agent.algorithm": "RayProximalPolicyOptimization",
+    "agent.algorithm.render_env": False,
+    "agent.algorithm.num_workers": 0,
+    "agent.algorithm.batch_mode": "complete_episodes",
+    "agent.algorithm.lr": 5e-05,
+    "agent.algorithm.train_batch_size": 200,
+    "agent.algorithm.optimizer": "Adam",
+    "agent.algorithm.vf_clip_param": 10,
+    "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50, 50]},
+    "env.env_class": "SchedulerPolicyRayEnvironment",
+    "env.env_config": {
+        "solver_driver": "DEdriver",
+        "solver_driver_args": [
+            [dim, 10, fun, "best1bin", "normal"]
+            for fun, dim in zip(
+                [
+                    12,
+                    11,
+                    2,
+                    23,
+                    15,
+                    8,
+                    17,
+                    20,
+                    1,
+                    16,
+                    6,
+                    6,
+                    6,
+                    4,
+                    4,
+                    4,
+                    19,
+                    19,
+                    19,
+                    14,
+                    14,
+                    14,
+                    5,
+                    5,
+                    5,
+                    13,
+                    13,
+                    13,
+                    7,
+                    7,
+                    7,
+                    9,
+                    9,
+                    9,
+                    18,
+                    18,
+                    18,
+                    24,
+                    24,
+                    24,
+                    21,
+                    21,
+                    21,
+                    22,
+                    22,
+                    22,
+                ],
+                [
+                    10,
+                    10,
+                    10,
+                    10,
+                    10,
+                    10,
+                    10,
+                    10,
+                    10,
+                    10,
+                    5,
+                    10,
+                    20,
+                    5,
+                    10,
+                    20,
+                    5,
+                    10,
+                    20,
+                    5,
+                    10,
+                    20,
+                    5,
+                    10,
+                    20,
+                    5,
+                    10,
+                    20,
+                    5,
+                    10,
+                    20,
+                    5,
+                    10,
+                    20,
+                    5,
+                    10,
+                    20,
+                    5,
+                    10,
+                    20,
+                    5,
+                    10,
+                    20,
+                    5,
+                    10,
+                    20,
+                ],
+            )
+        ],
+        "maximize": False,
+        "steps": 50,
+        "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
+        "state_metrics_config": [
+            [40, False, 1, True, False],
+            [
+                {
+                    "F_mean": {"max": [2], "min": [0]},
+                    "F_stdev": {"max": [1], "min": [0]},
+                    "CR_mean": {"max": [1], "min": [0]},
+                    "CR_stdev": {"max": [1], "min": [0]},
+                },
+                40,
+            ],
+        ],
+        "reward_metric": "DeltaBest",
+        "reward_metric_config": [False, True, True],
+        "memes_no": 1,
+        "action_space_config": {
+            "F_mean": {"max": 2, "min": 0},
+            "F_stdev": {"max": 1, "min": 0},
+            "CR_mean": {"max": 1, "min": 0},
+            "CR_stdev": {"max": 1, "min": 0},
+        },
+    },
+}
 
 
 # endregion #################################################################################
@@ -491,9 +530,7 @@ multienv_ppo_de_gaussian_configuration = update_and_return(
 ppo_cma_configuration_10_funcs = [
     update_and_return(
         ppo_cma_configuration,
-        {
-            "env.env_config": {"solver_driver_args": [10, 10, fun, 0.5]}
-        },
+        {"env.env_config": {"solver_driver_args": [10, 10, fun, 0.5]}},
     )
     for clip, fun, sigma_init in zip(
         [1e7, 10000, 2e5, 100, 100, 1e4, 10, 5000, 50, 100],
@@ -511,7 +548,16 @@ de_uniform_ppo_configuration_46_funcs = [
     )
     for fun, dim in zip(
         [
-            12, 11, 2, 23, 15, 8, 17, 20, 1, 16,
+            12,
+            11,
+            2,
+            23,
+            15,
+            8,
+            17,
+            20,
+            1,
+            16,
             6,
             6,
             6,
@@ -550,7 +596,16 @@ de_uniform_ppo_configuration_46_funcs = [
             22,
         ],
         [
-            10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
             5,
             10,
             20,
@@ -592,11 +647,23 @@ de_uniform_ppo_configuration_46_funcs = [
 ]
 
 de_gaussian_ppo_configuration_46_funcs = [
-    update_and_return(
-        ppo_de_configuration,
-        {
-            "env.env_config": {
+    {
+        "agent.algorithm": "RayProximalPolicyOptimization",
+        "agent.algorithm.render_env": False,
+        "agent.algorithm.num_workers": 0,
+        "agent.algorithm.batch_mode": "complete_episodes",
+        "agent.algorithm.lr": 5e-05,
+        "agent.algorithm.train_batch_size": 200,
+        "agent.algorithm.optimizer": "Adam",
+        "agent.algorithm.vf_clip_param": 10,
+        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50, 50]},
+        "env.env_class": "SchedulerPolicyRayEnvironment",
+        "env.env_config": {
+            "solver_driver": "DEdriver",
             "solver_driver_args": [dim, 10, fun, "best1bin", "normal"],
+            "maximize": False,
+            "steps": 50,
+            "state_metrics_names": ["DifferenceOfBest", "SolverStateHistory"],
             "state_metrics_config": [
                 [40, False, 1, True, False],
                 [
@@ -609,6 +676,9 @@ de_gaussian_ppo_configuration_46_funcs = [
                     40,
                 ],
             ],
+            "reward_metric": "DeltaBest",
+            "reward_metric_config": [False, True, True],
+            "memes_no": 1,
             "action_space_config": {
                 "F_mean": {"max": 2, "min": 0},
                 "F_stdev": {"max": 1, "min": 0},
@@ -616,11 +686,19 @@ de_gaussian_ppo_configuration_46_funcs = [
                 "CR_stdev": {"max": 1, "min": 0},
             },
         },
-        },
-    )
+    }
     for fun, dim in zip(
         [
-            12, 11, 2, 23, 15, 8, 17, 20, 1, 16,
+            12,
+            11,
+            2,
+            23,
+            15,
+            8,
+            17,
+            20,
+            1,
+            16,
             6,
             6,
             6,
@@ -659,7 +737,16 @@ de_gaussian_ppo_configuration_46_funcs = [
             22,
         ],
         [
-            10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
             5,
             10,
             20,
@@ -713,7 +800,16 @@ cma_ppo_configuration_46_funcs = [
     )
     for fun, dim in zip(
         [
-            12, 11, 2, 23, 15, 8, 17, 20, 1, 16,
+            12,
+            11,
+            2,
+            23,
+            15,
+            8,
+            17,
+            20,
+            1,
+            16,
             6,
             6,
             6,
@@ -752,7 +848,16 @@ cma_ppo_configuration_46_funcs = [
             22,
         ],
         [
-            10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
             5,
             10,
             20,
@@ -889,5 +994,4 @@ de_gaussian_ppo_configuration_46_funcs45 = de_gaussian_ppo_configuration_46_func
 
 
 # dict of all configurations in this file
-ALL_CONFIGURATIONS = {k: v for k, v in locals().items(
-) if not "__" in k and isinstance(v, (dict, list))}
+ALL_CONFIGURATIONS = {k: v for k, v in locals().items() if not "__" in k and isinstance(v, (dict, list))}
