@@ -52,7 +52,7 @@
 
 ##### BentCigar
 
-![](BentCigar/PPO_vs_iDE:_BentCigar_comparison.png)
+![](BentCigar\PPO_vs_iDE_BentCigar_comparison.png)
 
 ##### Discus
 
