@@ -57,8 +57,8 @@ funcs = [
     "Schwefel",
     "Sphere",
     "Weierstrass",
-]
-dir1 = "./experiments/multifunctions/CMA ppo" # the document will be saved in this folder and the configuration will be taken from here
+] + funcs
+dir1 = "./experiments/multifunctions/CMA ppo 46 functions" # the document will be saved in this folder and the configuration will be taken from here
 dir2 = "./experiments/CSA"
 name1 = "PPO multifunction"
 name2 = "CSA"

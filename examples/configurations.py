@@ -600,7 +600,6 @@ cma_ppo_configuration_46_funcs42 = cma_ppo_configuration_46_funcs[42]
 cma_ppo_configuration_46_funcs43 = cma_ppo_configuration_46_funcs[43]
 cma_ppo_configuration_46_funcs44 = cma_ppo_configuration_46_funcs[44]
 cma_ppo_configuration_46_funcs45 = cma_ppo_configuration_46_funcs[45]
-cma_ppo_configuration_46_funcs46 = cma_ppo_configuration_46_funcs[46]
 
 # dict of all configurations in this file
 ALL_CONFIGURATIONS = {k: v for k, v in locals().items(
