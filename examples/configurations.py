@@ -355,9 +355,162 @@ multienv_ppo_de_uniform_configuration = update_and_return(
 )
 
 multienv_ppo_de_gaussian_configuration = update_and_return(
-    ppo_de_configuration, {
+    ppo_de_configuration,
+    {
         "env.env_class": "SchedulerPolicyMultiRayEnvironment",
-        "env.env_config": {"solver_driver_args": [[dim, 10, fun, "best1bin", "normal"] for fun, dim in zip([
+        "env.env_config": {
+            "solver_driver_args": [
+                [dim, 10, fun, "best1bin", "normal"]
+                for fun, dim in zip(
+                    [
+                        12,
+                        11,
+                        2,
+                        23,
+                        15,
+                        8,
+                        17,
+                        20,
+                        1,
+                        16,
+                        6,
+                        6,
+                        6,
+                        4,
+                        4,
+                        4,
+                        19,
+                        19,
+                        19,
+                        14,
+                        14,
+                        14,
+                        5,
+                        5,
+                        5,
+                        13,
+                        13,
+                        13,
+                        7,
+                        7,
+                        7,
+                        9,
+                        9,
+                        9,
+                        18,
+                        18,
+                        18,
+                        24,
+                        24,
+                        24,
+                        21,
+                        21,
+                        21,
+                        22,
+                        22,
+                        22,
+                    ],
+                    [
+                        10,
+                        10,
+                        10,
+                        10,
+                        10,
+                        10,
+                        10,
+                        10,
+                        10,
+                        10,
+                        5,
+                        10,
+                        20,
+                        5,
+                        10,
+                        20,
+                        5,
+                        10,
+                        20,
+                        5,
+                        10,
+                        20,
+                        5,
+                        10,
+                        20,
+                        5,
+                        10,
+                        20,
+                        5,
+                        10,
+                        20,
+                        5,
+                        10,
+                        20,
+                        5,
+                        10,
+                        20,
+                        5,
+                        10,
+                        20,
+                        5,
+                        10,
+                        20,
+                        5,
+                        10,
+                        20,
+                    ],
+                )
+            ],
+            "state_metrics_config": [
+                [40, False, 1, True, False],
+                [
+                    {
+                        "F_mean": {"max": [2], "min": [0]},
+                        "F_stdev": {"max": [1], "min": [0]},
+                        "CR_mean": {"max": [1], "min": [0]},
+                        "CR_stdev": {"max": [1], "min": [0]},
+                    },
+                    40,
+                ],
+            ],
+            "action_space_config": {
+                "F_mean": {"max": 2, "min": 0},
+                "F_stdev": {"max": 1, "min": 0},
+                "CR_mean": {"max": 1, "min": 0},
+                "CR_stdev": {"max": 1, "min": 0},
+            },
+        },
+    },
+)
+
+
+# endregion #################################################################################
+
+
+# A way to get a list of equal configurations with some difference on some parameter
+# ["BentCigar", "Discus", "Ellipsoid", "Katsuura", "Rastrigin", "Rosenbrock", "Schaffers", "Schwefel", "Sphere", "Weierstrass"]
+ppo_cma_configuration_10_funcs = [
+    update_and_return(
+        ppo_cma_configuration,
+        {
+            "env.env_config": {"solver_driver_args": [10, 10, fun, 0.5]}
+        },
+    )
+    for clip, fun, sigma_init in zip(
+        [1e7, 10000, 2e5, 100, 100, 1e4, 10, 5000, 50, 100],
+        [12, 11, 2, 23, 15, 8, 17, 20, 1, 16],
+        [1.28, 0.38, 1.54, 1.18, 0.1, 1.66, 0.33, 0.1, 1.63, 0.1],
+    )
+]
+
+de_uniform_ppo_configuration_46_funcs = [
+    update_and_return(
+        ppo_de_configuration,
+        {
+            "env.env_config": {"solver_driver_args": [dim, 10, fun, "best1bin", "uniform"]},
+        },
+    )
+    for fun, dim in zip(
+        [
             12, 11, 2, 23, 15, 8, 17, 20, 1, 16,
             6,
             6,
@@ -396,115 +549,8 @@ multienv_ppo_de_gaussian_configuration = update_and_return(
             22,
             22,
         ],
-            [
-                10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-            5,
-            10,
-            20,
-        ])]}
-    }
-)
-
-
-# endregion #################################################################################
-
-
-# A way to get a list of equal configurations with some difference on some parameter
-# ["BentCigar", "Discus", "Ellipsoid", "Katsuura", "Rastrigin", "Rosenbrock", "Schaffers", "Schwefel", "Sphere", "Weierstrass"]
-ppo_cma_configuration_10_funcs = [
-    update_and_return(
-        ppo_cma_configuration,
-        {
-            "env.env_config": {"solver_driver_args": [10, 10, fun, 0.5]}
-        },
-    )
-    for clip, fun, sigma_init in zip(
-        [1e7, 10000, 2e5, 100, 100, 1e4, 10, 5000, 50, 100],
-        [12, 11, 2, 23, 15, 8, 17, 20, 1, 16],
-        [1.28, 0.38, 1.54, 1.18, 0.1, 1.66, 0.33, 0.1, 1.63, 0.1],
-    )
-]
-
-de_uniform_ppo_configuration_46_funcs = [
-    update_and_return(
-        ppo_de_configuration,
-        {
-            "env.env_config": {"solver_driver_args": [dim, 10, fun, "best1bin", "uniform"]},
-        },
-    )
-    for fun, dim in zip(
         [
-            6,
-            6,
-            6,
-            4,
-            4,
-            4,
-            19,
-            19,
-            19,
-            14,
-            14,
-            14,
-            5,
-            5,
-            5,
-            13,
-            13,
-            13,
-            7,
-            7,
-            7,
-            9,
-            9,
-            9,
-            18,
-            18,
-            18,
-            24,
-            24,
-            24,
-            21,
-            21,
-            21,
-            22,
-            22,
-            22,
-        ],
-        [
+            10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
             5,
             10,
             20,
@@ -549,11 +595,32 @@ de_gaussian_ppo_configuration_46_funcs = [
     update_and_return(
         ppo_de_configuration,
         {
-            "env.env_config": {"solver_driver_args": [dim, 10, fun, "best1bin", "normal"]},
+            "env.env_config": {
+            "solver_driver_args": [dim, 10, fun, "best1bin", "normal"],
+            "state_metrics_config": [
+                [40, False, 1, True, False],
+                [
+                    {
+                        "F_mean": {"max": [2], "min": [0]},
+                        "F_stdev": {"max": [1], "min": [0]},
+                        "CR_mean": {"max": [1], "min": [0]},
+                        "CR_stdev": {"max": [1], "min": [0]},
+                    },
+                    40,
+                ],
+            ],
+            "action_space_config": {
+                "F_mean": {"max": 2, "min": 0},
+                "F_stdev": {"max": 1, "min": 0},
+                "CR_mean": {"max": 1, "min": 0},
+                "CR_stdev": {"max": 1, "min": 0},
+            },
+        },
         },
     )
     for fun, dim in zip(
         [
+            12, 11, 2, 23, 15, 8, 17, 20, 1, 16,
             6,
             6,
             6,
@@ -592,6 +659,7 @@ de_gaussian_ppo_configuration_46_funcs = [
             22,
         ],
         [
+            10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
             5,
             10,
             20,
@@ -725,52 +793,100 @@ cma_ppo_configuration_46_funcs = [
     )
 ]
 
-cma_ppo_configuration_46_funcs0 = cma_ppo_configuration_46_funcs[0]
-cma_ppo_configuration_46_funcs1 = cma_ppo_configuration_46_funcs[1]
-cma_ppo_configuration_46_funcs2 = cma_ppo_configuration_46_funcs[2]
-cma_ppo_configuration_46_funcs3 = cma_ppo_configuration_46_funcs[3]
-cma_ppo_configuration_46_funcs4 = cma_ppo_configuration_46_funcs[4]
-cma_ppo_configuration_46_funcs5 = cma_ppo_configuration_46_funcs[5]
-cma_ppo_configuration_46_funcs6 = cma_ppo_configuration_46_funcs[6]
-cma_ppo_configuration_46_funcs7 = cma_ppo_configuration_46_funcs[7]
-cma_ppo_configuration_46_funcs8 = cma_ppo_configuration_46_funcs[8]
-cma_ppo_configuration_46_funcs9 = cma_ppo_configuration_46_funcs[9]
-cma_ppo_configuration_46_funcs10 = cma_ppo_configuration_46_funcs[10]
-cma_ppo_configuration_46_funcs11 = cma_ppo_configuration_46_funcs[11]
-cma_ppo_configuration_46_funcs12 = cma_ppo_configuration_46_funcs[12]
-cma_ppo_configuration_46_funcs13 = cma_ppo_configuration_46_funcs[13]
-cma_ppo_configuration_46_funcs14 = cma_ppo_configuration_46_funcs[14]
-cma_ppo_configuration_46_funcs15 = cma_ppo_configuration_46_funcs[15]
-cma_ppo_configuration_46_funcs16 = cma_ppo_configuration_46_funcs[16]
-cma_ppo_configuration_46_funcs17 = cma_ppo_configuration_46_funcs[17]
-cma_ppo_configuration_46_funcs18 = cma_ppo_configuration_46_funcs[18]
-cma_ppo_configuration_46_funcs19 = cma_ppo_configuration_46_funcs[19]
-cma_ppo_configuration_46_funcs20 = cma_ppo_configuration_46_funcs[20]
-cma_ppo_configuration_46_funcs21 = cma_ppo_configuration_46_funcs[21]
-cma_ppo_configuration_46_funcs22 = cma_ppo_configuration_46_funcs[22]
-cma_ppo_configuration_46_funcs23 = cma_ppo_configuration_46_funcs[23]
-cma_ppo_configuration_46_funcs24 = cma_ppo_configuration_46_funcs[24]
-cma_ppo_configuration_46_funcs25 = cma_ppo_configuration_46_funcs[25]
-cma_ppo_configuration_46_funcs26 = cma_ppo_configuration_46_funcs[26]
-cma_ppo_configuration_46_funcs27 = cma_ppo_configuration_46_funcs[27]
-cma_ppo_configuration_46_funcs28 = cma_ppo_configuration_46_funcs[28]
-cma_ppo_configuration_46_funcs29 = cma_ppo_configuration_46_funcs[29]
-cma_ppo_configuration_46_funcs30 = cma_ppo_configuration_46_funcs[30]
-cma_ppo_configuration_46_funcs31 = cma_ppo_configuration_46_funcs[31]
-cma_ppo_configuration_46_funcs32 = cma_ppo_configuration_46_funcs[32]
-cma_ppo_configuration_46_funcs33 = cma_ppo_configuration_46_funcs[33]
-cma_ppo_configuration_46_funcs34 = cma_ppo_configuration_46_funcs[34]
-cma_ppo_configuration_46_funcs35 = cma_ppo_configuration_46_funcs[35]
-cma_ppo_configuration_46_funcs36 = cma_ppo_configuration_46_funcs[36]
-cma_ppo_configuration_46_funcs37 = cma_ppo_configuration_46_funcs[37]
-cma_ppo_configuration_46_funcs38 = cma_ppo_configuration_46_funcs[38]
-cma_ppo_configuration_46_funcs39 = cma_ppo_configuration_46_funcs[39]
-cma_ppo_configuration_46_funcs40 = cma_ppo_configuration_46_funcs[40]
-cma_ppo_configuration_46_funcs41 = cma_ppo_configuration_46_funcs[41]
-cma_ppo_configuration_46_funcs42 = cma_ppo_configuration_46_funcs[42]
-cma_ppo_configuration_46_funcs43 = cma_ppo_configuration_46_funcs[43]
-cma_ppo_configuration_46_funcs44 = cma_ppo_configuration_46_funcs[44]
-cma_ppo_configuration_46_funcs45 = cma_ppo_configuration_46_funcs[45]
+de_uniform_ppo_configuration_46_funcs0 = de_uniform_ppo_configuration_46_funcs[0]
+de_uniform_ppo_configuration_46_funcs1 = de_uniform_ppo_configuration_46_funcs[1]
+de_uniform_ppo_configuration_46_funcs2 = de_uniform_ppo_configuration_46_funcs[2]
+de_uniform_ppo_configuration_46_funcs3 = de_uniform_ppo_configuration_46_funcs[3]
+de_uniform_ppo_configuration_46_funcs4 = de_uniform_ppo_configuration_46_funcs[4]
+de_uniform_ppo_configuration_46_funcs5 = de_uniform_ppo_configuration_46_funcs[5]
+de_uniform_ppo_configuration_46_funcs6 = de_uniform_ppo_configuration_46_funcs[6]
+de_uniform_ppo_configuration_46_funcs7 = de_uniform_ppo_configuration_46_funcs[7]
+de_uniform_ppo_configuration_46_funcs8 = de_uniform_ppo_configuration_46_funcs[8]
+de_uniform_ppo_configuration_46_funcs9 = de_uniform_ppo_configuration_46_funcs[9]
+de_uniform_ppo_configuration_46_funcs10 = de_uniform_ppo_configuration_46_funcs[10]
+de_uniform_ppo_configuration_46_funcs11 = de_uniform_ppo_configuration_46_funcs[11]
+de_uniform_ppo_configuration_46_funcs12 = de_uniform_ppo_configuration_46_funcs[12]
+de_uniform_ppo_configuration_46_funcs13 = de_uniform_ppo_configuration_46_funcs[13]
+de_uniform_ppo_configuration_46_funcs14 = de_uniform_ppo_configuration_46_funcs[14]
+de_uniform_ppo_configuration_46_funcs15 = de_uniform_ppo_configuration_46_funcs[15]
+de_uniform_ppo_configuration_46_funcs16 = de_uniform_ppo_configuration_46_funcs[16]
+de_uniform_ppo_configuration_46_funcs17 = de_uniform_ppo_configuration_46_funcs[17]
+de_uniform_ppo_configuration_46_funcs18 = de_uniform_ppo_configuration_46_funcs[18]
+de_uniform_ppo_configuration_46_funcs19 = de_uniform_ppo_configuration_46_funcs[19]
+de_uniform_ppo_configuration_46_funcs20 = de_uniform_ppo_configuration_46_funcs[20]
+de_uniform_ppo_configuration_46_funcs21 = de_uniform_ppo_configuration_46_funcs[21]
+de_uniform_ppo_configuration_46_funcs22 = de_uniform_ppo_configuration_46_funcs[22]
+de_uniform_ppo_configuration_46_funcs23 = de_uniform_ppo_configuration_46_funcs[23]
+de_uniform_ppo_configuration_46_funcs24 = de_uniform_ppo_configuration_46_funcs[24]
+de_uniform_ppo_configuration_46_funcs25 = de_uniform_ppo_configuration_46_funcs[25]
+de_uniform_ppo_configuration_46_funcs26 = de_uniform_ppo_configuration_46_funcs[26]
+de_uniform_ppo_configuration_46_funcs27 = de_uniform_ppo_configuration_46_funcs[27]
+de_uniform_ppo_configuration_46_funcs28 = de_uniform_ppo_configuration_46_funcs[28]
+de_uniform_ppo_configuration_46_funcs29 = de_uniform_ppo_configuration_46_funcs[29]
+de_uniform_ppo_configuration_46_funcs30 = de_uniform_ppo_configuration_46_funcs[30]
+de_uniform_ppo_configuration_46_funcs31 = de_uniform_ppo_configuration_46_funcs[31]
+de_uniform_ppo_configuration_46_funcs32 = de_uniform_ppo_configuration_46_funcs[32]
+de_uniform_ppo_configuration_46_funcs33 = de_uniform_ppo_configuration_46_funcs[33]
+de_uniform_ppo_configuration_46_funcs34 = de_uniform_ppo_configuration_46_funcs[34]
+de_uniform_ppo_configuration_46_funcs35 = de_uniform_ppo_configuration_46_funcs[35]
+de_uniform_ppo_configuration_46_funcs36 = de_uniform_ppo_configuration_46_funcs[36]
+de_uniform_ppo_configuration_46_funcs37 = de_uniform_ppo_configuration_46_funcs[37]
+de_uniform_ppo_configuration_46_funcs38 = de_uniform_ppo_configuration_46_funcs[38]
+de_uniform_ppo_configuration_46_funcs39 = de_uniform_ppo_configuration_46_funcs[39]
+de_uniform_ppo_configuration_46_funcs40 = de_uniform_ppo_configuration_46_funcs[40]
+de_uniform_ppo_configuration_46_funcs41 = de_uniform_ppo_configuration_46_funcs[41]
+de_uniform_ppo_configuration_46_funcs42 = de_uniform_ppo_configuration_46_funcs[42]
+de_uniform_ppo_configuration_46_funcs43 = de_uniform_ppo_configuration_46_funcs[43]
+de_uniform_ppo_configuration_46_funcs44 = de_uniform_ppo_configuration_46_funcs[44]
+de_uniform_ppo_configuration_46_funcs45 = de_uniform_ppo_configuration_46_funcs[45]
+
+de_gaussian_ppo_configuration_46_funcs0 = de_gaussian_ppo_configuration_46_funcs[0]
+de_gaussian_ppo_configuration_46_funcs1 = de_gaussian_ppo_configuration_46_funcs[1]
+de_gaussian_ppo_configuration_46_funcs2 = de_gaussian_ppo_configuration_46_funcs[2]
+de_gaussian_ppo_configuration_46_funcs3 = de_gaussian_ppo_configuration_46_funcs[3]
+de_gaussian_ppo_configuration_46_funcs4 = de_gaussian_ppo_configuration_46_funcs[4]
+de_gaussian_ppo_configuration_46_funcs5 = de_gaussian_ppo_configuration_46_funcs[5]
+de_gaussian_ppo_configuration_46_funcs6 = de_gaussian_ppo_configuration_46_funcs[6]
+de_gaussian_ppo_configuration_46_funcs7 = de_gaussian_ppo_configuration_46_funcs[7]
+de_gaussian_ppo_configuration_46_funcs8 = de_gaussian_ppo_configuration_46_funcs[8]
+de_gaussian_ppo_configuration_46_funcs9 = de_gaussian_ppo_configuration_46_funcs[9]
+de_gaussian_ppo_configuration_46_funcs10 = de_gaussian_ppo_configuration_46_funcs[10]
+de_gaussian_ppo_configuration_46_funcs11 = de_gaussian_ppo_configuration_46_funcs[11]
+de_gaussian_ppo_configuration_46_funcs12 = de_gaussian_ppo_configuration_46_funcs[12]
+de_gaussian_ppo_configuration_46_funcs13 = de_gaussian_ppo_configuration_46_funcs[13]
+de_gaussian_ppo_configuration_46_funcs14 = de_gaussian_ppo_configuration_46_funcs[14]
+de_gaussian_ppo_configuration_46_funcs15 = de_gaussian_ppo_configuration_46_funcs[15]
+de_gaussian_ppo_configuration_46_funcs16 = de_gaussian_ppo_configuration_46_funcs[16]
+de_gaussian_ppo_configuration_46_funcs17 = de_gaussian_ppo_configuration_46_funcs[17]
+de_gaussian_ppo_configuration_46_funcs18 = de_gaussian_ppo_configuration_46_funcs[18]
+de_gaussian_ppo_configuration_46_funcs19 = de_gaussian_ppo_configuration_46_funcs[19]
+de_gaussian_ppo_configuration_46_funcs20 = de_gaussian_ppo_configuration_46_funcs[20]
+de_gaussian_ppo_configuration_46_funcs21 = de_gaussian_ppo_configuration_46_funcs[21]
+de_gaussian_ppo_configuration_46_funcs22 = de_gaussian_ppo_configuration_46_funcs[22]
+de_gaussian_ppo_configuration_46_funcs23 = de_gaussian_ppo_configuration_46_funcs[23]
+de_gaussian_ppo_configuration_46_funcs24 = de_gaussian_ppo_configuration_46_funcs[24]
+de_gaussian_ppo_configuration_46_funcs25 = de_gaussian_ppo_configuration_46_funcs[25]
+de_gaussian_ppo_configuration_46_funcs26 = de_gaussian_ppo_configuration_46_funcs[26]
+de_gaussian_ppo_configuration_46_funcs27 = de_gaussian_ppo_configuration_46_funcs[27]
+de_gaussian_ppo_configuration_46_funcs28 = de_gaussian_ppo_configuration_46_funcs[28]
+de_gaussian_ppo_configuration_46_funcs29 = de_gaussian_ppo_configuration_46_funcs[29]
+de_gaussian_ppo_configuration_46_funcs30 = de_gaussian_ppo_configuration_46_funcs[30]
+de_gaussian_ppo_configuration_46_funcs31 = de_gaussian_ppo_configuration_46_funcs[31]
+de_gaussian_ppo_configuration_46_funcs32 = de_gaussian_ppo_configuration_46_funcs[32]
+de_gaussian_ppo_configuration_46_funcs33 = de_gaussian_ppo_configuration_46_funcs[33]
+de_gaussian_ppo_configuration_46_funcs34 = de_gaussian_ppo_configuration_46_funcs[34]
+de_gaussian_ppo_configuration_46_funcs35 = de_gaussian_ppo_configuration_46_funcs[35]
+de_gaussian_ppo_configuration_46_funcs36 = de_gaussian_ppo_configuration_46_funcs[36]
+de_gaussian_ppo_configuration_46_funcs37 = de_gaussian_ppo_configuration_46_funcs[37]
+de_gaussian_ppo_configuration_46_funcs38 = de_gaussian_ppo_configuration_46_funcs[38]
+de_gaussian_ppo_configuration_46_funcs39 = de_gaussian_ppo_configuration_46_funcs[39]
+de_gaussian_ppo_configuration_46_funcs40 = de_gaussian_ppo_configuration_46_funcs[40]
+de_gaussian_ppo_configuration_46_funcs41 = de_gaussian_ppo_configuration_46_funcs[41]
+de_gaussian_ppo_configuration_46_funcs42 = de_gaussian_ppo_configuration_46_funcs[42]
+de_gaussian_ppo_configuration_46_funcs43 = de_gaussian_ppo_configuration_46_funcs[43]
+de_gaussian_ppo_configuration_46_funcs44 = de_gaussian_ppo_configuration_46_funcs[44]
+de_gaussian_ppo_configuration_46_funcs45 = de_gaussian_ppo_configuration_46_funcs[45]
+
 
 # dict of all configurations in this file
 ALL_CONFIGURATIONS = {k: v for k, v in locals().items(
