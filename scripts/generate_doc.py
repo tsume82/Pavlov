@@ -58,11 +58,11 @@ funcs = [
     "Sphere",
     "Weierstrass",
 ] + funcs
-dir1 = "./experiments/multifunctions/CMA ppo 46 functions" # the document will be saved in this folder and the configuration will be taken from here
-dir2 = "./experiments/CSA"
+dir1 = "./experiments/multifunctions/DE gaussian ppo 46 functions" # the document will be saved in this folder and the configuration will be taken from here
+dir2 = "./experiments/jDE"
 name1 = "PPO multifunction"
-name2 = "CSA"
-filename = f"results_CMA_{name1}_vs_{name2}.md".replace(" ","_")
+name2 = "jDE"
+filename = f"results_DE_{name1}_vs_{name2}.md".replace(" ","_")
 multienv = True # flag for multienv directory setup
 # endregion
 #▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚
