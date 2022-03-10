@@ -3,7 +3,8 @@ from matplotlib import rcParams, cm
 from matplotlib.lines import Line2D
 from matplotlib.ticker import AutoMinorLocator, StrMethodFormatter, ScalarFormatter, LinearLocator, LogLocator
 import numpy as np
-from os.path import exists, splitext, dirname, isdir
+from os.path import dirname, splitext, dirname, isdir, join, normpath
+from os import makedirs
 import json
 import pickle
 
@@ -407,6 +408,7 @@ def compare_experiments(
 		print("with final best metric: p({} < {}) = {}".format(exp_names[0], exp_names[1], final_best))
 
 	if save:
+		makedirs(dirname(save), exist_ok=True)
 		fig.savefig(save)
 	else:
 		plt.show()
@@ -490,12 +492,14 @@ def compute_metrics_comparison(exp_list, metric="AUC"):
 
 def save_experiment(experiment, folder, name="experiment"):
 	name = name if isinstance(name, str) else "experiment"
-	with open(folder + "/{}.bin".format(name), "wb") as f:
+	file_path = join(folder, f"{normpath(name)}.bin")
+	makedirs(dirname(file_path), exist_ok=True)
+	with open(file_path, "wb") as f:
 		pickle.dump(experiment, f)
 
 
 def load_experiment(dir_or_file):
 	if isdir(dir_or_file):
-		dir_or_file = dir_or_file + "/experiment.bin"
+		dir_or_file = join(dir_or_file, "experiment.bin")
 	with open(dir_or_file, "rb") as f:
 		return pickle.load(f)

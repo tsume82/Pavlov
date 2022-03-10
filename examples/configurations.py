@@ -49,7 +49,7 @@ rl_configuration_2 = {
         "action_space_config": None,
     },
 }
-pg_cma_es_configuration = {
+pg_cma_configuration = {
     "agent.algorithm": "RayPolicyGradient",
     "agent.algorithm.render_env": False,
     "agent.algorithm.batch_mode": "complete_episodes",
@@ -77,7 +77,7 @@ pg_cma_es_configuration = {
         "action_space_config": {"step_size": {"max": 1, "min": 1e-10}},
     },
 }
-ppo_cma_es_configuration = {
+ppo_cma_configuration = {
     "agent.algorithm": "RayProximalPolicyOptimization",
     "agent.algorithm.render_env": False,
     "agent.algorithm.num_workers": 0,
@@ -214,8 +214,14 @@ de_adapt_configuration = {
     },
 }
 
-# multi env test
-ppo_de_configuration_multienv = {
+
+
+
+
+# region: multienv ##########################################################################
+
+
+multienv_ppo_de_configuration = {
     "agent.algorithm": "RayProximalPolicyOptimization",
     "agent.algorithm.render_env": False,
     "agent.algorithm.num_workers": 0,
@@ -229,16 +235,16 @@ ppo_de_configuration_multienv = {
     "env.env_config": {
         "solver_driver": "DEdriver",
         "solver_driver_args": [
-            [10, 10, 12, "best1bin", "uniform"], 
+            [10, 10, 12, "best1bin", "uniform"],
             [10, 10, 11, "best1bin", "uniform"],
-            [10, 10, 2, "best1bin", "uniform"], 
+            [10, 10, 2, "best1bin", "uniform"],
             [10, 10, 23, "best1bin", "uniform"],
-            [10, 10, 15, "best1bin", "uniform"], 
+            [10, 10, 15, "best1bin", "uniform"],
             [10, 10, 8, "best1bin", "uniform"],
-            [10, 10, 17, "best1bin", "uniform"], 
+            [10, 10, 17, "best1bin", "uniform"],
             [10, 10, 20, "best1bin", "uniform"],
-            [10, 10, 1, "best1bin", "uniform"], 
-            [10, 10, 16, "best1bin", "uniform"]
+            [10, 10, 1, "best1bin", "uniform"],
+            [10, 10, 16, "best1bin", "uniform"],
         ],
         "maximize": False,
         "steps": 50,
@@ -267,16 +273,26 @@ ppo_de_configuration_multienv = {
     },
 }
 
-multienv_ppo_de_uniform1 = update_and_return(ppo_de_configuration,{"env.env_config": {"solver_driver_args": [10, 10, 12, "best1bin", "uniform"]}})
+multienv_ppo_cma_configuration = update_and_return(
+    ppo_cma_configuration, {
+		"env.env_class": "SchedulerPolicyMultiRayEnvironment", 
+		"env.env_config": { "solver_driver_args": [[10, 10, fun, 0.5] for fun in [12, 11, 2, 23, 15, 8, 17, 20, 1, 16]] }
+	}
+)
+
+
+# endregion #################################################################################
+
+
+
 
 # A way to get a list of equal configurations with some difference on some parameter
 # ["BentCigar", "Discus", "Ellipsoid", "Katsuura", "Rastrigin", "Rosenbrock", "Schaffers", "Schwefel", "Sphere", "Weierstrass"]
-all_ppo_configurations = [
+all_ppo_cma_configurations = [
     update_and_return(
-        ppo_cma_es_configuration,
+        ppo_cma_configuration,
         {
-            "env.env_config": {"solver_driver_args": [10, 10, fun, 0.5]},
-            "agent.algorithm.vf_clip_param": 10,
+            "env.env_config": {"solver_driver_args": [10, 10, fun, 0.5]}
         },
     )
     for clip, fun, sigma_init in zip(
@@ -379,7 +395,7 @@ extended_de_ppo_configurations = [
 # [5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20, 5, 10, 20],
 extended_cma_ppo_configurations = [
     update_and_return(
-        ppo_cma_es_configuration,
+        ppo_cma_configuration,
         {
             "env.env_config": {"solver_driver_args": [dim, 10, fun, 0.5]},
         },
@@ -464,9 +480,16 @@ extended_cma_ppo_configurations = [
     )
 ]
 
-
-
-
+all_ppo_cma_configurations0 = all_ppo_cma_configurations[0]
+all_ppo_cma_configurations1 = all_ppo_cma_configurations[1]
+all_ppo_cma_configurations2 = all_ppo_cma_configurations[2]
+all_ppo_cma_configurations3 = all_ppo_cma_configurations[3]
+all_ppo_cma_configurations4 = all_ppo_cma_configurations[4]
+all_ppo_cma_configurations5 = all_ppo_cma_configurations[5]
+all_ppo_cma_configurations6 = all_ppo_cma_configurations[6]
+all_ppo_cma_configurations7 = all_ppo_cma_configurations[7]
+all_ppo_cma_configurations8 = all_ppo_cma_configurations[8]
+all_ppo_cma_configurations9 = all_ppo_cma_configurations[9]
 
 # dict of all configurations in this file
 ALL_CONFIGURATIONS = {k: v for k, v in locals().items() if not "__" in k and isinstance(v, (dict, list))}

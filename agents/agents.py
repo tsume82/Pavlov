@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod, ABCMeta
-from os.path import splitext, join
+from os.path import basename, join
 import pickle
 import ray
 import numpy as np
@@ -180,7 +180,7 @@ class RayAgent(Agent, metaclass=ABCMeta):
 		self.agent = self.agent_class(env=self.env_class.__name__, config=self.config)
 
 	def load(self, path: str):
-		if "checkpoint-" in splitext(path)[0]:
+		if "checkpoint-" in basename(path):
 			self.agent.load_checkpoint(path)
 		else:
 			with open(path, "rb") as file:
