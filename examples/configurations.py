@@ -242,7 +242,7 @@ multienv_ppo_de_uniform_configuration = {
     "agent.algorithm.optimizer": "Adam",
     "agent.algorithm.vf_clip_param": 10,
     "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50, 50]},
-    "env.env_class": "SchedulerPolicyRayEnvironment",
+    "env.env_class": "SchedulerPolicyMultiRayEnvironment",
     "env.env_config": {
         "solver_driver": "DEdriver",
         "solver_driver_args": [

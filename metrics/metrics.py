@@ -216,7 +216,7 @@ class DeltaFitPop(Metric):
 	"""
 	History of the normaized difference between max fitness and min fitness in the population
 	"""
-
+	name = "DeltaFitPop"
 	MetricProvider.register_metric(__qualname__, __qualname__)
 
 	def __init__(self, history_max_length=1, maximize=True):
