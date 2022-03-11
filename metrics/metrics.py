@@ -214,7 +214,7 @@ class DifferenceOfBest(Metric):
 
 class DeltaFitPop(Metric):
 	"""
-	History of the normaized difference between max fitness and min fitness in the population between generations
+	History of the normaized difference between max fitness and min fitness in the population
 	"""
 
 	MetricProvider.register_metric(__qualname__, __qualname__)
