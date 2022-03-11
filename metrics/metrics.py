@@ -212,6 +212,43 @@ class DifferenceOfBest(Metric):
 		return Repeated(box, self.history_max_length)
 
 
+class DeltaFitPop(Metric):
+	"""
+	History of the normaized difference between max fitness and min fitness in the population between generations
+	"""
+
+	MetricProvider.register_metric(__qualname__, __qualname__)
+
+	def __init__(self, history_max_length=1, maximize=True):
+		self.maximize = maximize
+		# self.normalize = normalize
+		self.history_max_length = history_max_length
+		self.history = []
+
+	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+		if len(self.history) == 0:
+			self.history.insert(0, np.array(0, dtype=np.float32))
+		else:
+			max = np.nanmax(fitness, axis=0)
+			min = np.nanmin(fitness, axis=0)
+			
+			deltaFitPop = abs(max - min) / (abs(max - min) + abs(max if self.maximize else min) + 1e-5)
+			
+
+			self.history.insert(0, np.array(deltaFitPop.item()))  # Repeated needs a list, Box needs a np.array as a scalar
+			if len(self.history) > self.history_max_length:
+				self.history.pop()
+
+		return self.history
+
+	def reset(self) -> None:
+		self.history = []
+
+	def get_space(self):
+		box = spaces.Box(low=0, high=1, shape=([]))
+		return Repeated(box, self.history_max_length)
+
+
 class FitnessHistory(Metric):
 	"""
 	RecentFitness metric, keep track of the fitness within the last history_size steps
