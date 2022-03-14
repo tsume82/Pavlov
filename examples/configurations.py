@@ -354,10 +354,10 @@ de_uniform_ppo_configuration_46_funcs = [
             "solver_driver_args": [dim, 10, fun, "best1bin", "uniform"],
             "maximize": False,
             "steps": 50,
-            "state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "SolverStateHistory"],
+            "state_metrics_names": ["DifferenceOfBest", "DeltaX", "SolverStateHistory"],
             "state_metrics_config": [
                 [40, False, 1, True, False],
-                [40, False],
+                [40, False, True],
                 [
                     {
                         "F_min": {"max": [2], "min": [0]},
@@ -399,10 +399,10 @@ de_gaussian_ppo_configuration_46_funcs = [
             "solver_driver_args": [dim, 10, fun, "best1bin", "normal"],
             "maximize": False,
             "steps": 50,
-            "state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "SolverStateHistory"],
+            "state_metrics_names": ["DifferenceOfBest", "DeltaX", "SolverStateHistory"],
             "state_metrics_config": [
                 [40, False, 1, True, False],
-				[40, False],
+				[40, False, True],
                 [
                     {
                         "F_mean": {"max": [2], "min": [0]},
