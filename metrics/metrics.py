@@ -226,16 +226,73 @@ class DeltaFitPop(Metric):
 		self.history = []
 
 	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
-		if len(self.history) == 0:
-			self.history.insert(0, np.array(0, dtype=np.float32))
-		else:
-			max = np.nanmax(fitness, axis=0)
-			min = np.nanmin(fitness, axis=0)
-			
-			deltaFitPop = abs(max - min) / (abs(max - min) + abs(max if self.maximize else min) + 1e-5)
-			
+		max = np.nanmax(fitness, axis=0)
+		min = np.nanmin(fitness, axis=0)
+		
+		deltaFitPop = abs(max - min) / (abs(max - min) + abs(max if self.maximize else min) + 1e-5)
+		
+		self.history.insert(0, np.array(deltaFitPop.item()))  # Repeated needs a list, Box needs a np.array as a scalar
+		if len(self.history) > self.history_max_length:
+			self.history.pop()
 
-			self.history.insert(0, np.array(deltaFitPop.item()))  # Repeated needs a list, Box needs a np.array as a scalar
+		return self.history
+
+	def reset(self) -> None:
+		self.history = []
+
+	def get_space(self):
+		box = spaces.Box(low=0, high=1, shape=([]))
+		return Repeated(box, self.history_max_length)
+
+class DeltaX(Metric):
+	"""
+	History of deltaX intra or inter generation.
+
+	intra-generation deltaX: vector of the difference between the maximum and the minimum value of the search space of the objective function for each dimension
+
+	inter-generation deltaX: vector of the difference between the two best solutions in 2 genereations.
+	"""
+	name = "DeltaX"
+	MetricProvider.register_metric(__qualname__, __qualname__)
+
+	def __init__(self, domain_bounds, history_max_length=1, maximize=True, intra_gen = True):
+		self.maximize = maximize
+		self.history_max_length = history_max_length
+		self.history = []
+		self.intra_gen = intra_gen
+		self.compute = self._intra_deltaX if intra_gen else self._inter_deltaX
+
+		bounds = np.array(domain_bounds)
+		if len(bounds.shape) == 1: # bounds can be written as a 1D vector with 2*dim elements
+			bounds.reshape((bounds.shape[0]//2, 2))
+		self.bounds_range = np.abs(bounds.T[0] - bounds.T[1])
+		self.dim = len(self.bounds_range)
+
+	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+		pass # this function will be _intra_deltaX or _inter_deltaX
+	
+	def _intra_deltaX(self, solutions: np.array, fitness: np.array, **options):
+		max = np.nanmax(solutions, axis=0)
+		min = np.nanmin(solutions, axis=0)
+		
+		deltaX = np.abs(max - min) / self.bounds_range
+		
+		self.history.insert(0, deltaX)
+		if len(self.history) > self.history_max_length:
+			self.history.pop()
+
+		return self.history
+
+	def _inter_deltaX(self, solutions: np.array, fitness: np.array, **options):
+		best_idx = np.argmax(fitness) if self.maximize else np.argmin(fitness)
+
+		if len(self.history) == 0:
+			self.history.insert(0, np.zeros(shape=[self.dim], dtype=np.float32))
+			self.prec = solutions[best_idx]
+		else:
+			deltaX = (self.prec - solutions[best_idx]) / self.bounds_range
+			
+			self.history.insert(0, deltaX)
 			if len(self.history) > self.history_max_length:
 				self.history.pop()
 
@@ -245,7 +302,8 @@ class DeltaFitPop(Metric):
 		self.history = []
 
 	def get_space(self):
-		box = spaces.Box(low=0, high=1, shape=([]))
+		low = 0 if self.intra_gen else -1
+		box = spaces.Box(low=low, high=1, shape=[self.dim])
 		return Repeated(box, self.history_max_length)
 
 

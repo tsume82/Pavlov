@@ -10,12 +10,12 @@ def testMetric(metric: Metric, iterations, pop=10, dim=5):
 		fitness = np.random.normal(loc=0, scale=i+1, size=(pop,))
 		ret = metric.compute(solutions, fitness)
 		print()
-		print("best:", metric.prec_best)
 		print(ret)
 
 
 if __name__ == "__main__":
 	# m = RecentGradients(10, 6, 1, None, 3)
-	m = DifferenceOfBest(4, False, 1, True, True)
+	# m = DifferenceOfBest(4, False, 1, True, True)
 	# m = DeltaBest(False, True, False)
+	m = DeltaX([[5.12, -5.12],[-1,1],[-2,2],[4,-1],[3,1]], 40, False, True)
 	testMetric(m, 10)
