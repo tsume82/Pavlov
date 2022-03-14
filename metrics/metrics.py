@@ -264,7 +264,7 @@ class DeltaX(Metric):
 
 		bounds = np.array(domain_bounds)
 		if len(bounds.shape) == 1: # bounds can be written as a 1D vector with 2*dim elements
-			bounds.reshape((bounds.shape[0]//2, 2))
+			bounds = bounds.reshape((bounds.shape[0]//2, 2))
 		self.bounds_range = np.abs(bounds.T[0] - bounds.T[1])
 		self.dim = len(self.bounds_range)
 
@@ -290,7 +290,7 @@ class DeltaX(Metric):
 			self.history.insert(0, np.zeros(shape=[self.dim], dtype=np.float32))
 			self.prec = solutions[best_idx]
 		else:
-			deltaX = (self.prec - solutions[best_idx]) / self.bounds_range
+			deltaX = (solutions[best_idx] - self.prec) / self.bounds_range
 			
 			self.history.insert(0, deltaX)
 			if len(self.history) > self.history_max_length:

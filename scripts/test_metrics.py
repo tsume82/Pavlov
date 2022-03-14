@@ -17,5 +17,5 @@ if __name__ == "__main__":
 	# m = RecentGradients(10, 6, 1, None, 3)
 	# m = DifferenceOfBest(4, False, 1, True, True)
 	# m = DeltaBest(False, True, False)
-	m = DeltaX([[5.12, -5.12],[-1,1],[-2,2],[4,-1],[3,1]], 40, False, True)
+	m = DeltaX([-5,5]*5, 40, False, False)
 	testMetric(m, 10)
