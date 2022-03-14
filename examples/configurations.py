@@ -250,10 +250,10 @@ multienv_ppo_de_uniform_configuration = {
         ],
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "SolverStateHistory"],
+        "state_metrics_names": ["DifferenceOfBest", "DeltaX", "SolverStateHistory"],
         "state_metrics_config": [
             [40, False, 1, True, False],
-            [40, False],
+            [40, False, True],
             [
                 {
                     "F_min": {"max": [2], "min": [0]},
@@ -294,10 +294,10 @@ multienv_ppo_de_gaussian_configuration = {
         ],
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "SolverStateHistory"],
+        "state_metrics_names": ["DifferenceOfBest", "DeltaX", "SolverStateHistory"],
         "state_metrics_config": [
             [40, False, 1, True, False],
-            [40, False],
+            [40, False, True],
             [
                 {
                     "F_mean": {"max": [2], "min": [0]},

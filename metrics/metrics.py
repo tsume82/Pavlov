@@ -255,29 +255,34 @@ class DeltaX(Metric):
 	name = "DeltaX"
 	MetricProvider.register_metric(__qualname__, __qualname__)
 
-	def __init__(self, domain_bounds, history_max_length=1, maximize=True, intra_gen = True):
+	def __init__(self, history_max_length=1, maximize=True, intra_gen = True):
 		self.maximize = maximize
 		self.history_max_length = history_max_length
 		self.history = []
 		self.intra_gen = intra_gen
 		self.compute = self._intra_deltaX if intra_gen else self._inter_deltaX
 
-		bounds = np.array(domain_bounds)
-		if len(bounds.shape) == 1: # bounds can be written as a 1D vector with 2*dim elements
-			bounds = bounds.reshape((bounds.shape[0]//2, 2))
-		self.bounds_range = np.abs(bounds.T[0] - bounds.T[1])
-		self.dim = len(self.bounds_range)
+		# if domain_bounds is not None:
+		# 	bounds = np.array(domain_bounds)
+		# 	if len(bounds.shape) == 1: # bounds can be written as a 1D vector with 2*dim elements
+		# 		bounds = bounds.reshape((bounds.shape[0]//2, 2))
+		# 	self.bounds_range = np.abs(bounds.T[0] - bounds.T[1])
 
 	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
 		pass # this function will be _intra_deltaX or _inter_deltaX
 	
 	def _intra_deltaX(self, solutions: np.array, fitness: np.array, **options):
+		bounds = np.array(options["bounds"])
+		bounds_range = np.abs(bounds.T[0] - bounds.T[1])
+
 		max = np.nanmax(solutions, axis=0)
 		min = np.nanmin(solutions, axis=0)
 		
-		deltaX = np.abs(max - min) / self.bounds_range
+		deltaX = np.abs(max - min) / bounds_range
+
+		min_and_max_deltaX = np.array([np.max(deltaX), np.min(deltaX)])
 		
-		self.history.insert(0, deltaX)
+		self.history.insert(0, min_and_max_deltaX)
 		if len(self.history) > self.history_max_length:
 			self.history.pop()
 
@@ -290,9 +295,14 @@ class DeltaX(Metric):
 			self.history.insert(0, np.zeros(shape=[self.dim], dtype=np.float32))
 			self.prec = solutions[best_idx]
 		else:
-			deltaX = (solutions[best_idx] - self.prec) / self.bounds_range
+			bounds = np.array(options["bounds"])
+			bounds_range = np.abs(bounds.T[0] - bounds.T[1])
+
+			deltaX = (solutions[best_idx] - self.prec) / bounds_range
+
+			min_and_max_deltaX = np.array([np.max(deltaX), np.min(deltaX)])
 			
-			self.history.insert(0, deltaX)
+			self.history.insert(0, min_and_max_deltaX)
 			if len(self.history) > self.history_max_length:
 				self.history.pop()
 
@@ -303,7 +313,7 @@ class DeltaX(Metric):
 
 	def get_space(self):
 		low = 0 if self.intra_gen else -1
-		box = spaces.Box(low=low, high=1, shape=[self.dim])
+		box = spaces.Box(low=low, high=1, shape=[2])
 		return Repeated(box, self.history_max_length)
 
 

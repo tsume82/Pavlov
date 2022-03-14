@@ -248,6 +248,7 @@ class DEdriver(SolverDriver):
 		self.strategy = strategy
 		self.F_init = F_init
 		self.CR_init = CR_init
+		self.bounds = [[-5.12, 5.12]] * dim
 		assert sample in [None, "normal", "uniform"]
 		self.sample = sample
 		self.obj_fun = (
@@ -281,6 +282,7 @@ class DEdriver(SolverDriver):
 			{
 				"F": np.array(self.solver.scale, dtype=np.float32),
 				"CR": np.array(self.solver.cross_over_probability, dtype=np.float32),
+				"bounds": self.bounds,
 				**command
 			},
 		)
@@ -293,7 +295,7 @@ class DEdriver(SolverDriver):
 		self.curr_step = 0
 		self.solver = DifferentialEvolutionSolver(
 			self.obj_fun,
-			[[-5.12, 5.12]] * self.dim,
+			self.bounds,
 			mutation=self.F_init,
 			strategy=self.strategy,
 			recombination=self.CR_init,
@@ -325,6 +327,7 @@ class DEdriver(SolverDriver):
 			{
 				"F": np.array([self.solver.scale]),
 				"CR": np.array([self.solver.cross_over_probability]),
+				"bounds": self.bounds,
 				**command
 			},
 		)
