@@ -292,7 +292,7 @@ class DeltaX(Metric):
 		best_idx = np.argmax(fitness) if self.maximize else np.argmin(fitness)
 
 		if len(self.history) == 0:
-			self.history.insert(0, np.zeros(shape=[self.dim], dtype=np.float32))
+			self.history.insert(0, np.zeros(shape=[2], dtype=np.float32))
 			self.prec = solutions[best_idx]
 		else:
 			bounds = np.array(options["bounds"])

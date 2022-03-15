@@ -250,10 +250,57 @@ multienv_ppo_de_uniform_configuration = {
         ],
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "DeltaX", "SolverStateHistory"],
+        "state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "DeltaX", "SolverStateHistory"],
         "state_metrics_config": [
             [40, False, 1, True, False],
+			[40, False],
             [40, False, True],
+            [
+                {
+                    "F_min": {"max": [2], "min": [0]},
+                    "F_max": {"max": [2], "min": [0]},
+                    "CR_min": {"max": [1], "min": [0]},
+                    "CR_max": {"max": [1], "min": [0]},
+                },
+                40,
+            ],
+        ],
+        "reward_metric": "DeltaBest",
+        "reward_metric_config": [False, True, True],
+        "memes_no": 1,
+        "action_space_config": {
+            "F_min": {"max": 2, "min": 0},
+            "F_max": {"max": 2, "min": 0},
+            "CR_min": {"max": 1, "min": 0},
+            "CR_max": {"max": 1, "min": 0},
+        },
+    },
+}
+
+multienv_ppo_de_uniform_configuration2 = {
+    "agent.algorithm": "RayProximalPolicyOptimization",
+    "agent.algorithm.render_env": False,
+    "agent.algorithm.num_workers": 0,
+    "agent.algorithm.batch_mode": "complete_episodes",
+    "agent.algorithm.lr": 5e-05,
+    "agent.algorithm.train_batch_size": 200,
+    "agent.algorithm.optimizer": "Adam",
+    "agent.algorithm.vf_clip_param": 10,
+    "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50, 50]},
+    "env.env_class": "SchedulerPolicyMultiRayEnvironment",
+    "env.env_config": {
+        "solver_driver": "DEdriver",
+        "solver_driver_args": [
+            [dim, 10, fun, "best1bin", "uniform"] for fun, dim in zip(ids_46_functions, dims_46_functions)
+        ],
+        "maximize": False,
+        "steps": 50,
+        "state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "DeltaX", "DeltaX", "SolverStateHistory"],
+        "state_metrics_config": [
+            [40, False, 1, True, False],
+			[40, False],
+            [40, False, True],
+            [40, False, False],
             [
                 {
                     "F_min": {"max": [2], "min": [0]},
@@ -294,9 +341,10 @@ multienv_ppo_de_gaussian_configuration = {
         ],
         "maximize": False,
         "steps": 50,
-        "state_metrics_names": ["DifferenceOfBest", "DeltaX", "SolverStateHistory"],
+        "state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "DeltaX", "SolverStateHistory"],
         "state_metrics_config": [
             [40, False, 1, True, False],
+			[40, False],
             [40, False, True],
             [
                 {
@@ -319,6 +367,54 @@ multienv_ppo_de_gaussian_configuration = {
         },
     },
 }
+
+multienv_ppo_de_gaussian_configuration2 = {
+    "agent.algorithm": "RayProximalPolicyOptimization",
+    "agent.algorithm.render_env": False,
+    "agent.algorithm.num_workers": 0,
+    "agent.algorithm.batch_mode": "complete_episodes",
+    "agent.algorithm.lr": 5e-05,
+    "agent.algorithm.train_batch_size": 200,
+    "agent.algorithm.optimizer": "Adam",
+    "agent.algorithm.vf_clip_param": 10,
+    "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50, 50]},
+    "env.env_class": "SchedulerPolicyMultiRayEnvironment",
+    "env.env_config": {
+        "solver_driver": "DEdriver",
+        "solver_driver_args": [
+            [dim, 10, fun, "best1bin", "normal"] for fun, dim in zip(ids_46_functions, dims_46_functions)
+        ],
+        "maximize": False,
+        "steps": 50,
+        "state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "DeltaX", "DeltaX", "SolverStateHistory"],
+        "state_metrics_config": [
+            [40, False, 1, True, False],
+			[40, False],
+            [40, False, True],
+            [40, False, False],
+            [
+                {
+                    "F_mean": {"max": [2], "min": [0]},
+                    "F_stdev": {"max": [1], "min": [0]},
+                    "CR_mean": {"max": [1], "min": [0]},
+                    "CR_stdev": {"max": [1], "min": [0]},
+                },
+                40,
+            ],
+        ],
+        "reward_metric": "DeltaBest",
+        "reward_metric_config": [False, True, True],
+        "memes_no": 1,
+        "action_space_config": {
+            "F_mean": {"max": 2, "min": 0},
+            "F_stdev": {"max": 1, "min": 0},
+            "CR_mean": {"max": 1, "min": 0},
+            "CR_stdev": {"max": 1, "min": 0},
+        },
+    },
+}
+
+
 
 
 # endregion
@@ -354,10 +450,58 @@ de_uniform_ppo_configuration_46_funcs = [
             "solver_driver_args": [dim, 10, fun, "best1bin", "uniform"],
             "maximize": False,
             "steps": 50,
-            "state_metrics_names": ["DifferenceOfBest", "DeltaX", "SolverStateHistory"],
+            "state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "DeltaX", "SolverStateHistory"],
             "state_metrics_config": [
                 [40, False, 1, True, False],
+				[40, False],
                 [40, False, True],
+                [
+                    {
+                        "F_min": {"max": [2], "min": [0]},
+                        "F_max": {"max": [2], "min": [0]},
+                        "CR_min": {"max": [1], "min": [0]},
+                        "CR_max": {"max": [1], "min": [0]},
+                    },
+                    40,
+                ],
+            ],
+            "reward_metric": "DeltaBest",
+            "reward_metric_config": [False, True, True],
+            "memes_no": 1,
+            "action_space_config": {
+                "F_min": {"max": 2, "min": 0},
+                "F_max": {"max": 2, "min": 0},
+                "CR_min": {"max": 1, "min": 0},
+                "CR_max": {"max": 1, "min": 0},
+            },
+        },
+    }
+    for fun, dim in zip(ids_46_functions, dims_46_functions)
+]
+
+de_uniform_ppo_configuration_46_funcs_II = [
+    {
+        "agent.algorithm": "RayProximalPolicyOptimization",
+        "agent.algorithm.render_env": False,
+        "agent.algorithm.num_workers": 0,
+        "agent.algorithm.batch_mode": "complete_episodes",
+        "agent.algorithm.lr": 5e-05,
+        "agent.algorithm.train_batch_size": 200,
+        "agent.algorithm.optimizer": "Adam",
+        "agent.algorithm.vf_clip_param": 10,
+        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50, 50]},
+        "env.env_class": "SchedulerPolicyRayEnvironment",
+        "env.env_config": {
+            "solver_driver": "DEdriver",
+            "solver_driver_args": [dim, 10, fun, "best1bin", "uniform"],
+            "maximize": False,
+            "steps": 50,
+			"state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "DeltaX", "DeltaX", "SolverStateHistory"],
+			"state_metrics_config": [
+				[40, False, 1, True, False],
+				[40, False],
+				[40, False, True],
+				[40, False, False],
                 [
                     {
                         "F_min": {"max": [2], "min": [0]},
@@ -399,9 +543,10 @@ de_gaussian_ppo_configuration_46_funcs = [
             "solver_driver_args": [dim, 10, fun, "best1bin", "normal"],
             "maximize": False,
             "steps": 50,
-            "state_metrics_names": ["DifferenceOfBest", "DeltaX", "SolverStateHistory"],
+            "state_metrics_names": ["DifferenceOfBest", "DeltaFitPop","DeltaX", "SolverStateHistory"],
             "state_metrics_config": [
                 [40, False, 1, True, False],
+				[40, False],
 				[40, False, True],
                 [
                     {
@@ -426,6 +571,54 @@ de_gaussian_ppo_configuration_46_funcs = [
     }
     for fun, dim in zip(ids_46_functions, dims_46_functions)
 ]
+
+de_gaussian_ppo_configuration_46_funcs_II = [
+    {
+        "agent.algorithm": "RayProximalPolicyOptimization",
+        "agent.algorithm.render_env": False,
+        "agent.algorithm.num_workers": 0,
+        "agent.algorithm.batch_mode": "complete_episodes",
+        "agent.algorithm.lr": 5e-05,
+        "agent.algorithm.train_batch_size": 200,
+        "agent.algorithm.optimizer": "Adam",
+        "agent.algorithm.vf_clip_param": 10,
+        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50, 50]},
+        "env.env_class": "SchedulerPolicyRayEnvironment",
+        "env.env_config": {
+            "solver_driver": "DEdriver",
+            "solver_driver_args": [dim, 10, fun, "best1bin", "normal"],
+            "maximize": False,
+            "steps": 50,
+			"state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "DeltaX", "DeltaX", "SolverStateHistory"],
+			"state_metrics_config": [
+				[40, False, 1, True, False],
+				[40, False],
+				[40, False, True],
+				[40, False, False],
+                [
+                    {
+                        "F_mean": {"max": [2], "min": [0]},
+                        "F_stdev": {"max": [1], "min": [0]},
+                        "CR_mean": {"max": [1], "min": [0]},
+                        "CR_stdev": {"max": [1], "min": [0]},
+                    },
+                    40,
+                ],
+            ],
+            "reward_metric": "DeltaBest",
+            "reward_metric_config": [False, True, True],
+            "memes_no": 1,
+            "action_space_config": {
+                "F_mean": {"max": 2, "min": 0},
+                "F_stdev": {"max": 1, "min": 0},
+                "CR_mean": {"max": 1, "min": 0},
+                "CR_stdev": {"max": 1, "min": 0},
+            },
+        },
+    }
+    for fun, dim in zip(ids_46_functions, dims_46_functions)
+]
+
 
 cma_ppo_configuration_46_funcs = [
     update_and_return(
@@ -453,6 +646,12 @@ def add_configurations():
 
     for i, conf in enumerate(de_gaussian_ppo_configuration_46_funcs):
         ALL_CONFIGURATIONS[f"de_gaussian_ppo_configuration_46_funcs{i}"] = conf
+		
+    for i, conf in enumerate(de_uniform_ppo_configuration_46_funcs_II):
+        ALL_CONFIGURATIONS[f"de_uniform_ppo_configuration_46_funcs_II{i}"] = conf
+
+    for i, conf in enumerate(de_gaussian_ppo_configuration_46_funcs_II):
+        ALL_CONFIGURATIONS[f"de_gaussian_ppo_configuration_46_funcs_II{i}"] = conf
 
 
 add_configurations()
