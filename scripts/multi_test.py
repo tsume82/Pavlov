@@ -8,8 +8,8 @@ from main import main
 all_ide_configurations = [
     update_and_return(de_adapt_configuration, 
 	{
-		"env.env_config": {"solver_driver_args": [10, 10, fun, "best1bin"]},
-		"agent.algorithm.adapt_strategy": "jDE",
+		"env.env_config": {"solver_driver_args": [dim, 10, fun, "best1bin"]},
+		"agent.algorithm.adapt_strategy": "iDE",
 	})
     for fun, dim in zip(
 		[6, 6, 6, 4, 4, 4, 19, 19, 19, 14, 14, 14, 5, 5, 5, 13, 13, 13, 7, 7, 7, 9, 9, 9, 18, 18, 18, 24, 24, 24, 21, 21, 21, 22, 22, 22],
@@ -49,10 +49,11 @@ funcs = ['AttractiveSector_5D', 'AttractiveSector_10D', 'AttractiveSector_20D', 
 
 kwargs = {}
 kwargs["num_runs"] = 50
+kwargs["checkpoint"] = False
 kwargs["save_exp"] = True
 kwargs["plot"] = False
 
 for conf, fun in zip(all_ide_configurations, funcs):
-    dir = "./experiments/jDE/" + fun
+    dir = "./experiments/iDE/" + fun
     os.mkdir(dir)
     main(conf, train=False, folder=dir, **kwargs)

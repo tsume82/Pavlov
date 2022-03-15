@@ -141,10 +141,10 @@ if __name__ == "__main__":
 		"Weierstrass",
 	] + funcs
 	
-	dir1 = "./experiments/multifunctions/DE gaussian ppo 46 functions" # the document will be saved in this folder and the configuration will be taken from here
-	dir2 = "./experiments/jDE"
-	name1 = "PPO multifunction"
-	name2 = "jDE"
+	dir1 = "./experiments/multifunctions/DE uniform ppo wDeltaFitPop 46 functions" # the document will be saved in this folder and the configuration will be taken from here
+	dir2 = "./experiments/iDE"
+	name1 = "PPO mf wIntraDeltaF"
+	name2 = "iDE"
 	filename = f"results_DE_{name1}_vs_{name2}.md".replace(" ","_")
 	multienv = True # flag for multienv directory setup
 

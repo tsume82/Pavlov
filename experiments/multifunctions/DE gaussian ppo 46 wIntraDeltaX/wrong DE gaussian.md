@@ -1,0 +1,103 @@
+# PPO mf wIntraDeltaX vs jDE
+
+| Function                               | p(PPO mf wIntraDeltaX < jDE) with AUC metric | p(PPO mf wIntraDeltaX < jDE) with best of the run metric |
+| :------------------------------------- | -------------------------------------------- | -------------------------------------------------------- |
+| BentCigar                              | 0.2276                                       | 0.4172                                                   |
+| Discus                                 | 0.4528                                       | **0.502**                                                |
+| Ellipsoid                              | 0.206                                        | 0.306                                                    |
+| Katsuura                               | **0.5252**                                   | 0.4476                                                   |
+| Rastrigin                              | 0.3756                                       | **0.6388**                                               |
+| Rosenbrock                             | 0.2712                                       | 0.3764                                                   |
+| Schaffers                              | 0.2716                                       | 0.4284                                                   |
+| Schwefel                               | 0.2416                                       | 0.3156                                                   |
+| Sphere                                 | 0.088                                        | 0.192                                                    |
+| Weierstrass                            | **0.6032**                                   | **0.7304**                                               |
+| AttractiveSector_5D                    | 0.4512                                       | **0.996**                                                |
+| AttractiveSector_10D                   | 0.3456                                       | 0.4328                                                   |
+| AttractiveSector_20D                   | 0.0                                          | 0.01                                                     |
+| BuecheRastrigin_5D                     | **1.0**                                      | **0.96**                                                 |
+| BuecheRastrigin_10D                    | 0.1892                                       | 0.4124                                                   |
+| BuecheRastrigin_20D                    | 0.0                                          | 0.0004                                                   |
+| CompositeGR_5D                         | **0.96**                                     | **0.952**                                                |
+| CompositeGR_10D                        | 0.218                                        | 0.3604                                                   |
+| CompositeGR_20D                        | 0.0008                                       | 0.0276                                                   |
+| DifferentPowers_5D                     | **0.9876**                                   | **0.9928**                                               |
+| DifferentPowers_10D                    | 0.3028                                       | **0.5448**                                               |
+| DifferentPowers_20D                    | 0.0016                                       | 0.022                                                    |
+| LinearSlope_5D                         | **0.9576**                                   | **0.9348**                                               |
+| LinearSlope_10D                        | 0.302                                        | **0.5536**                                               |
+| LinearSlope_20D                        | 0.0                                          | 0.0                                                      |
+| SharpRidge_5D                          | **0.9936**                                   | **0.9804**                                               |
+| SharpRidge_10D                         | 0.2692                                       | **0.5192**                                               |
+| SharpRidge_20D                         | 0.0                                          | 0.0012                                                   |
+| StepEllipsoidal_5D                     | **0.9936**                                   | **0.9808**                                               |
+| StepEllipsoidal_10D                    | 0.3136                                       | **0.6608**                                               |
+| StepEllipsoidal_20D                    | 0.002                                        | 0.0476                                                   |
+| RosenbrockRotated_5D                   | **0.9868**                                   | **0.9508**                                               |
+| RosenbrockRotated_10D                  | 0.2104                                       | **0.5132**                                               |
+| RosenbrockRotated_20D                  | 0.0                                          | 0.002                                                    |
+| SchaffersIllConditioned_5D             | **0.9204**                                   | **0.9412**                                               |
+| SchaffersIllConditioned_10D            | 0.2692                                       | 0.4568                                                   |
+| SchaffersIllConditioned_20D            | 0.0036                                       | 0.0104                                                   |
+| LunacekBiR_5D                          | **1.0**                                      | **0.9996**                                               |
+| LunacekBiR_10D                         | 0.3108                                       | 0.4632                                                   |
+| LunacekBiR_20D                         | 0.0                                          | 0.0                                                      |
+| GG101me_5D                             | **0.9444**                                   | **0.802**                                                |
+| GG101me_10D                            | 0.3184                                       | 0.4912                                                   |
+| GG101me_20D                            | 0.0156                                       | 0.1132                                                   |
+| GG21hi_5D                              | **0.8788**                                   | **0.8836**                                               |
+| GG21hi_10D                             | 0.344                                        | **0.5076**                                               |
+| GG21hi_20D                             | 0.0024                                       | 0.0524                                                   |
+| **Total p(PPO mf wIntraDeltaX < jDE)** | 28.3% (13/46)                                | 45.7% (21/46)                                            |
+
+# PPO mf wIntraDeltaX vs iDE
+
+| Function    | p(PPO mf wIntraDeltaX < iDE) with AUC metric | p(PPO mf wIntraDeltaX < iDE) with best of the run metric |
+| :---------- | ------------------------------ | ------------------------------- |
+| BentCigar | 0.244 | 0.4488 |
+| Discus | 0.4164 | **0.7324** |
+| Ellipsoid | 0.2524 | **0.522** |
+| Katsuura | 0.4156 | 0.3696 |
+| Rastrigin | 0.3892 | **0.7476** |
+| Rosenbrock | 0.2144 | 0.4916 |
+| Schaffers | 0.34 | **0.5288** |
+| Schwefel | 0.256 | **0.6224** |
+| Sphere | 0.1952 | 0.3696 |
+| Weierstrass | **0.6536** | **0.728** |
+| AttractiveSector_5D | 0.414 | **0.9996** |
+| AttractiveSector_10D | 0.4656 | **0.6164** |
+| AttractiveSector_20D | 0.0 | 0.0 |
+| BuecheRastrigin_5D | **1.0** | **0.9996** |
+| BuecheRastrigin_10D | 0.1744 | 0.2788 |
+| BuecheRastrigin_20D | 0.004 | 0.1504 |
+| CompositeGR_5D | **0.9736** | **0.9592** |
+| CompositeGR_10D | 0.1092 | 0.3044 |
+| CompositeGR_20D | 0.0476 | 0.0852 |
+| DifferentPowers_5D | **1.0** | **1.0** |
+| DifferentPowers_10D | 0.3532 | **0.7448** |
+| DifferentPowers_20D | 0.0008 | 0.0008 |
+| LinearSlope_5D | **0.9516** | **0.9232** |
+| LinearSlope_10D | 0.1732 | 0.1288 |
+| LinearSlope_20D | 0.0 | 0.0012 |
+| SharpRidge_5D | **1.0** | **0.9936** |
+| SharpRidge_10D | 0.1096 | 0.2792 |
+| SharpRidge_20D | 0.0 | 0.0 |
+| StepEllipsoidal_5D | **0.9992** | **0.9** |
+| StepEllipsoidal_10D | 0.3396 | **0.766** |
+| StepEllipsoidal_20D | 0.0 | 0.0024 |
+| RosenbrockRotated_5D | **1.0** | **1.0** |
+| RosenbrockRotated_10D | **0.744** | **0.772** |
+| RosenbrockRotated_20D | 0.0 | 0.0032 |
+| SchaffersIllConditioned_5D | **0.9468** | **0.9864** |
+| SchaffersIllConditioned_10D | 0.1988 | 0.3144 |
+| SchaffersIllConditioned_20D | 0.0 | 0.0048 |
+| LunacekBiR_5D | **1.0** | **0.9996** |
+| LunacekBiR_10D | 0.2828 | **0.5908** |
+| LunacekBiR_20D | 0.0 | 0.0 |
+| GG101me_5D | **0.9812** | **0.9888** |
+| GG101me_10D | **0.6396** | **0.892** |
+| GG101me_20D | 0.0264 | 0.1464 |
+| GG21hi_5D | **0.8852** | **0.8016** |
+| GG21hi_10D | 0.2196 | 0.4188 |
+| GG21hi_20D | 0.002 | 0.0364 |
+| **Total p(PPO mf wIntraDeltaX < iDE)** | 30.4% (14/46) | **52.2**% (24/46) |
