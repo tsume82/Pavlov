@@ -18,6 +18,7 @@ def write_doc(funcs, dir1, dir2, name1, name2, filename, multienv=False):
 		img_paths = []
 		best_on_auc = best_on_final = tot = 0
 		for fun in funcs:
+			print(f"{fun}")
 			title = f"{name1} vs {name2}: {fun} comparison"
 			img_name = f"{title.replace(' ', '_').replace(':', '_')}.png"
 			
@@ -141,11 +142,11 @@ if __name__ == "__main__":
 		"Weierstrass",
 	] + funcs
 	
-	dir1 = "./experiments/multifunctions/DE uniform ppo wDeltaFitPop 46 functions" # the document will be saved in this folder and the configuration will be taken from here
+	dir1 = "./experiments/multifunctions/DE uniform ppo 46 wIntraDeltaF + IntraDeltaX + InterDeltaX" # the document will be saved in this folder and the configuration will be taken from here
 	dir2 = "./experiments/iDE"
-	name1 = "PPO mf wIntraDeltaF"
+	name1 = "PPO mf wIntraDeltaF + IntraDeltaX + InterDeltaX"
 	name2 = "iDE"
-	filename = f"results_DE_{name1}_vs_{name2}.md".replace(" ","_")
+	filename = f"__results_DE_{name1}_vs_{name2}.md".replace(" ","_")
 	multienv = True # flag for multienv directory setup
 
 

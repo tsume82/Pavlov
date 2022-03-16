@@ -8,7 +8,7 @@ def testMetric(metric: Metric, iterations, pop=10, dim=5):
 	for i in range(iterations):
 		solutions = np.random.uniform(low=-5, high=5, size=(pop,dim))
 		fitness = np.random.normal(loc=0, scale=i+1, size=(pop,))
-		ret = metric.compute(solutions, fitness)
+		ret = metric.compute(solutions, fitness, **{"bounds": [[-5,5]]*5})
 		print()
 		print(ret)
 
@@ -17,5 +17,5 @@ if __name__ == "__main__":
 	# m = RecentGradients(10, 6, 1, None, 3)
 	# m = DifferenceOfBest(4, False, 1, True, True)
 	# m = DeltaBest(False, True, False)
-	m = DeltaX([-5,5]*5, 40, False, False)
+	m = DeltaX(40, False, False)
 	testMetric(m, 10)

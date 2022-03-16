@@ -346,8 +346,8 @@ def compare_experiments(
 			min_plot = min(min_plot, np.min(all_best_avg - all_best_std))
 			max_plot = max(max_plot, np.max(all_best_avg + all_best_std))
 			
-	print("max value: {}".format(max_fit))
-	print("min value: {}".format(min_fit))
+	# print("max value: {}".format(max_fit))
+	# print("min value: {}".format(min_fit))
 
 	# configure plots
 
@@ -404,8 +404,8 @@ def compare_experiments(
 	if len(exp_list) == 2:
 		auc = compute_metrics_comparison(exp_list, "AUC")
 		final_best = compute_metrics_comparison(exp_list, "final_best")
-		print("with AUC metric: p({} < {}) = {}".format(exp_names[0], exp_names[1], auc))
-		print("with final best metric: p({} < {}) = {}".format(exp_names[0], exp_names[1], final_best))
+		# print("with AUC metric: p({} < {}) = {}".format(exp_names[0], exp_names[1], auc))
+		# print("with final best metric: p({} < {}) = {}".format(exp_names[0], exp_names[1], final_best))
 
 	if save:
 		makedirs(dirname(save), exist_ok=True)
@@ -442,19 +442,9 @@ def compute_metrics_comparison(exp_list, metric="AUC"):
 		# metrics of each run for both the experiments
 		metrics = np.zeros(shape=[2, num_run])
 
-		min_fit = np.inf
 		for i, experiment in enumerate(exp_list):
 			for j, run in enumerate(experiment):
-				min_fit = min(np.min(run["fitness"]), min_fit)
-		# raise the values with the -minimum to bring them above zero
-		# so the area can't be decreased with negative values
-		shift = -min_fit + 1e-5 if min_fit < 0 else 0
-
-		for i, experiment in enumerate(exp_list):
-			for j, run in enumerate(experiment):
-				# better to use the minimums or the averages of the populations?
-				min_fit_run = getBestDuringRun(run["fitness"]) + shift
-				# avg_fit_run = np.average(run["fitness"], axis=1)
+				min_fit_run = getBestDuringRun(run["fitness"])
 
 				# compute sum of trapezoid areas
 				area = np.trapz(min_fit_run, dx=1)
