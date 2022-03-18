@@ -443,7 +443,7 @@ de_uniform_ppo_configuration_46_funcs = [
         "agent.algorithm.train_batch_size": 200,
         "agent.algorithm.optimizer": "Adam",
         "agent.algorithm.vf_clip_param": 10,
-        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [100, 50, 10]},
+        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50,50]},
         "env.env_class": "SchedulerPolicyRayEnvironment",
         "env.env_config": {
             "solver_driver": "DEdriver",
@@ -489,7 +489,7 @@ de_uniform_ppo_configuration_46_funcs_II = [
         "agent.algorithm.train_batch_size": 200,
         "agent.algorithm.optimizer": "Adam",
         "agent.algorithm.vf_clip_param": 10,
-        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [100, 50, 10]},
+        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50,50]},
         "env.env_class": "SchedulerPolicyRayEnvironment",
         "env.env_config": {
             "solver_driver": "DEdriver",
@@ -536,7 +536,7 @@ de_gaussian_ppo_configuration_46_funcs = [
         "agent.algorithm.train_batch_size": 200,
         "agent.algorithm.optimizer": "Adam",
         "agent.algorithm.vf_clip_param": 10,
-        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [100, 50, 10]},
+        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50,50]},
         "env.env_class": "SchedulerPolicyRayEnvironment",
         "env.env_config": {
             "solver_driver": "DEdriver",
@@ -582,7 +582,7 @@ de_gaussian_ppo_configuration_46_funcs_II = [
         "agent.algorithm.train_batch_size": 200,
         "agent.algorithm.optimizer": "Adam",
         "agent.algorithm.vf_clip_param": 10,
-        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [100, 50, 10]},
+        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50,50]},
         "env.env_class": "SchedulerPolicyRayEnvironment",
         "env.env_config": {
             "solver_driver": "DEdriver",
