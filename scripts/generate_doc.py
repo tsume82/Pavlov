@@ -5,7 +5,7 @@ from utils.plot_utils import plot_experiment, compare_experiments
 from utils.config_utils import loadConfiguration
 from os.path import isdir, join, normpath
 
-def write_doc(funcs, dir1, dir2, name1, name2, filename, multienv=False):
+def write_doc(funcs, dir1, dir2, name1, name2, filename, multienv=False, generate_plots=True):
 	dir1 = normpath(dir1)
 	dir2 = normpath(dir2)
 	with open(join(dir1, filename), "w+") as f:
@@ -50,8 +50,8 @@ def write_doc(funcs, dir1, dir2, name1, name2, filename, multienv=False):
 				logyscale=True,
 				logxscale=False,
 				ylim=None,
-				plotMode="std",
-				save= image_path,
+				plotMode="std" if generate_plots else None,
+				save=image_path,
 			)
 
 			if auc > 0.5: best_on_auc += 1
@@ -65,11 +65,12 @@ def write_doc(funcs, dir1, dir2, name1, name2, filename, multienv=False):
 		f.write(f"| **Total p({name1} < {name2})** | {auc_tot}% ({best_on_auc}/{tot}) | {fin_tot}% ({best_on_final}/{tot}) |\n")
 
 		# write plots
-		f.write("\n## Plots\n\n")
+		if generate_plots:
+			f.write("\n## Plots\n\n")
 
-		for fun, img in zip(funcs, img_paths):
-			f.write(f"##### {fun}\n\n")
-			f.write(f"![]({img})\n\n")
+			for fun, img in zip(funcs, img_paths):
+				f.write(f"##### {fun}\n\n")
+				f.write(f"![]({img})\n\n")
 
 
 		# write configuration (if it exists)
@@ -142,12 +143,13 @@ if __name__ == "__main__":
 		"Weierstrass",
 	] + funcs
 	
-	dir1 = "./experiments/multifunctions/DE uniform ppo 46 wIntraDeltaF + IntraDeltaX + InterDeltaX (100,50,10)" # the document will be saved in this folder and the configuration will be taken from here
+	dir1 = "./experiments/multifunctions/DE uniform ppo 46 wIntraDeltaF + IntraDeltaX + InterDeltaX (more training)" # the document will be saved in this folder and the configuration will be taken from here
 	dir2 = "./experiments/iDE"
 	name1 = "PPO mf wIntraDeltaF + IntraDeltaX + InterDeltaX"
 	name2 = "iDE"
 	filename = f"_results_DE_{name1}_vs_{name2}.md".replace(" ","_")
 	multienv = True # flag for multienv directory setup
+	generate_plots = False
 
 
-	write_doc(funcs, dir1, dir2, name1, name2, filename, multienv)
+	write_doc(funcs, dir1, dir2, name1, name2, filename, multienv, generate_plots)
