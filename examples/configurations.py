@@ -229,6 +229,71 @@ de_adapt_configuration = {
     },
 }
 
+__DE_fixed_CR = {
+    "agent.algorithm": "RayProximalPolicyOptimization",
+    "agent.algorithm.render_env": False,
+    "agent.algorithm.num_workers": 0,
+    "agent.algorithm.batch_mode": "complete_episodes",
+    "agent.algorithm.lr": 5e-05,
+    "agent.algorithm.train_batch_size": 200,
+    "agent.algorithm.optimizer": "Adam",
+    "agent.algorithm.vf_clip_param": 10,
+    "agent.algorithm.model": {
+        "fcnet_activation": "relu",
+        "fcnet_hiddens": [50,50]
+    },
+    "env.env_class": "SchedulerPolicyRayEnvironment",
+    "env.env_config": {
+        "solver_driver": "DEdriver",
+        "solver_driver_args": [10,10,12,"best1bin"],
+        "maximize": False,
+        "steps": 50,
+        "state_metrics_names": ["DifferenceOfBest","SolverStateHistory"],
+        "state_metrics_config": [[40,False,1,True,True],[{"F": {"max": [2],"min": [0]}},40]],
+        "reward_metric": "Best",
+        "reward_metric_config": [False,True],
+        "memes_no": 1,
+        "action_space_config": {"F": {"max": 2,"min": 0}}
+    }
+}
+
+__DE_fixed_F = {
+    "agent.algorithm": "RayProximalPolicyOptimization",
+    "agent.algorithm.render_env": False,
+    "agent.algorithm.num_workers": 0,
+    "agent.algorithm.batch_mode": "complete_episodes",
+    "agent.algorithm.lr": 5e-05,
+    "agent.algorithm.train_batch_size": 200,
+    "agent.algorithm.optimizer": "Adam",
+    "agent.algorithm.vf_clip_param": 10,
+    "agent.algorithm.model": {
+        "fcnet_activation": "relu",
+        "fcnet_hiddens": [50,50]
+    },
+    "env.env_class": "SchedulerPolicyRayEnvironment",
+    "env.env_config": {
+        "solver_driver": "DEdriver",
+        "solver_driver_args": [10,10,12,"best1bin"],
+        "maximize": False,
+        "steps": 50,
+        "state_metrics_names": ["DifferenceOfBest","SolverStateHistory"],
+        "state_metrics_config": [[40,False,1,True,True],[{"CR": {"max": [1],"min": [0]}},40]],
+        "reward_metric": "Best",
+        "reward_metric_config": [False,True],
+        "memes_no": 1,
+        "action_space_config": {"CR": {"max": 1,"min": 0}}
+    }
+}
+
+DE_fixed_CR = [
+    update_and_return(__DE_fixed_CR, {"env.env_config": {"solver_driver_args": [dim, 10, fun, 0.5]}})
+    for fun, dim in zip(ids_46_functions, dims_46_functions)
+]
+
+DE_fixed_F = [
+    update_and_return(__DE_fixed_F, {"env.env_config": {"solver_driver_args": [dim, 10, fun, 0.5]}})
+    for fun, dim in zip(ids_46_functions, dims_46_functions)
+]
 
 # region: multienv
 

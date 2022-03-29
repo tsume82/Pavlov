@@ -474,7 +474,7 @@ def compute_metrics_comparison(exp_list, metric="AUC"):
 	mesh = np.array(np.meshgrid(metrics[0], metrics[1]))
 	combinations = mesh.T.reshape(-1, 2)
 
-	# create an array with 1 if the metric in experiment 0 is less than experiment 2, 0 otherwise
+	# create an array with 1 if the metric in experiment 1 is less than experiment 2, 0 otherwise
 	# sum the array and divide it for its evolution_length to get a probablity
 	# see Equation 1 in "Learning Step-Size Adaptation in CMA-ES"
 	prob = np.sum([1 if c[0] < c[1] else 0 for c in combinations]) / combinations.shape[0]

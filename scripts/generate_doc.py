@@ -143,12 +143,12 @@ if __name__ == "__main__":
 		"Weierstrass",
 	] + funcs
 	
-	dir1 = "./experiments/multifunctions/DE uniform ppo 46 wIntraDeltaF + IntraDeltaX + InterDeltaX (more training)" # the document will be saved in this folder and the configuration will be taken from here
-	dir2 = "./experiments/iDE"
-	name1 = "PPO mf wIntraDeltaF + IntraDeltaX + InterDeltaX"
-	name2 = "iDE"
-	filename = f"_results_DE_{name1}_vs_{name2}.md".replace(" ","_")
-	multienv = True # flag for multienv directory setup
+	dir1 = "./experiments/CMA ppo deltabest" # the document will be saved in this folder and the configuration will be taken from here
+	dir2 = "./experiments/CSA"
+	name1 = "PPO"
+	name2 = "CSA"
+	filename = f"_results_CMA_{name1}_vs_{name2}.md".replace(" ","_")
+	multienv = False # flag for multienv directory setup
 	generate_plots = False
 
 
