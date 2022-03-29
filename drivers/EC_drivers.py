@@ -266,8 +266,8 @@ class DEdriver(SolverDriver):
 			self.solver.scale = F
 			self.solver.cross_over_probability = CR
 		else:
-			self.solver.scale = command["F"]
-			self.solver.cross_over_probability = command["CR"]
+			self.solver.scale = command.get("F", self.F_init)
+			self.solver.cross_over_probability = command.get("CR", self.CR_init)
 
 		if np.any(np.isnan(list(command.values()))):
 			print("NaN action detected!!!")

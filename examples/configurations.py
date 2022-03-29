@@ -250,8 +250,8 @@ __DE_fixed_CR = {
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest","SolverStateHistory"],
         "state_metrics_config": [[40,False,1,True,True],[{"F": {"max": [2],"min": [0]}},40]],
-        "reward_metric": "Best",
-        "reward_metric_config": [False,True],
+        "reward_metric": "DeltaBest",
+        "reward_metric_config": [False, True, True],
         "memes_no": 1,
         "action_space_config": {"F": {"max": 2,"min": 0}}
     }
@@ -278,20 +278,20 @@ __DE_fixed_F = {
         "steps": 50,
         "state_metrics_names": ["DifferenceOfBest","SolverStateHistory"],
         "state_metrics_config": [[40,False,1,True,True],[{"CR": {"max": [1],"min": [0]}},40]],
-        "reward_metric": "Best",
-        "reward_metric_config": [False,True],
+        "reward_metric": "DeltaBest",
+        "reward_metric_config": [False, True, True],
         "memes_no": 1,
         "action_space_config": {"CR": {"max": 1,"min": 0}}
     }
 }
 
 DE_fixed_CR = [
-    update_and_return(__DE_fixed_CR, {"env.env_config": {"solver_driver_args": [dim, 10, fun, 0.5]}})
+    update_and_return(__DE_fixed_CR, {"env.env_config": {"solver_driver_args": [dim, 10, fun, "best1bin"]}})
     for fun, dim in zip(ids_46_functions, dims_46_functions)
 ]
 
 DE_fixed_F = [
-    update_and_return(__DE_fixed_F, {"env.env_config": {"solver_driver_args": [dim, 10, fun, 0.5]}})
+    update_and_return(__DE_fixed_F, {"env.env_config": {"solver_driver_args": [dim, 10, fun, "best1bin"]}})
     for fun, dim in zip(ids_46_functions, dims_46_functions)
 ]
 
