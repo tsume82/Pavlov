@@ -706,17 +706,21 @@ def add_configurations():
     function to add elements programmatically into ALL_CONFIGURATIONS
     used to facilitate the evaluation of many configurations
     """
-    for i, conf in enumerate(de_uniform_ppo_configuration_46_funcs):
-        ALL_CONFIGURATIONS[f"de_uniform_ppo_configuration_46_funcs{i}"] = conf
+    # for i, conf in enumerate(de_uniform_ppo_configuration_46_funcs):
+    #     ALL_CONFIGURATIONS[f"de_uniform_ppo_configuration_46_funcs{i}"] = conf
 
-    for i, conf in enumerate(de_gaussian_ppo_configuration_46_funcs):
-        ALL_CONFIGURATIONS[f"de_gaussian_ppo_configuration_46_funcs{i}"] = conf
+    # for i, conf in enumerate(de_gaussian_ppo_configuration_46_funcs):
+    #     ALL_CONFIGURATIONS[f"de_gaussian_ppo_configuration_46_funcs{i}"] = conf
 		
-    for i, conf in enumerate(de_uniform_ppo_configuration_46_funcs_II):
-        ALL_CONFIGURATIONS[f"de_uniform_ppo_configuration_46_funcs_II{i}"] = conf
+    # for i, conf in enumerate(de_uniform_ppo_configuration_46_funcs_II):
+    #     ALL_CONFIGURATIONS[f"de_uniform_ppo_configuration_46_funcs_II{i}"] = conf
 
-    for i, conf in enumerate(de_gaussian_ppo_configuration_46_funcs_II):
-        ALL_CONFIGURATIONS[f"de_gaussian_ppo_configuration_46_funcs_II{i}"] = conf
+    # for i, conf in enumerate(de_gaussian_ppo_configuration_46_funcs_II):
+    #     ALL_CONFIGURATIONS[f"de_gaussian_ppo_configuration_46_funcs_II{i}"] = conf
+
+    for i, conf in enumerate(DE_fixed_CR):
+        ALL_CONFIGURATIONS[f"exp_fixed_CR{i}"] = conf
+
 
 
 add_configurations()
