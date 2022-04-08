@@ -61,9 +61,12 @@ def train_agent(agent_config, folder="./.checkpoints", **kwargs):
 	agent = AgentBuilder.build(agent_config)
 	loadCheckpoint(agent, kwargs["checkpoint"], folder)
 	plotter = plot_episodes()
+	
 	while episodes < max_episodes:
 		res = agent.train()
 		episodes = res["episodes_total"]
+		# loss = res["info"]["learner"]["default_policy"]["learner_stats"]["total_loss"]
+		# plotter.plot(loss)
 		plotter.plot(res["hist_stats"]["episode_reward"][: res["episodes_this_iter"]])
 		# pprint(res)
 		print()

@@ -225,6 +225,10 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
 	def step(self, action):
 		# this will actually launch an eventual cli or interface with kimeme via RPC, it will take time
 		evaluated_solutions, self.fitness, solver_params = self.solver_driver.step(action)
+
+		if self.maximize: # metrics minimize only
+			self.fitness *= -1
+
 		self.state = self._build_state(evaluated_solutions, self.fitness, **solver_params)
 		reward = self.reward_metric.compute(evaluated_solutions, self.fitness)
 
