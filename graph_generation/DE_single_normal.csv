@@ -1,0 +1,47 @@
+Function,AUC jDE,Best jDE,AUC iDE,Best iDE
+BentCigar, 0.3044, 0.5188, 0.336, 0.5264
+Discus, 0.506, 0.3944, 0.4672, 0.6984
+Ellipsoid, 0.3496, 0.3432, 0.3876, 0.5652
+Katsuura, 0.594, 0.5716, 0.478, 0.482
+Rastrigin, 0.426, 0.584, 0.4568, 0.6592
+Rosenbrock, 0.2964, 0.3604, 0.234, 0.4868
+Schaffers, 0.3688, 0.4964, 0.4336, 0.6004
+Schwefel, 0.314, 0.2352, 0.3296, 0.5304
+Sphere, 0.246, 0.2356, 0.3948, 0.4248
+Weierstrass, 0.802, 0.8476, 0.8456, 0.8172
+AttractiveSector_5D, 0.4952, 0.2332, 0.408, 0.0856
+AttractiveSector_10D, 0.472, 0.4048, 0.6404, 0.6568
+AttractiveSector_20D, 0.164, 0.3512, 0.9028, 0.848
+BuecheRastrigin_5D, 0.3288, 0.4492, 0.404, 0.1416
+BuecheRastrigin_10D, 0.3712, 0.4836, 0.7992, 0.904
+BuecheRastrigin_20D, 0.118, 0.488, 0.0676, 0.35
+CompositeGR_5D, 0.3184, 0.5464, 0.3536, 0.5276
+CompositeGR_10D, 0.3636, 0.5532, 0.3296, 0.5592
+CompositeGR_20D,,,,
+DifferentPowers_5D, 0.1424, 0.3152, 0.4252, 0.4856
+DifferentPowers_10D, 0.158, 0.4124, 0.2024, 0.1928
+DifferentPowers_20D,,,,
+LinearSlope_5D, 0.3584, 0.198, 0.5708, 0.7444
+LinearSlope_10D, 0.5088, 0.6252, 0.6996, 0.9772
+LinearSlope_20D, 0.3896, 0.6172, 0.4448, 0.7536
+SharpRidge_5D,,,,
+SharpRidge_10D, 0.4616, 0.5508, 0.9292, 0.9716
+SharpRidge_20D, 0.2504, 0.6736, 0.2704, 0.7504
+StepEllipsoidal_5D,,,,
+StepEllipsoidal_10D,,,,
+StepEllipsoidal_20D,,,,
+RosenbrockRotated_5D,,,,
+RosenbrockRotated_10D,,,,
+RosenbrockRotated_20D, 0.2028, 0.1912, 0.1612, 0.1924
+SchaffersIllConditioned_5D, 0.1232, 0.1556, 0.0952, 0.0824
+SchaffersIllConditioned_10D,,,,
+SchaffersIllConditioned_20D,,,,
+LunacekBiR_5D, 0.402, 0.434, 0.5216, 0.5376
+LunacekBiR_10D, 0.3908, 0.4236, 0.4044, 0.468
+LunacekBiR_20D, 0.2664, 0.6632, 0.198, 0.6364
+GG101me_5D, 0.354, 0.5736, 0.428, 0.486
+GG101me_10D, 0.314, 0.442, 0.6832, 0.718
+GG101me_20D, 0.232, 0.32, 0.1896, 0.1912
+GG21hi_5D, 0.398, 0.5672, 0.45, 0.5148
+GG21hi_10D, 0.4016, 0.496, 0.4056, 0.4596
+GG21hi_20D, 0.2848, 0.3904, 0.2024, 0.3656
