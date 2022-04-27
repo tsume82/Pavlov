@@ -1,7 +1,7 @@
 <p align="center">
   <h3 align="center">Pavlov</h3>
   <p align="center">
-    A reinforcement learning python library interfacing with Kimeme
+    A reinforcement learning python library for creating adaptive metaheuristics
   </p>
 </p>
 
@@ -30,7 +30,8 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-Pavlov is a reinforcement python learning library providing the tools to optimize Kimeme RL scheduler and RL memes, automatically managing the training phase via KimemeCLI and providing KimemeGUI/KimemeCLI the information needed to test the trained models. The testing phase will be later integrated Kimeme-side, without the need for python RPC.
+Pavlov is a reinforcement python learning library providing the tools to optimize metaheuristics and their parameters/components, automatically managing the training phase and the information needed to test the trained models. 
+
 **This library is still in development and many functionalities are not available yet**
 
 
@@ -75,7 +76,3 @@ python do.py run-python
 <!-- USAGE EXAMPLES -->
 ## Usage
 TODO
-
-<!-- ROADMAP -->
-## Roadmap
-See the internal KIMEMERL shared Google sheet (Gantt sheet)
