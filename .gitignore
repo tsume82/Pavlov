@@ -114,3 +114,6 @@ commands.bat
 compare_tests.bat
 test.bat
 __rename.py
+
+#test files
+test/generated_dir*/

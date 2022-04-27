@@ -137,6 +137,7 @@ class CMAdriver(SolverDriver):
 		super().set_seed(seed)
 		self.dim = dim
 		self.pop_size = pop_size
+		self.bounds = [[-5.12, 5.12]] * dim
 		self.obj_fun = (
 			object_function
 			if not isinstance(object_function, (str, int))
@@ -179,6 +180,7 @@ class CMAdriver(SolverDriver):
 				"ps": np.array(conjugate_evolution_path),
 				"es": self.es,
 				"curr_step": self.curr_step,
+				"bounds": self.bounds,
 			},
 		)
 
@@ -198,7 +200,7 @@ class CMAdriver(SolverDriver):
 		return (
 			self.solutions,
 			self.fitness,
-			{"step_size": np.array(self.init_sigma, dtype=np.float32), "ps": np.array(0, dtype=np.float32), "es": self.es, "curr_step": self.curr_step},
+			{"step_size": np.array(self.init_sigma, dtype=np.float32), "ps": np.array(0, dtype=np.float32), "es": self.es, "curr_step": self.curr_step, "bounds": self.bounds},
 		)
 
 	def set_condition(self, condition):

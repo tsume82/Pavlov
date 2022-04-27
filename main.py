@@ -59,7 +59,7 @@ def train_agent(agent_config, folder="./.checkpoints", **kwargs):
 
 	episodes = 0
 	agent = AgentBuilder.build(agent_config)
-	loadCheckpoint(agent, kwargs["checkpoint"], folder)
+	loadCheckpoint(agent, kwargs.get("checkpoint", False), folder)
 	plotter = plot_episodes()
 	
 	while episodes < max_episodes:

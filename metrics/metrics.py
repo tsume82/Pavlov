@@ -1,24 +1,16 @@
 from abc import ABC, abstractmethod
-from builtins import Exception, map
+from builtins import Exception
 from gym import spaces
 from ray.rllib.utils.spaces.repeated import Repeated
-import warnings
-
 import numpy as np
-
-
-class UnknownMetricException(Exception):
-	def __init__(self, name):
-		message = (
-			'The metric identifier "{}" provided does not correspond to a registered metric implementation'.format(
-				name
-			)
-		)
-		super().__init__(message)
-
 
 class MetricProvider:
 	_metrics = {}
+
+	class UnknownMetricException(Exception):
+		def __init__(self, name):
+			message = (f'The metric identifier {name} provided does not correspond to a registered metric implementation')
+			super().__init__(message)
 
 	@classmethod
 	def register_metric(cls, name, clazz):
@@ -29,7 +21,7 @@ class MetricProvider:
 		if name in cls._metrics.keys():
 			return cls._metrics[name]
 		else:
-			raise UnknownMetricException(name)
+			raise cls.UnknownMetricException(name)
 
 	@classmethod
 	def build(cls):
@@ -99,9 +91,9 @@ class DeltaBest(Metric):
 
 	def get_space(self):
 		if self.normalize:
-			return spaces.Box(low=-1, high=1, shape=(1, 1))
+			return spaces.Box(low=-1, high=1, shape=[])
 		else:
-			return spaces.Box(low=-np.inf, high=np.inf, shape=(1, 1)) # TODO: inf bounds reduce significantly the performance
+			return spaces.Box(low=-np.inf, high=np.inf, shape=[]) # TODO: inf bounds reduce significantly the performance
 
 	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
 		curr_best_index = np.argmin(fitness, axis=0)
@@ -140,6 +132,9 @@ class IntraDeltaF(Metric):
 		deltaFitPop = abs(max - min) / (abs(max - min) + abs(min) + 1e-5)
 
 		return deltaFitPop
+	
+	def reset(self) -> None:
+		return
 
 	def get_space(self):
 		return spaces.Box(low=0, high=1, shape=([]))
@@ -165,6 +160,9 @@ class IntraDeltaX(Metric):
 		deltaX = np.abs(max - min) / bounds_range
 
 		return np.array([np.max(deltaX), np.min(deltaX)])
+	
+	def reset(self) -> None:
+		return
 
 	def get_space(self):
 		return spaces.Box(low=0, high=1, shape=[2])
@@ -261,7 +259,7 @@ class MetricHistory(Metric):
 	"""
 	name = "MetricHistory"
 	MetricProvider.register_metric(name, __qualname__)
-	def __init__(self, metric: str, metric_args: list, history_max_length = 1) -> None:
+	def __init__(self, metric: str, metric_args: list = [], history_max_length = 1) -> None:
 		self.metric = eval(metric)(*metric_args)
 		self.history_max_length = history_max_length
 		self.history = []
