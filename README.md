@@ -62,15 +62,11 @@ Create a dedicated virtualenv using the ``requirements.txt`` file (TODO), eventu
 ```bash
 git clone https://github.com/tsume82/Pavlov
 ```
-- Update the submodules
+- [TODO] Install the requisites
+
+- Test a training
 ```bash
-git submodule init
-git submodule update --remote
-```
-- build COCO benchmarks (for any problem look their [README](https://github.com/numbbo/coco))
-```bash
-cd benchmarks/COCO
-python do.py run-python
+python test/test.py
 ```
 
 <!-- USAGE EXAMPLES -->
