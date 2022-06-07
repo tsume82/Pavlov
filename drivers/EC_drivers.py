@@ -132,7 +132,7 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
 
 
 class CMAdriver(SolverDriver):
-	def __init__(self, dim, pop_size, object_function="sphere", init_sigma=0.5, seed=None) -> None:
+	def __init__(self, dim, pop_size, object_function="sphere", init_sigma=0.5, bounds = [None,None], seed=None) -> None:
 		super().__init__()
 		super().set_seed(seed)
 		self.dim = dim
@@ -144,8 +144,8 @@ class CMAdriver(SolverDriver):
 			else loadFunction(object_function, lib="cma")
 		)
 		self.curr_step = 0
-		self.lower_bound = None
-		self.upper_bound = None
+		self.lower_bound = bounds[0]
+		self.upper_bound = bounds[1]
 		self.init_sigma = init_sigma
 		self.chi_N = dim ** 0.5 * (1 - 1.0 / (4.0 * dim) + 1.0 / (21.0 * dim ** 2))
 		self.options = {

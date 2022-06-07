@@ -338,11 +338,12 @@ class DEadapt(RayAgent):
 			self.mem_F = np.where(fitness < oldFitness, self.F, self.mem_F)
 			self.mem_CR = np.where(fitness < oldFitness, self.CR, self.mem_CR)
 
-			prob = self.u_dist() < 0.9
+			probF = self.u_dist() < 0.9
+			probCR = self.u_dist() < 0.9 # probabilities between F and CR must be independent
 			newF = self.u_dist() * 0.9 + 0.1
 
-			self.F = np.where(prob, self.mem_F, newF)
-			self.CR = np.where(prob, self.mem_CR, self.u_dist())
+			self.F = np.where(probF, self.mem_F, newF)
+			self.CR = np.where(probCR, self.mem_CR, self.u_dist())
 
 			return {"F": self.F, "CR": self.CR}
 

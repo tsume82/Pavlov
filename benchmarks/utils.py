@@ -60,10 +60,11 @@ def loadFunction(function, dim=10, options={}, lib: str = None):
 
     if (not lib or lib == "cma"):
         if bbobbenchmarks:
-            if isinstance(function, str) and function in BBOB_OBJ_FN_NAMES.keys():
-                return bbobbenchmarks.instantiate(BBOB_OBJ_FN_NAMES[function])[0]
-            elif isinstance(function, int) and 1 <= function <= 24:
-                return bbobbenchmarks.instantiate(function)[0]
+            iinstance = options.get("instance", 0) # id instance
+            ifun = BBOB_OBJ_FN_NAMES.get(function, function) # id function
+            if not (isinstance(ifun, int) and 1 <= ifun <= 24):
+                raise ValueError(f"Unknown function: {function}")
+            return bbobbenchmarks.instantiate(ifun, iinstance)[0]
         elif lib == "cma":
             raise ModuleNotFoundError("cma module not found")
 

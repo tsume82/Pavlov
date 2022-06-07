@@ -11,6 +11,7 @@ from os import listdir, makedirs, environ
 from os.path import isfile, join, basename, isdir, normpath, exists
 # environ["RAY_PICKLE_VERBOSE_DEBUG"] = "1"
 
+
 def getLastCheckpoint(folder):
 	if not isdir(folder):
 		return None
@@ -167,6 +168,7 @@ if __name__ == "__main__":
 	parser.add_argument("--create-dir","-cd", dest="create_dir", default=None, help="create dir with this name and save here the training")
 	parser.add_argument("--save", "-s", dest="save_exp", nargs="?", default=False, const=True, help="save the experiment")
 	parser.add_argument("--noplot", "-np", dest="plot", action="store_false", default=True, help="do no plot during testing")
+	# parser.add_argument("--verbose", "-v", dest="verbose", type=int, default=1, help="verbose level: 0: no output, 1: errors, 2: warnings, 3: info, 4: debug")
 	args = parser.parse_args()
 
 	if isinstance(args.train, str):

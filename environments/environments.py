@@ -8,7 +8,7 @@ from metrics import MetricProvider
 from itertools import cycle
 from drivers import DRIVERS
 
-# region: Envrionment registration region
+# region: Envrionment registration
 ENVIRONMENTS = {}
 
 def registerEnvironment(env, clazz):
@@ -195,6 +195,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
 
 		# reward space, note that the reward must be one-dimensional, so an appropriate metric must be used
 		self.reward_metric = MetricProvider.get_metric(reward_metric)(*reward_metric_config)
+		# self.reward_range = self.reward_metric.get_space()
 
 		if isinstance(solver_driver, str):
 			if solver_driver in DRIVERS:
@@ -230,7 +231,7 @@ class SchedulerPolicyEnvironment(SolverEnvironment):
 		self.state = self._build_state(evaluated_solutions, self.fitness, **solver_params)
 		reward = self.reward_metric.compute(evaluated_solutions, self.fitness)
 
-		if not self.maximize:
+		if not self.maximize: # reward must be always maximized
 			reward *= -1
 		self.cumulative_reward += reward
 
@@ -343,7 +344,7 @@ class SchedulerPolicyMultiRayEnvironment(VectorEnv):
 	The number of sub environments is defined by the number of solver_driver_args. It must be a list of arguments for each solver.
 
 	For now the solver must be the same, with the same observation, action and reward spaces. The only difference between the environments
-	are the arguments of the solvers (with the purose of training a policy working with different functions/dimensions)
+	are the arguments of the solvers (with the purpose of training a policy working with different functions/dimensions)
 	"""
 	registerEnvironment(__qualname__, __qualname__)
 
