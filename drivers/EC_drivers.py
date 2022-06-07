@@ -1,5 +1,3 @@
-from inspyred.ec import variators
-from numpy.core.numeric import Inf
 from drivers import SolverDriver, registerDriver
 from abc import ABC, abstractmethod, ABCMeta
 from benchmarks.utils import loadFunction
@@ -9,7 +7,6 @@ import copy
 import math
 import cma
 import copy
-import pygmo
 from drivers.DE import DifferentialEvolutionSolver
 
 

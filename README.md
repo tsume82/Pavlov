@@ -62,7 +62,7 @@ Create a dedicated virtualenv using the ``requirements.txt`` file (TODO), eventu
 ```bash
 git clone https://github.com/tsume82/Pavlov
 ```
-- [TODO] Install the requisites
+- [TODO] Install the requirements
 
 - Test a training
 ```bash

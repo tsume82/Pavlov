@@ -3,6 +3,7 @@ from benchmarks import functions
 try:
     from cma import bbobbenchmarks
 except ModuleNotFoundError as err:
+    print(f"\033[91m{err}\033[00m")
     bbobbenchmarks = None
 
 # doc: https://hal.inria.fr/inria-00362633v2/document

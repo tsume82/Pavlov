@@ -1,7 +1,4 @@
-import gym
 import numpy as np
-import os
-
 
 from ray.rllib.models.preprocessors import get_preprocessor
 from ray.rllib.evaluation.sample_batch_builder import SampleBatchBuilder
