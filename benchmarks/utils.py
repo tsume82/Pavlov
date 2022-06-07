@@ -1,5 +1,4 @@
 from benchmarks import functions
-from benchmarks import COCO
 
 try:
     from cma import bbobbenchmarks
@@ -50,7 +49,7 @@ def loadFunction(function, dim=10, options={}, lib: str = None):
         function = int(function) if function.isdigit() else function.lower()
     if lib:
         lib = lib.lower()
-        assert lib in ["local", "coco", "cma"]
+        assert lib in ["local", "cma"]
 
     if (not lib or lib == "local"):
         if isinstance(function, str) and function in functions.all.keys():
@@ -68,18 +67,4 @@ def loadFunction(function, dim=10, options={}, lib: str = None):
         elif lib == "cma":
             raise ModuleNotFoundError("cma module not found")
 
-    if (not lib or lib == "coco"):
-        fun_num = None
-        if isinstance(function, str) and function in BBOB_OBJ_FN_NAMES.keys():
-            fun_num = BBOB_OBJ_FN_NAMES[function]
-        elif isinstance(function, int) and 1 <= function <= 24:
-            fun_num = function
-        if fun_num:
-            # TODO possibility to use other suites ('bbob-biobj', 'bbob-largescale', 'bbob-mixint', 'bbob-biobj-mixint')
-            arg1 = "instances: {}".format(options.get("instances", 1))
-            arg2 = "function_indices: {}, dimensions: {}".format(fun_num, dim)
-            # can't do differently because COCO's objects can't be pickled
-            return lambda x: COCO.Suite("bbob", arg1, arg2)[0](x)
-
     raise AttributeError("'{}' object function doesn't exists".format(function))
-    # TODO use CEC2017, for now COCO have all we need
