@@ -20,14 +20,13 @@ def test_train_single_function(num_test = 1):
 			"solver_driver_args": [10, 10, 11, 0.5, [-5.12, 5.12]],
 			"maximize": False,
 			"steps": 50,
-			"state_metrics_names": ["MetricHistory"],
-			#, "MetricHistory", "MetricHistory", "MetricHistory", "SolverStateHistory"],
+			"state_metrics_names": ["MetricHistory", "MetricHistory", "MetricHistory", "MetricHistory", "SolverStateHistory"],
 			"state_metrics_config": [
-				# ["DeltaBest", [True, True], 40], 
-				# ["IntraDeltaF", [], 40], 
+				["IntraDeltaF", [], 40], 
+				["InterDeltaF", [], 40], 
 				["IntraDeltaX", [], 40], 
-				# ["InterDeltaX", [], 40], 
-				# [{"step_size": {"max": 3, "min": 0}}, 40]
+				["InterDeltaX", [], 40], 
+				[{"step_size": {"max": 3, "min": 0}}, 40]
 				],
 			"reward_metric": "DeltaBest",
 			"reward_metric_config": [True, True],

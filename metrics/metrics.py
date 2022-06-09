@@ -73,7 +73,232 @@ class Metric(ABC):
 		pass
 
 
+class InterDeltaF(Metric):
+	"""
+		Inter Generational Delta F: normalized difference between the best fitness of the current generation and the best fitness of the previous generation.
+		It is a measure of the improvement of the optimization process.
+
+		If "use_fitness_bound = True" , the fitness is normalized with a bound range, maintaining linearity between the two fitness 
+		(requires "fitness_bound" option passed from the solver driver in step()).
+		Otherwise, the normalization is a ratio proportional to the absolute value of the previous fitness.
+
+		with fitness_bound = [min_b, max_b]:
+			Inter-ΔF = |curr_best - self.prec_best} / |min_b - max_b|
+		without fitness_bound:
+			Inter-ΔF = |curr_best - self.prec_best| / (|curr_best - self.prec_best| + |self.prec_best| + 1e-5)
+	"""
+
+	name = "InterDeltaF"
+	MetricProvider.register_metric(__qualname__, __qualname__)
+
+	def __init__(self, use_fitness_bound=False):
+		self.prec_best = None
+		if use_fitness_bound:
+			self.deltaF_fun = lambda c, p, b: abs(c-p) / abs(b[0]-b[1])
+		else:
+			self.deltaF_fun = lambda c, p, b: abs(c-p) / (abs(c-p) + abs(p) + 1e-5)
+
+	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+		if self.prec_best is None:
+			self.prec_best = np.nanmin(fitness, axis=0)
+			return 0
+		
+		curr_best = np.nanmin(fitness, axis=0)
+		deltaF = self.deltaF_fun(curr_best, self.prec_best, options.get('fitness_bound', None))
+		self.prec_best = curr_best
+
+		return deltaF
+
+	def reset(self) -> None:
+		self.prec_best = None
+
+	def get_space(self):
+		return spaces.Box(low=0, high=1, shape=([]))
+
+
+class IntraDeltaF(Metric):
+	"""
+		Normalized difference between max fitness and min fitness in the population.
+		It is a measure of the range of the fitness in the population.
+
+		If "use_fitness_bound = True" , the fitness is normalized with a bound range, maintaining linearity between the two fitness
+		(requires "fitness_bound" option passed from the solver driver in step()).
+		Otherwise, the normalization is a ratio proportional to the absolute value of the min fitness of the population.
+
+		max = max(fitness), min = min(fitness)
+		with fitness_bound = [min_b, max_b]:
+			Intra-ΔF = |max - min} / |min_b - max_b|
+		without fitness_bound:
+			Intra-ΔF = |max - min| / (|max - min| + |min| + 1e-5)
+	"""
+	name = "IntraDeltaF"
+	MetricProvider.register_metric(__qualname__, __qualname__)
+
+	def __init__(self, use_fitness_bound=False):
+		if use_fitness_bound:
+			self.deltaF_fun = lambda M, m, b: abs(M-m) / abs(b[0]-b[1])
+		else:
+			self.deltaF_fun = lambda M, m, b: abs(M-m) / (abs(M-m) + abs(m) + 1e-5)
+
+	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+		max = np.nanmax(fitness, axis=0)
+		min = np.nanmin(fitness, axis=0)
+		
+		return self.deltaF_fun(max, min, options.get('fitness_bound', None))
+	
+	def reset(self) -> None:
+		return
+
+	def get_space(self):
+		return spaces.Box(low=0, high=1, shape=([]))
+
+
+class IntraDeltaX(Metric):
+	"""
+		Intra generational deltaX.
+		It requires "bounds" option in compute's arguments (so must be returned by the solver in step() method)
+
+		intra-generation deltaX: vector of the difference between the maximum and the minimum value of the search space of the objective function for each dimension.
+		max = max(X, axis=0), min = min(X, axis=0)
+		dim-ΔX = abs(max - min) / bounds_range
+		Intra-ΔX = [max(dim-ΔX), min(dim-ΔX)]
+	"""
+	name = "IntraDeltaX"
+	MetricProvider.register_metric(__qualname__, __qualname__)
+
+	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+		bounds = np.array(options["bounds"])
+		bounds_range = np.abs(bounds.T[0] - bounds.T[1])
+
+		max = np.nanmax(solutions, axis=0)
+		min = np.nanmin(solutions, axis=0)
+		
+		deltaX = np.abs(max - min) / bounds_range
+
+		return np.array([np.max(deltaX), np.min(deltaX)])
+	
+	def reset(self) -> None:
+		return
+
+	def get_space(self):
+		return spaces.Box(low=0, high=1, shape=[2])
+
+
+class InterDeltaX(Metric):
+	"""
+		inter generational deltaX.
+		It requires "bounds" option in compute's arguments (so must be returned by the solver in step() method)
+
+		inter-generation deltaX: vector of the difference between the two best solutions in 2 generetions.
+		# best(X) = x_i ∈ X | f(x_i) = min(f(X)). (prec_best is the same for the previous generation)
+		ΔX = (best(X) - prec_best(X)) / bounds_range
+		Inter-ΔX = [max(ΔX), min(ΔX)]
+	"""
+	name = "InterDeltaX"
+	MetricProvider.register_metric(__qualname__, __qualname__)
+
+	def __init__(self) -> None:
+		self.prec = None
+
+	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+		best_idx = np.argmin(fitness)
+
+		if self.prec is None:
+			interDeltaX =  np.zeros(shape=[2], dtype=np.float32)
+		else:
+			bounds = np.array(options["bounds"])
+			bounds_range = np.abs(bounds.T[0] - bounds.T[1])
+
+			deltaX = (solutions[best_idx] - self.prec) / bounds_range
+			interDeltaX = np.array([np.max(deltaX), np.min(deltaX)])
+
+		self.prec = solutions[best_idx]
+		return interDeltaX
+	
+	def reset(self) -> None:
+		self.prec = None
+
+	def get_space(self):
+		return spaces.Box(low=-1, high=1, shape=[2])
+
+
+class SolverState(Metric):
+	"""
+		It pass a dictionary with one or more states of the solver driver.
+		It requires that the solver pass the state(s) with the same key in the options dictionary returned by step().
+		The bounds must be specified with min and max in __init__.
+
+		Configuration Example:
+		...
+		"state_metrics_names": ["SolverState"],
+        "state_metrics_config": [
+            ({"ps": {"min": -10, "max": 10}},),
+        ],
+		...
+	"""
+
+	name = "SolverState"
+	MetricProvider.register_metric(name, __qualname__)
+
+	def __init__(self, solver_states_bounds: dict):
+		self.solver_states_bounds = solver_states_bounds
+
+	def get_space(self):
+		return spaces.Dict(
+			{
+				key: spaces.Box(low=np.array(value["min"]), high=np.array(value["max"]))
+				for (key, value) in self.solver_states_bounds.items()
+			}
+		)
+
+	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+		return {key: value for (key, value) in options.items() if key in self.solver_states_bounds.keys()}
+
+	def reset(self):
+		return
+
+
+class MetricHistory(Metric):
+	"""
+	General metric History, last g generations of a given metric.
+	The vector goes from the most recent generation to the first one.
+
+	Args:
+		metric (str): name of the metric to be stored
+		metric_args (list): arguments of the metric
+		history_max_length (int): maximum length of the history
+	"""
+	name = "MetricHistory"
+	MetricProvider.register_metric(name, __qualname__)
+	def __init__(self, metric: str, metric_args: list = [], history_max_length = 1) -> None:
+		self.metric = eval(metric)(*metric_args)
+		self.history_max_length = history_max_length
+		self.history = []
+	
+	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
+		metric_value = self.metric.compute(solutions, fitness, **options)
+
+		self.history.insert(0, metric_value)
+		if len(self.history) > self.history_max_length:
+			self.history.pop()
+
+		return self.history
+
+	def get_space(self):
+		metric_space = self.metric.get_space()
+		return Repeated(metric_space, max_len=self.history_max_length)
+
+	def reset(self) -> None:
+		self.history = []
+
+
+
+# OLD DEPRECATED METRICS USED BY OLD MODELS ######################################################################
+
 class DeltaBest(Metric):
+	"""
+		Deprecated by InterDeltaF
+	"""
 	name = "DeltaBest"
 	MetricProvider.register_metric(name, __qualname__)
 
@@ -117,117 +342,10 @@ class DeltaBest(Metric):
 		self.best = np.inf
 		self.prec_best = None
 
-
-class IntraDeltaF(Metric):
-	"""
-	normaized difference between max fitness and min fitness in the population
-	"""
-	name = "IntraDeltaF"
-	MetricProvider.register_metric(__qualname__, __qualname__)
-
-	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
-		max = np.nanmax(fitness, axis=0)
-		min = np.nanmin(fitness, axis=0)
-		
-		deltaFitPop = abs(max - min) / (abs(max - min) + abs(min) + 1e-5)
-
-		return deltaFitPop
-	
-	def reset(self) -> None:
-		return
-
-	def get_space(self):
-		return spaces.Box(low=0, high=1, shape=([]))
-
-
-class IntraDeltaX(Metric):
-	"""
-	intra generational deltaX.
-	It requires "bounds" option in compute's arguments
-
-	intra-generation deltaX: vector of the difference between the maximum and the minimum value of the search space of the objective function for each dimension
-	"""
-	name = "IntraDeltaX"
-	MetricProvider.register_metric(__qualname__, __qualname__)
-
-	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
-		bounds = np.array(options["bounds"])
-		bounds_range = np.abs(bounds.T[0] - bounds.T[1])
-
-		max = np.nanmax(solutions, axis=0)
-		min = np.nanmin(solutions, axis=0)
-		
-		deltaX = np.abs(max - min) / bounds_range
-
-		return np.array([np.max(deltaX), np.min(deltaX)])
-	
-	def reset(self) -> None:
-		return
-
-	def get_space(self):
-		return spaces.Box(low=0, high=1, shape=[2])
-
-
-class InterDeltaX(Metric):
-	"""
-	inter generational deltaX.
-	It requires "bounds" option in compute's arguments
-
-	inter-generation deltaX: vector of the difference between the two best solutions in 2 generetions.
-	"""
-	name = "InterDeltaX"
-	MetricProvider.register_metric(__qualname__, __qualname__)
-
-	def __init__(self) -> None:
-		self.prec = None
-
-	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
-		best_idx = np.argmin(fitness)
-
-		if self.prec is None:
-			interDeltaX =  np.zeros(shape=[2], dtype=np.float32)
-		else:
-			bounds = np.array(options["bounds"])
-			bounds_range = np.abs(bounds.T[0] - bounds.T[1])
-
-			deltaX = (solutions[best_idx] - self.prec) / bounds_range
-			interDeltaX = np.array([np.max(deltaX), np.min(deltaX)])
-
-		self.prec = solutions[best_idx]
-		return interDeltaX
-	
-	def reset(self) -> None:
-		self.prec = None
-
-	def get_space(self):
-		return spaces.Box(low=-1, high=1, shape=[2])
-
-
-class SolverState(Metric):
-
-	name = "SolverState"
-	MetricProvider.register_metric(name, __qualname__)
-
-	def __init__(self, solver_states_bounds: dict):
-		self.solver_states_bounds = solver_states_bounds
-
-	def get_space(self):
-		return spaces.Dict(
-			{
-				key: spaces.Box(low=np.array(value["min"]), high=np.array(value["max"]))
-				for (key, value) in self.solver_states_bounds.items()
-			}
-		)
-
-	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
-		return {key: value for (key, value) in options.items() if key in self.solver_states_bounds.keys()}
-
-	def reset(self):
-		return
-
-
 class SolverStateHistory(SolverState):
-
+	"""
+		Deprecated by MetricHistory
+	"""
 	name = "SolverStateHistory"
 	MetricProvider.register_metric(name, __qualname__)
 
@@ -252,40 +370,10 @@ class SolverStateHistory(SolverState):
 	def reset(self) -> None:
 		self.history = []
 
-
-class MetricHistory(Metric):
-	"""
-	General metric History, last h generations of a given metric
-	"""
-	name = "MetricHistory"
-	MetricProvider.register_metric(name, __qualname__)
-	def __init__(self, metric: str, metric_args: list = [], history_max_length = 1) -> None:
-		self.metric = eval(metric)(*metric_args)
-		self.history_max_length = history_max_length
-		self.history = []
-	
-	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
-		metric_value = self.metric.compute(solutions, fitness, **options)
-
-		self.history.insert(0, metric_value)
-		if len(self.history) > self.history_max_length:
-			self.history.pop()
-
-		return self.history
-
-	def get_space(self):
-		metric_space = self.metric.get_space()
-		return Repeated(metric_space, max_len=self.history_max_length)
-
-	def reset(self) -> None:
-		self.history = []
-
-
-
-# OLD METRICS USED BY OLD MODELS ######################################################################
-
 class DifferenceOfBest(Metric):
 	"""
+	Deprecated by InterDeltaF
+	
 	Get the difference of the current best fitness and the precedent best fitness
 	"""
 
@@ -344,12 +432,14 @@ class DifferenceOfBest(Metric):
 
 class DeltaFitPop(Metric):
 	"""
-	History of the normaized difference between max fitness and min fitness in the population
+	Deprecated by MetricHistory(IntraDeltaF)
+
+	History of the normalized difference between max fitness and min fitness in the population
 	"""
 	name = "DeltaFitPop"
 	MetricProvider.register_metric(__qualname__, __qualname__)
 
-	def __init__(self, history_max_length=1, maximize=True):
+	def __init__(self, history_max_length=1, maximize=False):
 		self.maximize = maximize
 		# self.normalize = normalize
 		self.history_max_length = history_max_length
@@ -376,6 +466,8 @@ class DeltaFitPop(Metric):
 
 class DeltaX(Metric):
 	"""
+	Deprecated by MetricHistory(IntraDeltaX) and MetricHistory(InterDeltaX)
+
 	History of deltaX intra or inter generation.
 	It requires "bounds" option in compute's arguments
 
@@ -445,6 +537,8 @@ class DeltaX(Metric):
 
 class FitnessHistory(Metric):
 	"""
+	Deprecated and not recommended
+
 	RecentFitness metric, keep track of the fitness within the last history_size steps
 	most recent is in [0]
 	"""
@@ -474,6 +568,8 @@ class FitnessHistory(Metric):
 
 class BestsHistory(Metric):
 	"""
+	Deprecated and not recommended, consider to use it only for models trained with Guided Policy Search
+
 	BestsHistory metric, history of the best fitness values
 	"""
 
@@ -513,6 +609,9 @@ class BestsHistory(Metric):
 		self.history = []
 
 class Best(Metric):
+	"""
+		Deprecated and not recommended, consider to use it only for models trained with Guided Policy Search
+	"""
 
 	name = "Best"
 	MetricProvider.register_metric(name, __qualname__)
