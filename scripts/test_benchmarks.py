@@ -13,7 +13,7 @@ from benchmarks.utils import loadFunction
 
 parser = argparse.ArgumentParser()
 parser.add_argument("function", nargs='?', type=str, default="discus")
-parser.add_argument("-lib", type=str, default=None, help="The library where to take the benchmark function")
+parser.add_argument("-lib", type=str, default="cma", help="The library where to take the benchmark function")
 parser.add_argument("-x", nargs=2, type=float, default=[-100, 100], help="range on the x axis")
 parser.add_argument("-y", nargs=2, type=float, default=[-100, 100], help="range on the y axis")
 parser.add_argument("-res", dest="resolution", type=int, default=100, help="resolution of the plot. high resolution: ~200, medium: ~100")
