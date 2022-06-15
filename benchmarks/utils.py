@@ -37,7 +37,7 @@ BBOB_OBJ_FN_NAMES = {
 }
 
 
-def loadFunction(function, dim=10, options={}, lib: str = None):
+def loadFunction(function, dim=10, options={}, lib: str = "cma"):
     """
     function to facilitate the configuration of the drivers. Load an object function from its name
 
@@ -48,17 +48,19 @@ def loadFunction(function, dim=10, options={}, lib: str = None):
     """
     if isinstance(function, str):
         function = int(function) if function.isdigit() else function.lower()
+    if not isinstance(function, int):
+        return function
     if lib:
         lib = lib.lower()
         assert lib in ["local", "cma"]
 
-    if (not lib or lib == "local"):
+    if (lib == "local"):
         if isinstance(function, str) and function in functions.all.keys():
             return functions.all[function]
         elif isinstance(function, int) and 0 <= function < len(functions.all):
             return list(functions.all.values())[function]
 
-    if (not lib or lib == "cma"):
+    if (lib == "cma"):
         if bbobbenchmarks:
             iinstance = options.get("instance", 0) # id instance
             ifun = BBOB_OBJ_FN_NAMES.get(function, function) # id function

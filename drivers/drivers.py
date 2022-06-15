@@ -5,6 +5,7 @@ import numpy as np
 from typing import Tuple
 import matplotlib.pyplot as plt
 from matplotlib.colors import TABLEAU_COLORS
+from benchmarks.utils import loadFunction
 COLORS = list(TABLEAU_COLORS.values())
 
 DRIVERS = {}
@@ -39,13 +40,14 @@ class Driver(ABC):
 
 
 class SolverDriver(Driver):
-	def __init__(self) -> None:
+	def __init__(self, objective_function={"id": 1, "instance": 0, "lib": "cma"}) -> None:
 		self.__lines = []
 		self.__add_lines = []
 		self.__data = []
 		self.__add_data = []
 		self.np_rng = np.random
 		self.seed = None
+		self.obj_fun = self.__parse_obj_fun(objective_function)
 
 	def render(self, curr_step, fitness, additional_params={}, block=False):
 		max_fitness = np.max(fitness)
@@ -127,6 +129,18 @@ class SolverDriver(Driver):
 			plt.ioff()
 			plt.show()
 
+
+	def __parse_obj_fun(self, obj_func):
+		if isinstance(obj_func, (str, int)):
+			return loadFunction(obj_func, lib="cma")
+		elif isinstance(obj_func, dict):
+			if not "id" in obj_func:
+				raise ValueError("Objective function must have an id")
+			id = obj_func.pop('id')
+			lib = obj_func.pop("lib", "cma")
+			return loadFunction(id, lib, options=obj_func)
+		else:
+			return obj_func
 
 	def reset(self):
 		plt.ioff()

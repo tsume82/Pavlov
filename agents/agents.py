@@ -6,7 +6,6 @@ import numpy as np
 
 # from ray.rllib.agents import Trainer as RayTrainer
 from ray.rllib.agents.pg import PGTrainer
-from algorithms.GuidedPolicySearch import GuidedPolicySearch
 from ray.tune.registry import register_env
 
 # import logging
@@ -202,11 +201,6 @@ class RayPolicyGradient(RayAgent):
 	agent_class = PGTrainer
 	registerRayAgent(__qualname__, __qualname__)
 
-
-class RayGuidedPolicySearch(RayAgent):
-	name = "Ray Guided Policy Search"
-	agent_class = GuidedPolicySearch
-	registerRayAgent(__qualname__, __qualname__)
 
 
 from ray.rllib.agents.ppo import PPOTrainer, APPOTrainer

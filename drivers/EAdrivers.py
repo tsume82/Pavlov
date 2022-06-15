@@ -1,17 +1,15 @@
 from drivers import SolverDriver, registerDriver
-from abc import ABC, abstractmethod, ABCMeta
-from benchmarks.utils import loadFunction
 import numpy as np
 import random
 import copy
-import math
 import cma
 import copy
 from drivers.DE import DifferentialEvolutionSolver
 
 
-class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
-	def __init__(self, dim, pop_dim, max_gen=50):
+class GADriver(SolverDriver):
+	def __init__(self, dim, pop_dim, objective_function="sphere", max_gen=50):
+		super.__init__(objective_function)
 		self.dim = dim
 		self.pop_dim = pop_dim
 		self.num_selected = pop_dim
@@ -30,15 +28,15 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
 			parents = self.mutation(parents)
 		else:
 			parents = self.crossover(parents)
-		fitnessParent = self.evaluate_rastrign(parents)
+		fitnessParent = self.obj_fun(parents)
 		self.pop, self.fitness = self.generational_replacement(self.pop, parents, self.fitness, fitnessParent)
 		self.curr_step += 1
-		return self.pop, self.fitness
+		return self.pop, self.fitness, {}
 
 	def reset(self):
 		self.curr_step = 0
 		self.pop = self.np_rng.uniform(low=self.lower_bound, high=self.upper_bound, size=(self.pop_dim, self.dim))
-		self.fitness = self.evaluate_rastrign(self.pop)
+		self.fitness = self.obj_fun(self.pop)
 		return self.pop, self.fitness
 
 	def initialized(self):
@@ -50,13 +48,6 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
 
 	def is_done(self):
 		return self.curr_step >= self.max_steps
-
-	def evaluate_rastrign(self, population):
-		fitness = np.zeros(shape=(0,))
-		for c in population:
-			rastrign = sum([x ** 2 - 10 * math.cos(2 * math.pi * x) + 10 for x in c])
-			fitness = np.append(fitness, [rastrign], axis=0)
-		return fitness
 
 	def truncation_selection(self, population, fitness):
 		indSort = np.argsort(fitness)
@@ -130,16 +121,11 @@ class RastriginGADriver(SolverDriver, metaclass=ABCMeta):
 
 class CMAdriver(SolverDriver):
 	def __init__(self, dim, pop_size, object_function="sphere", init_sigma=0.5, bounds = [None,None], seed=None) -> None:
-		super().__init__()
+		super().__init__(object_function)
 		super().set_seed(seed)
 		self.dim = dim
 		self.pop_size = pop_size
 		self.bounds = [[-5.12, 5.12]] * dim
-		self.obj_fun = (
-			object_function
-			if not isinstance(object_function, (str, int))
-			else loadFunction(object_function, lib="cma")
-		)
 		self.curr_step = 0
 		self.lower_bound = bounds[0]
 		self.upper_bound = bounds[1]
@@ -241,7 +227,7 @@ class DEdriver(SolverDriver):
 	def __init__(
 		self, dim, pop_size, object_function="sphere", strategy="best1bin", sample=None, F_init=0.8, CR_init=0.7
 	) -> None:
-		super().__init__()
+		super().__init__(object_function)
 		self.dim = dim
 		self.pop_size = pop_size
 		self.strategy = strategy
@@ -250,11 +236,6 @@ class DEdriver(SolverDriver):
 		self.bounds = [[-5.12, 5.12]] * dim
 		assert sample in [None, "normal", "uniform"]
 		self.sample = sample
-		self.obj_fun = (
-			object_function
-			if not isinstance(object_function, (str, int))
-			else loadFunction(object_function, lib="cma")
-		)
 
 	def step(self, command):
 		# F and CR can be both scalar or array of shape (dim,)
@@ -352,6 +333,6 @@ class DEdriver(SolverDriver):
 		)
 
 
-registerDriver("RastriginGADriver", RastriginGADriver)
+registerDriver("GADriver", GADriver)
 registerDriver("CMAdriver", CMAdriver)
 registerDriver("DEdriver", DEdriver)

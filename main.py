@@ -65,17 +65,12 @@ def train_agent(agent_config, folder="./.checkpoints", **kwargs):
 	
 	while episodes < max_episodes:
 		res = agent.train()
+		if episodes == 0: print(f"{'Episode':^17}│{'Min':^19}│{'Max':^19}│{'Mean':^18}\n{'━'*17}┿{'━'*19}┿{'━'*19}┿{'━'*19}")
 		episodes = res["episodes_total"]
 		# loss = res["info"]["learner"]["default_policy"]["learner_stats"]["total_loss"]
 		# plotter.plot(loss)
-		plotter.plot(res["hist_stats"]["episode_reward"][: res["episodes_this_iter"]])
-		# pprint(res)
-		print()
-		print(f"═════════════════════╣Ep.: {episodes}\t╠═════════════════════")
-		print()
-		print("Min:\t", res["episode_reward_min"])
-		print("Max:\t", res["episode_reward_max"])
-		print("Mean:\t", res["episode_reward_mean"])
+		plotter.plot(res["hist_stats"]["episode_reward"][0:res["episodes_this_iter"]])
+		print(f"{str(episodes)+' / '+str(max_episodes):^17}│{res['episode_reward_min']:^19.9f}│{res['episode_reward_max']:^19.9f}│{res['episode_reward_mean']:^19.9f}")
 
 		if episodes % episodes_to_checkpoint < res["episodes_this_iter"]:
 			agent.save(folder)

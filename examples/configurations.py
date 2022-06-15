@@ -148,7 +148,7 @@ ppo_de_configuration = {
             ],
         ],
         "reward_metric": "DeltaBest",
-        "reward_metric_config": [False, True, True],
+        "reward_metric_config": [True, True],
         "memes_no": 1,
         "action_space_config": {
             "F_min": {"max": 2, "min": 0},
