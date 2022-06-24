@@ -26,7 +26,6 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
   </ol>
 </details>
 
@@ -123,5 +122,3 @@ Run the training:
 ```
 python main.py train -c config.json
 ```
-
-## Roadmap
