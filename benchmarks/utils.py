@@ -37,13 +37,12 @@ BBOB_OBJ_FN_NAMES = {
 }
 
 
-def loadFunction(function, dim=10, options={}, lib: str = "cma"):
+def loadFunction(function, options={}, lib: str = "cma"):
     """
     function to facilitate the configuration of the drivers. Load an object function from its name
 
     function: name or id of the object function to load
-    dim: dimension of the input space (necessary only for COCO's benchmark)
-    options: options for selecting functions e.g. the instance of the function (necessary only for COCO's benchmark)
+    options: options for selecting functions e.g. the instance of the function
     lib: what library to use. "local", "COCO", "cma", default search on all
     """
     if isinstance(function, str):

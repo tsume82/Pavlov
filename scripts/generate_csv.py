@@ -56,55 +56,55 @@ def write_csv(funcs, dir1, dirlist, namelist, filename, multienv=False):
 if __name__ == "__main__":
 
 	funcs = [
-		"AttractiveSector_5D",
-		"AttractiveSector_10D",
-		"AttractiveSector_20D",
-		"BuecheRastrigin_5D",
-		"BuecheRastrigin_10D",
-		"BuecheRastrigin_20D",
-		"CompositeGR_5D",
-		"CompositeGR_10D",
-		"CompositeGR_20D",
-		"DifferentPowers_5D",
-		"DifferentPowers_10D",
-		"DifferentPowers_20D",
-		"LinearSlope_5D",
-		"LinearSlope_10D",
-		"LinearSlope_20D",
-		"SharpRidge_5D",
-		"SharpRidge_10D",
-		"SharpRidge_20D",
-		"StepEllipsoidal_5D",
-		"StepEllipsoidal_10D",
-		"StepEllipsoidal_20D",
-		"RosenbrockRotated_5D",
-		"RosenbrockRotated_10D",
-		"RosenbrockRotated_20D",
-		"SchaffersIllConditioned_5D",
-		"SchaffersIllConditioned_10D",
-		"SchaffersIllConditioned_20D",
-		"LunacekBiR_5D",
-		"LunacekBiR_10D",
-		"LunacekBiR_20D",
-		"GG101me_5D",
-		"GG101me_10D",
-		"GG101me_20D",
-		"GG21hi_5D",
-		"GG21hi_10D",
-		"GG21hi_20D",
+		"inst_42_AttractiveSector_5D",
+		"inst_42_AttractiveSector_10D",
+		"inst_42_AttractiveSector_20D",
+		"inst_42_BuecheRastrigin_5D",
+		"inst_42_BuecheRastrigin_10D",
+		"inst_42_BuecheRastrigin_20D",
+		"inst_42_CompositeGR_5D",
+		"inst_42_CompositeGR_10D",
+		"inst_42_CompositeGR_20D",
+		"inst_42_DifferentPowers_5D",
+		"inst_42_DifferentPowers_10D",
+		"inst_42_DifferentPowers_20D",
+		"inst_42_LinearSlope_5D",
+		"inst_42_LinearSlope_10D",
+		"inst_42_LinearSlope_20D",
+		"inst_42_SharpRidge_5D",
+		"inst_42_SharpRidge_10D",
+		"inst_42_SharpRidge_20D",
+		"inst_42_StepEllipsoidal_5D",
+		"inst_42_StepEllipsoidal_10D",
+		"inst_42_StepEllipsoidal_20D",
+		"inst_42_RosenbrockRotated_5D",
+		"inst_42_RosenbrockRotated_10D",
+		"inst_42_RosenbrockRotated_20D",
+		"inst_42_SchaffersIllConditioned_5D",
+		"inst_42_SchaffersIllConditioned_10D",
+		"inst_42_SchaffersIllConditioned_20D",
+		"inst_42_LunacekBiR_5D",
+		"inst_42_LunacekBiR_10D",
+		"inst_42_LunacekBiR_20D",
+		"inst_42_GG101me_5D",
+		"inst_42_GG101me_10D",
+		"inst_42_GG101me_20D",
+		"inst_42_GG21hi_5D",
+		"inst_42_GG21hi_10D",
+		"inst_42_GG21hi_20D",
 	]
 
 	funcs = [
-		"BentCigar",
-		"Discus",
-		"Ellipsoid",
-		"Katsuura",
-		"Rastrigin",
-		"Rosenbrock",
-		"Schaffers",
-		"Schwefel",
-		"Sphere",
-		"Weierstrass",
+		"inst_42_BentCigar",
+		"inst_42_Discus",
+		"inst_42_Ellipsoid",
+		"inst_42_Katsuura",
+		"inst_42_Rastrigin",
+		"inst_42_Rosenbrock",
+		"inst_42_Schaffers",
+		"inst_42_Schwefel",
+		"inst_42_Sphere",
+		"inst_42_Weierstrass",
 	] + funcs
 	
 	# dir1 = "./experiments/multifunctions/CMA ppo 46 functions"
@@ -112,82 +112,16 @@ if __name__ == "__main__":
 	# namelist = ["CSA"]
 	dir2 = ["./experiments/jDE", "./experiments/iDE"]
 	namelist = ["jDE", "iDE"]
-	multienv = False # flag for multienv directory setup
+	multienv = True # flag for multienv directory setup
 
-	dir1 = "./experiments/jDE"
-	dir2 = ["./experiments/iDE"]
-	namelist = ["iDE"]
-	filename = "../dataviz/iDE_vs_jDE.csv"
+	dir1 = "./experiments/multifunctions/DE gaussian ppo 46 wIntraDeltaF + IntraDeltaX (100,50,10; train x2)"
+	filename = "./graph_generation/inst_42_DE_multi_gauss_wIntraDeltaF_IntraDeltaX_big_moretrain.csv"
 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
 
-# 	dir1 = "./experiments/multifunctions/DE gaussian ppo 46 functions"
-# 	filename = "../dataviz/DE_multi_gauss.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
+	dir1 = "./experiments/multifunctions/DE uniform ppo wIntraDeltaF 46 functions"
+	filename = "./graph_generation/inst_42_DE_multi_unif_wIntraDeltaF.csv"
+	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
 
-# 	dir1 = "./experiments/multifunctions/DE gaussian ppo wIntraDeltaF 46 functions"
-# 	filename = "../dataviz/DE_multi_gauss_wIntraDeltaF.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE gaussian ppo 46 wIntraDeltaX"
-# 	filename = "../dataviz/DE_multi_gauss_wIntraDeltaX.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE gaussian ppo 46 wIntraDeltaF + IntraDeltaX"
-# 	filename = "../dataviz/DE_multi_gauss_wIntraDeltaF_IntraDeltaX.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE gaussian ppo 46 wIntraDeltaF + IntraDeltaX (more training)"
-# 	filename = "../dataviz/DE_multi_gauss_wIntraDeltaF_IntraDeltaX_moretrain.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE gaussian ppo 46 wIntraDeltaF + IntraDeltaX (100,50,10; train x2)"
-# 	filename = "../dataviz/DE_multi_gauss_wIntraDeltaF_IntraDeltaX_big_moretrain.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE gaussian ppo 46 wIntraDeltaF + IntraDeltaX + InterDeltaX"
-# 	filename = "../dataviz/DE_multi_gauss_wIntraDeltaF_IntraDeltaX_InterDeltaX.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE gaussian ppo 46 wIntraDeltaF + IntraDeltaX + InterDeltaX (more training)"
-# 	filename = "../dataviz/DE_multi_gauss_wIntraDeltaF_IntraDeltaX_InterDeltaX_moretrain.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE gaussian ppo 46 wIntraDeltaF + IntraDeltaX + InterDeltaX (100,50,10; train x2)"
-# 	filename = "../dataviz/DE_multi_gauss_wIntraDeltaF_IntraDeltaX_InterDeltaX_big_moretrain.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-# #####
-# 	dir1 = "./experiments/multifunctions/DE uniform ppo 46 functions"
-# 	filename = "../dataviz/DE_multi_unif.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE uniform ppo wIntraDeltaF 46 functions"
-# 	filename = "../dataviz/DE_multi_unif_wIntraDeltaF.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE uniform ppo 46 wIntraDeltaX"
-# 	filename = "../dataviz/DE_multi_unif_wIntraDeltaX.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE uniform ppo 46 wIntraDeltaF + IntraDeltaX"
-# 	filename = "../dataviz/DE_multi_unif_wIntraDeltaF_IntraDeltaX.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE uniform ppo 46 wIntraDeltaF + IntraDeltaX (more training)"
-# 	filename = "../dataviz/DE_multi_unif_wIntraDeltaF_IntraDeltaX_moretrain.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE uniform ppo 46 wIntraDeltaF + IntraDeltaX (100,50,10; train x2)"
-# 	filename = "../dataviz/DE_multi_unif_wIntraDeltaF_IntraDeltaX_big_moretrain.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE uniform ppo 46 wIntraDeltaF + IntraDeltaX + InterDeltaX"
-# 	filename = "../dataviz/DE_multi_unif_wIntraDeltaF_IntraDeltaX_InterDeltaX.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE uniform ppo 46 wIntraDeltaF + IntraDeltaX + InterDeltaX (more training)"
-# 	filename = "../dataviz/DE_multi_unif_wIntraDeltaF_IntraDeltaX_InterDeltaX_moretrain.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
-
-# 	dir1 = "./experiments/multifunctions/DE uniform ppo 46 wIntraDeltaF + IntraDeltaX + InterDeltaX (100,50,10; train x2)"
-# 	filename = "../dataviz/DE_multi_unif_wIntraDeltaF_IntraDeltaX_InterDeltaX_big_moretrain.csv"
-# 	write_csv(funcs, dir1, dir2, namelist, filename, multienv)
+	dir1 = "./experiments/multifunctions/DE uniform ppo 46 wIntraDeltaF + IntraDeltaX + InterDeltaX (more training)"
+	filename = "./graph_generation/inst_42_DE_multi_unif_wIntraDeltaF_IntraDeltaX_InterDeltaX_moretrain.csv"
+	write_csv(funcs, dir1, dir2, namelist, filename, multienv)

@@ -508,18 +508,19 @@ de_uniform_ppo_configuration_46_funcs = [
         "agent.algorithm.train_batch_size": 200,
         "agent.algorithm.optimizer": "Adam",
         "agent.algorithm.vf_clip_param": 10,
-        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [100, 50, 10]},
+        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50,50]},
         "env.env_class": "SchedulerPolicyRayEnvironment",
         "env.env_config": {
             "solver_driver": "DEdriver",
-            "solver_driver_args": [dim, 10, fun, "best1bin", "uniform"],
+            "solver_driver_args": [dim, 10, {"id": fun, "instance": 42}, "best1bin", "uniform"],
             "maximize": False,
             "steps": 50,
-            "state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "DeltaX", "SolverStateHistory"],
+            "state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "DeltaX", "DeltaX", "SolverStateHistory"],
             "state_metrics_config": [
                 [40, False, 1, True, False],
 				[40, False],
                 [40, False, True],
+                [40, False, False],
                 [
                     {
                         "F_min": {"max": [2], "min": [0]},
@@ -531,7 +532,7 @@ de_uniform_ppo_configuration_46_funcs = [
                 ],
             ],
             "reward_metric": "DeltaBest",
-            "reward_metric_config": [False, True, True],
+            "reward_metric_config": [True, True],
             "memes_no": 1,
             "action_space_config": {
                 "F_min": {"max": 2, "min": 0},
@@ -554,19 +555,17 @@ de_uniform_ppo_configuration_46_funcs_II = [
         "agent.algorithm.train_batch_size": 200,
         "agent.algorithm.optimizer": "Adam",
         "agent.algorithm.vf_clip_param": 10,
-        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [100, 50, 10]},
+        "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50,50]},
         "env.env_class": "SchedulerPolicyRayEnvironment",
         "env.env_config": {
             "solver_driver": "DEdriver",
-            "solver_driver_args": [dim, 10, fun, "best1bin", "uniform"],
+            "solver_driver_args": [dim, 10, {"id": fun, "instance": 42}, "best1bin", "uniform"],
             "maximize": False,
             "steps": 50,
-			"state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "DeltaX", "DeltaX", "SolverStateHistory"],
+			"state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "SolverStateHistory"],
 			"state_metrics_config": [
 				[40, False, 1, True, False],
 				[40, False],
-				[40, False, True],
-				[40, False, False],
                 [
                     {
                         "F_min": {"max": [2], "min": [0]},
@@ -578,7 +577,7 @@ de_uniform_ppo_configuration_46_funcs_II = [
                 ],
             ],
             "reward_metric": "DeltaBest",
-            "reward_metric_config": [False, True, True],
+            "reward_metric_config": [True, True],
             "memes_no": 1,
             "action_space_config": {
                 "F_min": {"max": 2, "min": 0},
@@ -651,15 +650,14 @@ de_gaussian_ppo_configuration_46_funcs_II = [
         "env.env_class": "SchedulerPolicyRayEnvironment",
         "env.env_config": {
             "solver_driver": "DEdriver",
-            "solver_driver_args": [dim, 10, fun, "best1bin", "normal"],
+            "solver_driver_args": [dim, 10, {"id": fun, "instance": 42}, "best1bin", "normal"],
             "maximize": False,
             "steps": 50,
-			"state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "DeltaX", "DeltaX", "SolverStateHistory"],
+			"state_metrics_names": ["DifferenceOfBest", "DeltaFitPop", "DeltaX", "SolverStateHistory"],
 			"state_metrics_config": [
 				[40, False, 1, True, False],
 				[40, False],
 				[40, False, True],
-				[40, False, False],
                 [
                     {
                         "F_mean": {"max": [2], "min": [0]},
@@ -671,7 +669,7 @@ de_gaussian_ppo_configuration_46_funcs_II = [
                 ],
             ],
             "reward_metric": "DeltaBest",
-            "reward_metric_config": [False, True, True],
+            "reward_metric_config": [True, True],
             "memes_no": 1,
             "action_space_config": {
                 "F_mean": {"max": 2, "min": 0},
@@ -706,20 +704,20 @@ def add_configurations():
     function to add elements programmatically into ALL_CONFIGURATIONS
     used to facilitate the evaluation of many configurations
     """
-    # for i, conf in enumerate(de_uniform_ppo_configuration_46_funcs):
-    #     ALL_CONFIGURATIONS[f"de_uniform_ppo_configuration_46_funcs{i}"] = conf
+    for i, conf in enumerate(de_uniform_ppo_configuration_46_funcs):
+        ALL_CONFIGURATIONS[f"de_uniform_ppo_configuration_46_funcs{i}"] = conf
 
     # for i, conf in enumerate(de_gaussian_ppo_configuration_46_funcs):
     #     ALL_CONFIGURATIONS[f"de_gaussian_ppo_configuration_46_funcs{i}"] = conf
 		
-    # for i, conf in enumerate(de_uniform_ppo_configuration_46_funcs_II):
-    #     ALL_CONFIGURATIONS[f"de_uniform_ppo_configuration_46_funcs_II{i}"] = conf
+    for i, conf in enumerate(de_uniform_ppo_configuration_46_funcs_II):
+        ALL_CONFIGURATIONS[f"de_uniform_ppo_configuration_46_funcs_II{i}"] = conf
 
-    # for i, conf in enumerate(de_gaussian_ppo_configuration_46_funcs_II):
-    #     ALL_CONFIGURATIONS[f"de_gaussian_ppo_configuration_46_funcs_II{i}"] = conf
+    for i, conf in enumerate(de_gaussian_ppo_configuration_46_funcs_II):
+        ALL_CONFIGURATIONS[f"de_gaussian_ppo_configuration_46_funcs_II{i}"] = conf
 
-    for i, conf in enumerate(DE_fixed_CR):
-        ALL_CONFIGURATIONS[f"exp_fixed_CR{i}"] = conf
+    # for i, conf in enumerate(DE_fixed_CR):
+    #     ALL_CONFIGURATIONS[f"exp_fixed_CR{i}"] = conf
 
 
 

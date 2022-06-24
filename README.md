@@ -13,6 +13,10 @@
   <ol>
     <li>
       <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#paper-pubblication">Paper Pubblication</a></li>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
     </li>
     <li>
       <a href="#getting-started">Getting Started</a>
@@ -22,6 +26,7 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
   </ol>
 </details>
 
@@ -32,6 +37,17 @@
 Pavlov is a reinforcement python learning library providing the tools to optimize metaheuristics and their parameters/components, automatically managing the training phase and the information needed to test the trained models. 
 
 **This library is still in development and many functionalities are not available yet**
+
+### Paper Pubblication
+Repository with code and experiments reported in: Reinforcement learning based adaptive metaheuristics, Michele Tessari, Giovanni Iacca.
+
+DOI:...
+
+```
+@misc{
+  ...
+}
+```
 
 
 ### Built With

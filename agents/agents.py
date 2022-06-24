@@ -172,8 +172,8 @@ class RayAgent(Agent, metaclass=ABCMeta):
 		return self.agent.train()
 
 	def reset(self):
-		ray.shutdown()
-		ray.init()
+		# ray.shutdown()
+		# ray.init()
 		self.env = self.env_class(self.env_config.get("env_config", {}))
 		register_env(self.env_class.__name__, lambda config: self.env)
 		self.agent = self.agent_class(env=self.env_class.__name__, config=self.config)

@@ -138,7 +138,7 @@ class SolverDriver(Driver):
 				raise ValueError("Objective function must have an id")
 			id = obj_func.pop('id')
 			lib = obj_func.pop("lib", "cma")
-			return loadFunction(id, lib, options=obj_func)
+			return loadFunction(id, lib=lib, options=obj_func)
 		else:
 			return obj_func
 

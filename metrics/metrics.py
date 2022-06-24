@@ -94,9 +94,9 @@ class InterDeltaF(Metric):
 	def __init__(self, use_fitness_bound=False):
 		self.prec_best = None
 		if use_fitness_bound:
-			self.deltaF_fun = lambda c, p, b: abs(c-p) / abs(b[0]-b[1])
+			self.deltaF_fun = lambda c, p, b: (c-p) / abs(b[0]-b[1])
 		else:
-			self.deltaF_fun = lambda c, p, b: abs(c-p) / (abs(c-p) + abs(p) + 1e-5)
+			self.deltaF_fun = lambda c, p, b: (c-p) / (abs(c-p) + abs(p) + 1e-5)
 
 	def compute(self, solutions: np.array, fitness: np.array, **options) -> np.array:
 		if self.prec_best is None:
@@ -113,7 +113,7 @@ class InterDeltaF(Metric):
 		self.prec_best = None
 
 	def get_space(self):
-		return spaces.Box(low=0, high=1, shape=([]))
+		return spaces.Box(low=-1, high=1, shape=([]))
 
 
 class IntraDeltaF(Metric):
