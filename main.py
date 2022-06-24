@@ -123,10 +123,7 @@ def create_folder_and_train(agent_config, folder, **kwargs):
 			next = dir
 		else:
 			dirs = [f for f in listdir(folder) if isdir(join(folder, f))]
-			if len(dirs) == 0:
-				next = "1"
-			else:
-				next = str(max([int(d) for d in dirs])+1)
+			next = str(max([int(d) for d in dirs if d.isnumeric()] + [0])+1)
 			makedirs(join(folder, next))
 		train_agent(agent_config, join(folder, next), **kwargs)
 
@@ -151,17 +148,57 @@ def main(agent_config, train=True, folder="./.checkpoints", **kwargs):
 
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser(description="launch the training/testing of an agent")
-	parser.add_argument("train", nargs='?', type=str, default=True, help="train: '1', 'true' or 'train' for training mode, otherwise test mode is selected")
-	parser.add_argument("--dir", "-d", type=str, default="", help="directory: the directory of the experiment")
+	from colorama import Fore
+	parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description=
+	"""\033[33mPavlov: a reinforcement learning python library for training adaptive metaheuristics.\033[39m
+
+\033[32mTest: \033[33mpython\033[39m test/test.py
+
+\033[32mUsage: \033[39mWrite a configuration file, example \033[33mconfig.json\033[39m:
+\033[36m
+{
+	"agent.algorithm": "RayProximalPolicyOptimization",
+	"agent.algorithm.render_env": false,
+	"agent.algorithm.num_workers": 0,
+	"agent.algorithm.batch_mode": "complete_episodes",
+	"agent.algorithm.lr": 1e-05,
+	"agent.algorithm.train_batch_size": 200,
+	"agent.algorithm.optimizer": "Adam",
+	"agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50, 50]},
+	"env.env_class": "SchedulerPolicyRayEnvironment",
+	"env.env_config": {
+		"solver_driver": "CMAdriver",
+		"solver_driver_args": [10, 10, 11, 0.5, [-5.12, 5.12]],
+		"maximize": false,
+		"steps": 50,
+		"state_metrics_names": ["MetricHistory", "MetricHistory", "MetricHistory", "MetricHistory", "SolverStateHistory"],
+		"state_metrics_config": [
+			["IntraDeltaF", [], 40], 
+			["InterDeltaF", [], 40], 
+			["IntraDeltaX", [], 40], 
+			["InterDeltaX", [], 40], 
+			[{"step_size": {"max": 3, "min": 0}}, 40]
+			],
+		"reward_metric": "DeltaBest",
+		"reward_metric_config": [true, true],
+		"memes_no": 1,
+		"action_space_config": {"step_size": {"max": 3, "min": 1e-5}}
+	}
+}\033[39m
+
+\033[32mRun the training:
+\033[33mpython\033[39m main.py train -c config.json""")
+
+	parser.add_argument("train", nargs='?', type=str, default=True, help="train: '1', 'true' or 'train' for training mode, otherwise test (inference) mode is selected")
+	parser.add_argument("--dir", "-d", type=str, default="", help="directory: the directory of the experiment (this directory is used to save and load files)")
 	parser.add_argument("--multi", "-m", dest="num_runs", type=int, default=None, help="multiexperiment: run multiple runs of test")
-	parser.add_argument("--max_ep", dest="max_episodes", type=int, help="max_episodes: maximum number of episodes in training", default=5000)
+	parser.add_argument("--max_ep", dest="max_episodes", type=int, help="max_episodes: maximum number of episodes in training (default: 5000)", default=5000)
 	parser.add_argument("--checkpoint", "-cp", dest="checkpoint", nargs="?", default=False, const=True, help="checkpoint: the name of the checkpoint file to test or training starting from that checkpoint. If no checkpoint is passed, automatically is choosen the last one in the directory")
-	parser.add_argument("--ep_to_cp", dest="episodes_to_checkpoint", type=int, help="episodes_to_checkpoint: the number of episodes before saving a checkpoint", default=1000)
+	parser.add_argument("--ep_to_cp", dest="episodes_to_checkpoint", type=int, help="episodes_to_checkpoint: the number of episodes before saving a checkpoint (default: 1000)", default=1000)
 	parser.add_argument("--config","-c", nargs="?", default=False, const=True, help="config: the configuraton file of the experiment, if the flag has no arguments the config.json file in the experiment directory is used")
 	parser.add_argument("--multi-config","-mc", dest="multi_config", default=None, help="multi config: test or train from multiple configurations")
-	parser.add_argument("--create-dir","-cd", dest="create_dir", default=None, help="create dir with this name and save here the training")
-	parser.add_argument("--save", "-s", dest="save_exp", nargs="?", default=False, const=True, help="save the experiment")
+	parser.add_argument("--create-dir","-cd", dest="create_dir", default=None, help="create dir with this name and save here the training files (weights, configurations...)")
+	parser.add_argument("--save", "-s", dest="save_exp", nargs="?", default=False, const=True, help="save the experiment, it's a flag by default, optionally you can choose the name of the save file")
 	parser.add_argument("--noplot", "-np", dest="plot", action="store_false", default=True, help="do no plot during testing")
 	# parser.add_argument("--verbose", "-v", dest="verbose", type=int, default=1, help="verbose level: 0: no output, 1: errors, 2: warnings, 3: info, 4: debug")
 	args = parser.parse_args()

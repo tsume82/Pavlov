@@ -1,7 +1,7 @@
 <p align="center">
   <h3 align="center">Pavlov</h3>
   <p align="center">
-    A reinforcement learning python library for creating adaptive metaheuristics
+    A reinforcement learning python library for training adaptive metaheuristics
   </p>
 </p>
 
@@ -57,7 +57,7 @@ The core libraries used by Pavlov are:
 * [Tensorflow 2.x](https://www.tensorflow.org/)
 * [OpenAI GYM](https://gym.openai.com/)
 
-Additional RL models can be wrapped in Pavlov via the ``Agent`` interface, from libraries such as
+Additional RL models can be wrapped in Pavlov via the ``Agent`` interface, from libraries such as[TODO]:
 * [TensorForce](https://tensorforce.readthedocs.io/)
 * [TF_Agents](https://www.tensorflow.org/agents)
 
@@ -86,4 +86,42 @@ python test/test.py
 
 <!-- USAGE EXAMPLES -->
 ## Usage
-TODO
+Write a configuration file, example ```config.json```:
+```json
+{
+    "agent.algorithm": "RayProximalPolicyOptimization",
+    "agent.algorithm.render_env": false,
+    "agent.algorithm.num_workers": 0,
+    "agent.algorithm.batch_mode": "complete_episodes",
+    "agent.algorithm.lr": 1e-05,
+    "agent.algorithm.train_batch_size": 200,
+    "agent.algorithm.optimizer": "Adam",
+    "agent.algorithm.model": {"fcnet_activation": "relu", "fcnet_hiddens": [50, 50]},
+    "env.env_class": "SchedulerPolicyRayEnvironment",
+    "env.env_config": {
+        "solver_driver": "CMAdriver",
+        "solver_driver_args": [10, 10, 11, 0.5, [-5.12, 5.12]],
+        "maximize": false,
+        "steps": 50,
+        "state_metrics_names": ["MetricHistory", "MetricHistory", "MetricHistory", "MetricHistory", "SolverStateHistory"],
+        "state_metrics_config": [
+            ["IntraDeltaF", [], 40], 
+            ["InterDeltaF", [], 40], 
+            ["IntraDeltaX", [], 40], 
+            ["InterDeltaX", [], 40], 
+            [{"step_size": {"max": 3, "min": 0}}, 40]
+            ],
+        "reward_metric": "DeltaBest",
+        "reward_metric_config": [true, true],
+        "memes_no": 1,
+        "action_space_config": {"step_size": {"max": 3, "min": 1e-5}}
+    }
+}
+```
+
+Run the training:
+```
+python main.py train -c config.json
+```
+
+## Roadmap

@@ -1,8 +1,6 @@
 from numpy.core.numeric import Inf
 from numpy import array
 from copy import deepcopy
-# from drivers import KimemeSchedulerFileDriver, RastriginGADriver, CMAdriver
-# from benchmarks import functions
 
 
 def update_and_return(config, key):
