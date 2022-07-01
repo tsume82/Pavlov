@@ -77,7 +77,7 @@ Pavlov interface is modelled after TensorFlow one, providing powerful commands t
 Currently tested with Python 3.8.11, not intended to work with Pytohn 2.x.
 
 ### Installation
-Create a dedicated virtualenv using the ``requirements.txt`` file (TODO), eventually adding the libraries needed for custom environments or custom metrics
+Create a dedicated virtualenv using the ``requirements.txt`` file, eventually adding the libraries needed for custom environments or custom metrics
 
 - Clone the repository
 ```bash
@@ -95,7 +95,7 @@ python test/test.py
 
 <!-- USAGE EXAMPLES -->
 ## Usage
-Write a configuration file, example ```config.json```:
+- Write a configuration file, example ```config.json```:
 ```json
 {
     "agent.algorithm": "RayProximalPolicyOptimization",
@@ -128,7 +128,14 @@ Write a configuration file, example ```config.json```:
 }
 ```
 
-Run the training:
+- Run the training (use -md \<path\> to save the generated files in a directory):
+```bash
+python main.py train -c config.json -md train_direcotry
 ```
-python main.py train -c config.json
+
+- After the training you should have a folder containing three files (config.json, model_weights and train.svg)
+
+- Test the trained policy (with -d \<path\>: by default is loaded config.json in the directory):
+```bash
+python main.py test -d train_direcotry
 ```

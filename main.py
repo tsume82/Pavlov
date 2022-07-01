@@ -7,8 +7,8 @@ import warnings
 import traceback
 warnings.filterwarnings("ignore")
 
-from os import listdir, makedirs, environ
-from os.path import isfile, join, basename, isdir, normpath, exists
+from os import listdir, makedirs
+from os.path import isfile, join, basename, isdir, normpath
 # environ["RAY_PICKLE_VERBOSE_DEBUG"] = "1"
 
 
@@ -197,7 +197,7 @@ if __name__ == "__main__":
 	parser.add_argument("--ep_to_cp", dest="episodes_to_checkpoint", type=int, help="episodes_to_checkpoint: the number of episodes before saving a checkpoint (default: 1000)", default=1000)
 	parser.add_argument("--config","-c", nargs="?", default=False, const=True, help="config: the configuraton file of the experiment, if the flag has no arguments the config.json file in the experiment directory is used")
 	parser.add_argument("--multi-config","-mc", dest="multi_config", default=None, help="multi config: test or train from multiple configurations")
-	parser.add_argument("--create-dir","-cd", dest="create_dir", default=None, help="create dir with this name and save here the training files (weights, configurations...)")
+	parser.add_argument("--make-dir","-md", dest="create_dir", default=None, help="create dir with this name and save here the training files (weights, configurations...)")
 	parser.add_argument("--save", "-s", dest="save_exp", nargs="?", default=False, const=True, help="save the experiment, it's a flag by default, optionally you can choose the name of the save file")
 	parser.add_argument("--noplot", "-np", dest="plot", action="store_false", default=True, help="do no plot during testing")
 	# parser.add_argument("--verbose", "-v", dest="verbose", type=int, default=1, help="verbose level: 0: no output, 1: errors, 2: warnings, 3: info, 4: debug")
