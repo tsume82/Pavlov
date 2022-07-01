@@ -26,7 +26,6 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
   </ol>
 </details>
 
@@ -41,11 +40,18 @@ Pavlov is a reinforcement python learning library providing the tools to optimiz
 ### Paper Pubblication
 Repository with code and experiments reported in: Reinforcement learning based adaptive metaheuristics, Michele Tessari, Giovanni Iacca.
 
-DOI:...
+DOI: [https://doi.org/10.48550/arxiv.2206.12233](https://doi.org/10.48550/arxiv.2206.12233)
 
 ```
-@misc{
-  ...
+@misc{https://doi.org/10.48550/arxiv.2206.12233,
+  doi = {10.48550/ARXIV.2206.12233},
+  url = {https://arxiv.org/abs/2206.12233},
+  author = {Tessari, Michele and Iacca, Giovanni},
+  keywords = {Neural and Evolutionary Computing (cs.NE), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},
+  title = {Reinforcement learning based adaptive metaheuristics},
+  publisher = {arXiv},
+  year = {2022},
+  copyright = {Creative Commons Attribution Non Commercial No Derivatives 4.0 International}
 }
 ```
 
@@ -123,5 +129,3 @@ Run the training:
 ```
 python main.py train -c config.json
 ```
-
-## Roadmap
