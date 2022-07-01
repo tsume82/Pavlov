@@ -83,7 +83,10 @@ Create a dedicated virtualenv using the ``requirements.txt`` file (TODO), eventu
 ```bash
 git clone https://github.com/tsume82/Pavlov
 ```
-- [TODO] Install the requirements
+- Install the requirements
+```bash
+pip install -r requirements.txt
+```
 
 - Test a training
 ```bash
